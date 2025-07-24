@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "Gemini 翻譯小幫手",
+  "version": "1.0",
+  "description": "選取網頁文字並使用 Gemini 翻譯成自訂語言，並在頁面上顯示結果。",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "storage",
+    "https://generativelanguage.googleapis.com/"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content-script.js"
+      ]
+    }
+  ],
+  "browser_action": {
+    "default_icon": "icons/icon-48.png",
+    "default_popup": "options.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
+  },
+  "icons": {
+    "48": "icons/icon-48.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "gemini-translator@example.com"
+    }
+  }
+}
