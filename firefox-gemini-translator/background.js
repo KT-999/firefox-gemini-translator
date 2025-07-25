@@ -16,20 +16,38 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     ]);
 
     if (!GEMINI_API_KEY) {
-      alert("請先在設定頁輸入 Gemini API Key");
+      // 在 content script 中顯示提示，而非使用 alert
+      browser.tabs.sendMessage(tab.id, {
+        type: "showTranslation",
+        text: "錯誤：請先在附加元件的設定頁面輸入您的 Gemini API Key。"
+      });
       return;
     }
 
     const lang = TRANSLATE_LANG || "繁體中文";
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-    const prompt = `請將以下文字翻譯成${lang}：\n\n${selectedText}`;
+    // --- 全新的、更精確的提示詞 ---
+    const prompt = `你是一個專業的翻譯引擎。請嚴格按照以下規則，將「」中的文字翻譯成${lang}。
+
+規則：
+1.  **絕對不要**有任何解釋、前言、或額外補充說明。
+2.  如果原文是單一詞彙且有多種常見意思，請用「、」分隔後直接列出，例如：「令牌、象徵、代幣」。
+3.  如果原文是句子或片語，請直接提供最通順、最自然的單一翻譯結果。
+4.  **絕對不要**使用任何 Markdown 格式，例如 * 或 -。
+
+原文：「${selectedText}」`;
 
     const response = await fetch(GEMINI_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [{ parts: [{ text: prompt }] }],
+        // 增加 generationConfig 來限制模型輸出
+        generationConfig: {
+          maxOutputTokens: 100,
+          temperature: 0.1,
+        }
       })
     });
 
