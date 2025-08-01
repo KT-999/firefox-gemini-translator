@@ -15,8 +15,8 @@ async function translateWithGoogle(text, targetLang, tabId) {
       "日文": "ja"
     };
     const tl = langCodeMap[targetLang] || "zh-TW";
-    // 修改 API 參數，加入 dt=bd 來請求字典資料 (dictionary)
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&q=${encodeURIComponent(text)}`;
+    // 請求包含標準翻譯(t)、同義詞(t)、字典定義(bd)等多種資料
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Google API 錯誤: ${response.status}`);
@@ -25,32 +25,62 @@ async function translateWithGoogle(text, targetLang, tabId) {
     let translatedText = '';
 
     // --- 全新的、更穩健的字典格式解析邏輯 ---
-    const dictionaryBlock = data.find(block =>
-      Array.isArray(block) &&
-      block.length > 0 &&
-      block[0] && typeof block[0][0] === 'string' && // 檢查詞性是否為字串
-      Array.isArray(block[0][1])       // 檢查定義列表是否存在
-    );
+    // 使用一個物件來按詞性收集所有定義，並用 Set 自動去重
+    const allDefinitions = {};
 
+    // 1. 解析同義詞和主要定義 (通常在 data[1] 或 data[5])
+    const synonymBlocks = [data[1], data[5]].filter(Boolean);
+    synonymBlocks.forEach(block => {
+        if (Array.isArray(block)) {
+            block.forEach(part => {
+                if (!Array.isArray(part) || part.length < 2) return;
+                const partOfSpeech = part[0];
+                const words = part[1];
+                if (typeof partOfSpeech === 'string' && Array.isArray(words)) {
+                    if (!allDefinitions[partOfSpeech]) {
+                        allDefinitions[partOfSpeech] = new Set();
+                    }
+                    words.forEach(word => allDefinitions[partOfSpeech].add(word));
+                }
+            });
+        }
+    });
+
+    // 2. 解析詳細的字典定義 (位置不固定，需用結構特徵尋找)
+    const dictionaryBlock = data.find(block =>
+        Array.isArray(block) && block.length > 0 && block[0] &&
+        typeof block[0][0] === 'string' && Array.isArray(block[0][1])
+    );
     if (dictionaryBlock) {
-      // 如果找到了字典區塊，就格式化它
-      translatedText = dictionaryBlock.map(part => {
-        const partOfSpeech = part[0]; // 詞性，例如 "noun" 或 "名詞"
-        // 修正：Google API 回傳的完整單字在 part[1][i][0]
-        const definitions = part[1].map(def => def[0]).filter(Boolean); // 過濾掉空的定義
-        if (definitions.length === 0) return null; // 如果該詞性沒有有效定義，則跳過
-        return `${partOfSpeech}: ${definitions.join(', ')}`;
-      }).filter(Boolean).join('__NEWLINE__'); // 使用特殊標記替代換行符，並過濾掉空行
+        dictionaryBlock.forEach(part => {
+            if (!Array.isArray(part) || part.length < 2) return;
+            const partOfSpeech = part[0];
+            const definitions = part[1];
+            if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
+                if (!allDefinitions[partOfSpeech]) {
+                    allDefinitions[partOfSpeech] = new Set();
+                }
+                definitions.forEach(def => {
+                    if (def && typeof def[0] === 'string') {
+                        allDefinitions[partOfSpeech].add(def[0]);
+                    }
+                });
+            }
+        });
     }
 
-    // 如果沒有找到字典資料，則退回使用標準翻譯
+    // 3. 格式化最終輸出
+    translatedText = Object.entries(allDefinitions).map(([pos, defSet]) => {
+        return `${pos}: ${[...defSet].join(', ')}`;
+    }).join('__NEWLINE__');
+
+    // 4. 如果以上解析都失敗，則退回使用最基本的翻譯結果
     if (!translatedText && data[0] && Array.isArray(data[0])) {
       translatedText = data[0].map(item => item[0]).join('');
     }
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
 
-    // 移除 (G) 標記，直接傳送處理好的文字
     browser.tabs.sendMessage(tabId, {
       type: "showTranslation",
       text: translatedText,
