@@ -1,6 +1,18 @@
 // --- Helper Functions ---
 
 /**
+ * 檢查文字是否包含中日韓 (CJK) 字元。
+ * @param {string} text - 要檢查的文字。
+ * @returns {boolean} - 如果文字中含有任何 CJK 字元，則回傳 true。
+ */
+function containsCjk(text) {
+  // 正則表達式，匹配中日韓統一表意文字、平假名、片假名、韓文音節等
+  const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
+  return cjkRegex.test(text);
+}
+
+
+/**
  * 使用 Google Translate API 進行翻譯，並優先取得詳細的字典結果。
  * @param {string} text - 要翻譯的文字。
  * @param {string} targetLang - 目標語言的名稱 (例如 "繁體中文")。
@@ -15,7 +27,6 @@ async function translateWithGoogle(text, targetLang, tabId) {
       "日文": "ja"
     };
     const tl = langCodeMap[targetLang] || "zh-TW";
-    // 請求包含標準翻譯(t)、同義詞(t)、字典定義(bd)等多種資料
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
 
     const response = await fetch(url);
@@ -24,11 +35,7 @@ async function translateWithGoogle(text, targetLang, tabId) {
     const data = await response.json();
     let translatedText = '';
 
-    // --- 全新的、更穩健的字典格式解析邏輯 ---
-    // 使用一個物件來按詞性收集所有定義，並用 Set 自動去重
     const allDefinitions = {};
-
-    // 1. 解析同義詞和主要定義 (通常在 data[1] 或 data[5])
     const synonymBlocks = [data[1], data[5]].filter(Boolean);
     synonymBlocks.forEach(block => {
         if (Array.isArray(block)) {
@@ -46,7 +53,6 @@ async function translateWithGoogle(text, targetLang, tabId) {
         }
     });
 
-    // 2. 解析詳細的字典定義 (位置不固定，需用結構特徵尋找)
     const dictionaryBlock = data.find(block =>
         Array.isArray(block) && block.length > 0 && block[0] &&
         typeof block[0][0] === 'string' && Array.isArray(block[0][1])
@@ -69,12 +75,10 @@ async function translateWithGoogle(text, targetLang, tabId) {
         });
     }
 
-    // 3. 格式化最終輸出
     translatedText = Object.entries(allDefinitions).map(([pos, defSet]) => {
         return `${pos}: ${[...defSet].join(', ')}`;
     }).join('__NEWLINE__');
 
-    // 4. 如果以上解析都失敗，則退回使用最基本的翻譯結果
     if (!translatedText && data[0] && Array.isArray(data[0])) {
       translatedText = data[0].map(item => item[0]).join('');
     }
@@ -166,13 +170,24 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
   ]);
   const targetLang = TRANSLATE_LANG || "繁體中文";
 
-  const wordCount = selectedText.split(/\s+/).length;
-  const characterCount = selectedText.length;
-  const isSimpleText = wordCount <= 3 && characterCount < 30;
+  // --- 全新的、更智慧的語言感知分流邏輯 ---
+  let useGoogleTranslate = false;
+  
+  if (containsCjk(selectedText)) {
+    // 對於中日韓語言，單字計數不可靠，改用較短的字元數門檻
+    // 如果字元數小於等於 5，則視為簡單詞彙，使用 Google 翻譯
+    useGoogleTranslate = selectedText.length <= 5;
+  } else {
+    // 對於使用空格的語言 (如英文)，沿用舊的複雜度判斷
+    const wordCount = selectedText.split(/\s+/).length;
+    const characterCount = selectedText.length;
+    useGoogleTranslate = wordCount <= 3 && characterCount < 30;
+  }
 
-  if (isSimpleText) {
+  if (useGoogleTranslate) {
     await translateWithGoogle(selectedText, targetLang, tab.id);
   } else {
+    // 對於複雜片語或句子，使用 Gemini 翻譯
     if (!GEMINI_API_KEY) {
       browser.tabs.sendMessage(tabId, {
         type: "showTranslation",
