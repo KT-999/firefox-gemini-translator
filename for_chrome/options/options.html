@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Gemini 翻譯設定</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Gemini 翻譯設定</h2>
+
+      <label>Gemini API Key:
+        <input type="password" id="apiKey" placeholder="請輸入您的 API Key">
+      </label>
+
+      <label>目標語言:
+        <select id="lang">
+          <option value="繁體中文">繁體中文</option>
+          <option value="簡體中文">簡體中文</option>
+          <option value="英文">英文</option>
+          <option value="日文">日文</option>
+        </select>
+      </label>
+
+      <label>主題:
+        <select id="theme">
+          <option value="light">明亮</option>
+          <option value="dark">黑暗</option>
+        </select>
+      </label>
+      
+      <label>最大紀錄數量:
+        <input type="number" id="maxHistorySize" min="0" max="100" value="20">
+      </label>
+
+      <button id="saveBtn">儲存設定</button>
+      <div id="status"></div>
+    </div>
+
+    <div class="card">
+      <div class="history-header">
+        <h2>翻譯紀錄</h2>
+        <button id="clearHistoryBtn" class="clear-btn">清除紀錄</button>
+      </div>
+      <div id="historyContainer">
+        <!-- 翻譯紀錄將會顯示在這裡 -->
+      </div>
+    </div>
+  </div>
+  <script src="../browser-polyfill.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
