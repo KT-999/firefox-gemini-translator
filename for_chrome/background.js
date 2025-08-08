@@ -1,13 +1,32 @@
-// --- Helper Functions ---
+importScripts('browser-polyfill.js');
+
+// --- 一次性安裝設定 ---
+
+/**
+ * 處理一次性的安裝設定，例如建立右鍵選單。
+ * 這個監聽器只會在附加元件首次安裝或更新時執行。
+ */
+browser.runtime.onInstalled.addListener(() => {
+  // 為了避免開發時重載造成衝突，先移除所有已存在的選單，再重新建立。
+  // 使用 .then() 的 Promise 語法，這是 polyfill 要求的正確寫法。
+  browser.contextMenus.removeAll().then(() => {
+    browser.contextMenus.create({
+      id: "smart-translate",
+      title: "智慧翻譯", // 使用您原有的標題
+      contexts: ["selection"]
+    });
+    console.log("智慧翻譯右鍵選單已成功建立或更新。");
+  });
+});
+
+
+// --- Helper Functions (您的原始程式碼) ---
 
 /**
  * 儲存一筆翻譯紀錄。
  * @param {string} original - 原始文字。
  * @param {string} translated - 翻譯後的文字。
  */
-
-importScripts('browser-polyfill.js');
-
 async function saveToHistory(original, translated) {
   try {
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get([
@@ -45,7 +64,6 @@ function containsCjk(text) {
   const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
   return cjkRegex.test(text);
 }
-
 
 /**
  * 使用 Google Translate API 進行翻譯。
@@ -138,13 +156,7 @@ async function translateWithGemini(text, apiKey, targetLang, tabId) {
   }
 }
 
-// --- Main Logic ---
-
-browser.contextMenus.create({
-  id: "smart-translate",
-  title: "智慧翻譯",
-  contexts: ["selection"]
-});
+// --- Main Logic (您的原始程式碼) ---
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "smart-translate") return;
@@ -168,7 +180,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     await translateWithGoogle(selectedText, targetLang, tab.id);
   } else {
     if (!GEMINI_API_KEY) {
-      browser.tabs.sendMessage(tab.id, { type: "showTranslation", text: "錯誤：翻譯句子需要 Gemini API Key，請先在設定頁輸入。" });
+      browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "錯誤：翻譯句子需要 Gemini API Key，請先在設定頁輸入。" });
       return;
     }
     await translateWithGemini(selectedText, GEMINI_API_KEY, targetLang, tab.id);
