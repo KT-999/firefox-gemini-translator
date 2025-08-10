@@ -11,6 +11,8 @@
   --primary-color-hover: #0056b3;
   --danger-color: #dc3545;
   --danger-color-hover: #c82333;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
 }
 
 body {
@@ -110,9 +112,29 @@ button:hover {
 
 #status {
   margin-top: 1em;
-  color: #28a745;
+  color: var(--success-color);
   font-weight: 500;
 }
+
+/* Key Status Styles */
+.key-status {
+  font-size: 0.9em;
+  font-weight: normal;
+  margin-left: 8px;
+}
+.key-status.valid {
+  color: var(--success-color);
+}
+.key-status.invalid {
+  color: var(--danger-color);
+}
+.key-status.missing {
+  color: #888;
+}
+body.dark .key-status.missing {
+    color: #aaa;
+}
+
 
 /* History Section Styles */
 .history-header {

@@ -1,63 +1,85 @@
 /**
  * 根據主題設定調整頁面樣式。
- * @param {string} theme - 'light' 或 'dark'。
  */
 function applyTheme(theme) {
   document.body.className = theme;
 }
 
 /**
+ * 顯示 API Key 的狀態，並在需要時提供可點擊的連結。
+ * @param {string} apiKey - 使用者儲存的 API Key。
+ * @param {boolean|undefined} isValid - 金鑰是否有效的旗標。
+ */
+function displayApiKeyStatus(apiKey, isValid) {
+  const statusEl = document.getElementById("apiKeyStatus");
+  if (!statusEl) return;
+
+  statusEl.innerHTML = ''; // 清空現有內容
+
+  // 建立一個可點擊的連結
+  const createLink = (text) => {
+    const link = document.createElement('a');
+    link.href = "https://aistudio.google.com/app/apikey";
+    link.target = "_blank"; // 在新分頁中開啟
+    link.textContent = text;
+    return link;
+  };
+
+  if (!apiKey) {
+    const link = createLink("(尚未輸入，點此獲取)");
+    statusEl.className = "key-status invalid"; // 使用 'invalid' class 來顯示紅色
+    statusEl.appendChild(link);
+  } else if (isValid === false) {
+    const link = createLink("(金鑰無效，點此獲取)");
+    statusEl.className = "key-status invalid";
+    statusEl.appendChild(link);
+  } else {
+    // isValid 為 true 或 undefined (尚未驗證) 時
+    const span = document.createElement('span');
+    span.textContent = "(已儲存)";
+    statusEl.className = "key-status valid";
+    statusEl.appendChild(span);
+  }
+}
+
+/**
  * 渲染翻譯紀錄列表。
- * @param {Array} history - 翻譯紀錄陣列。
  */
 function renderHistory(history = []) {
   const container = document.getElementById("historyContainer");
   if (!container) return;
-
-  container.innerHTML = ""; // 清空現有內容
-
+  container.innerHTML = "";
   if (history.length === 0) {
     container.textContent = "尚無翻譯紀錄。";
     return;
   }
-
   history.forEach(item => {
     const itemDiv = document.createElement("div");
     itemDiv.className = "history-item";
-
     const originalP = document.createElement("p");
     originalP.className = "original-text";
     originalP.textContent = item.original;
-
     const translatedP = document.createElement("p");
     translatedP.className = "translated-text";
     translatedP.textContent = item.translated;
-
     const footerDiv = document.createElement("div");
     footerDiv.className = "history-item-footer";
-
     const timeSpan = document.createElement("span");
     timeSpan.textContent = new Date(item.timestamp).toLocaleString();
-
     const copyBtn = document.createElement("button");
     copyBtn.className = "copy-history-btn";
     copyBtn.textContent = "複製";
     copyBtn.onclick = () => {
       navigator.clipboard.writeText(item.translated).then(() => {
         copyBtn.textContent = "已複製!";
-        setTimeout(() => {
-          copyBtn.textContent = "複製";
-        }, 1500);
+        setTimeout(() => { copyBtn.textContent = "複製"; }, 1500);
       });
     };
-
     footerDiv.appendChild(timeSpan);
     footerDiv.appendChild(copyBtn);
-    
     itemDiv.appendChild(originalP);
     itemDiv.appendChild(translatedP);
     itemDiv.appendChild(footerDiv);
-
     container.appendChild(itemDiv);
   });
 }
@@ -74,16 +96,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const clearHistoryBtn = document.getElementById("clearHistoryBtn");
   const status = document.getElementById("status");
 
-  // 載入所有設定和紀錄
   const settings = await browser.storage.local.get([
-    "GEMINI_API_KEY",
-    "TRANSLATE_LANG",
-    "THEME",
-    "maxHistorySize",
-    "translationHistory"
+    "GEMINI_API_KEY", "TRANSLATE_LANG", "THEME", "maxHistorySize", "translationHistory", "geminiKeyValid"
   ]);
 
-  // 填入現有設定
   if (settings.GEMINI_API_KEY) apiKeyInput.value = settings.GEMINI_API_KEY;
   if (settings.TRANSLATE_LANG) langSelect.value = settings.TRANSLATE_LANG;
   if (settings.THEME) themeSelect.value = settings.THEME;
@@ -91,55 +107,62 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   applyTheme(settings.THEME || 'light');
   renderHistory(settings.translationHistory);
+  displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
 
-  // 監聽主題變更
   themeSelect.onchange = () => applyTheme(themeSelect.value);
 
-  // --- 全新的儲存按鈕事件 ---
   saveBtn.onclick = async () => {
     const newMaxHistorySize = parseInt(maxHistoryInput.value, 10);
-    // 確保輸入值是有效的數字，否則使用預設值 20
     const validMaxHistorySize = isNaN(newMaxHistorySize) ? 20 : newMaxHistorySize;
+    const newApiKey = apiKeyInput.value.trim();
 
-    // 1. 從儲存空間取得目前的歷史紀錄
+    // 根據是否有輸入金鑰來決定其初始有效性狀態
+    const isNewKeyPresent = !!newApiKey;
+
     const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
-
-    // 2. 如果目前的紀錄數量超過新的最大值，就進行裁剪
     if (translationHistory.length > validMaxHistorySize) {
-      translationHistory.length = validMaxHistorySize; // 直接修改陣列長度，移除多餘的舊紀錄
+      translationHistory.length = validMaxHistorySize;
     }
 
-    // 3. 將所有設定，包含可能已被裁剪的歷史紀錄，一併儲存
+    // 當使用者儲存金鑰時，如果金鑰為空，則立即標記為無效；
+    // 如果不為空，則樂觀地假設它是有效的，直到翻譯失敗為止。
     await browser.storage.local.set({
-      GEMINI_API_KEY: apiKeyInput.value.trim(),
+      GEMINI_API_KEY: newApiKey,
       TRANSLATE_LANG: langSelect.value,
       THEME: themeSelect.value,
       maxHistorySize: validMaxHistorySize,
-      translationHistory: translationHistory // 儲存更新後的歷史紀錄
+      translationHistory: translationHistory,
+      geminiKeyValid: isNewKeyPresent 
     });
 
-    // 4. 立即在畫面上重新渲染歷史紀錄，讓使用者看到變化
-    renderHistory(translationHistory);
+    // 立即根據金鑰是否存在來更新 UI
+    displayApiKeyStatus(newApiKey, isNewKeyPresent);
 
-    status.textContent = "✅ 設定已儲存，紀錄已更新";
+    status.textContent = "✅ 設定已儲存";
     setTimeout(() => { status.textContent = ''; }, 2000);
   };
 
-  // 清除紀錄按鈕事件
   clearHistoryBtn.onclick = async () => {
     if (confirm("確定要清除所有翻譯紀錄嗎？此操作無法復原。")) {
       await browser.storage.local.remove("translationHistory");
-      renderHistory([]); // 立即更新畫面
+      renderHistory([]);
       status.textContent = "✅ 紀錄已清除";
       setTimeout(() => { status.textContent = ''; }, 2000);
     }
   };
   
-  // 監聽儲存空間變化，即時更新紀錄列表
+  // 監聽儲存空間變化，即時更新金鑰狀態和紀錄列表
   browser.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.translationHistory) {
-      // 確保目前頁面上的列表與儲存的資料同步
-      renderHistory(changes.translationHistory.newValue);
+    if (area === 'local') {
+      if (changes.translationHistory) {
+        renderHistory(changes.translationHistory.newValue);
+      }
+      if (changes.geminiKeyValid || changes.GEMINI_API_KEY) {
+        // 如果金鑰本身或其有效性狀態被改變，就重新讀取並更新狀態顯示
+        browser.storage.local.get(["GEMINI_API_KEY", "geminiKeyValid"]).then(data => {
+            displayApiKeyStatus(data.GEMINI_API_KEY, data.geminiKeyValid);
+        });
+      }
     }
   });
 });

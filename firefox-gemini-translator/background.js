@@ -2,31 +2,15 @@
 
 /**
  * 儲存一筆翻譯紀錄。
- * @param {string} original - 原始文字。
- * @param {string} translated - 翻譯後的文字。
  */
 async function saveToHistory(original, translated) {
   try {
-    const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get([
-      "translationHistory",
-      "maxHistorySize"
-    ]);
-
-    // 建立新的紀錄項目
-    const newEntry = {
-      original,
-      translated,
-      timestamp: new Date().toISOString()
-    };
-
-    // 將新紀錄加到最前面
+    const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
+    const newEntry = { original, translated, timestamp: new Date().toISOString() };
     const updatedHistory = [newEntry, ...translationHistory];
-
-    // 如果紀錄超過最大數量，則移除最舊的紀錄
     if (updatedHistory.length > maxHistorySize) {
       updatedHistory.length = maxHistorySize;
     }
-
     await browser.storage.local.set({ translationHistory: updatedHistory });
   } catch (err) {
     console.error("儲存翻譯紀錄失敗：", err);
@@ -35,8 +19,6 @@ async function saveToHistory(original, translated) {
 
 /**
  * 檢查文字是否包含中日韓 (CJK) 字元。
- * @param {string} text - 要檢查的文字。
- * @returns {boolean} - 如果文字中含有任何 CJK 字元，則回傳 true。
  */
 function containsCjk(text) {
   const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
@@ -106,7 +88,7 @@ async function translateWithGoogle(text, targetLang, tabId) {
 }
 
 /**
- * 使用 Gemini API 進行翻譯。
+ * 使用 Gemini API 進行翻譯，如果失敗則自動降級為 Google 翻譯。
  */
 async function translateWithGemini(text, apiKey, targetLang, tabId) {
   try {
@@ -122,16 +104,35 @@ async function translateWithGemini(text, apiKey, targetLang, tabId) {
       })
     });
 
-    if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
+    // 如果 API 回應明確表示金鑰無效 (例如 400 錯誤)
+    if (!response.ok && response.status === 400) {
+      throw new Error('Invalid API Key');
+    }
+    if (!response.ok) {
+      throw new Error(`API 網路錯誤: ${response.status}`);
+    }
+
     const data = await response.json();
     const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!translatedText) throw new Error("從 Gemini 未收到翻譯結果");
 
+    // 翻譯成功，標記金鑰為有效
+    await browser.storage.local.set({ geminiKeyValid: true });
     await saveToHistory(text, translatedText);
     browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'gemini' });
+
   } catch (err) {
-    console.error("Gemini 翻譯發生錯誤", err);
-    browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "❌ Gemini 翻譯失敗，請檢查網路或 API Key。" });
+    console.error("Gemini 翻譯發生錯誤:", err.message);
+    // 如果錯誤是金鑰無效，則標記並降級
+    if (err.message === 'Invalid API Key') {
+      console.log("偵測到無效的 Gemini API Key，自動降級為 Google 翻譯。");
+      await browser.storage.local.set({ geminiKeyValid: false });
+      // 自動使用 Google 翻譯作為備援
+      await translateWithGoogle(text, targetLang, tabId);
+    } else {
+      // 其他錯誤（如網路問題）
+      browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "❌ Gemini 翻譯失敗" });
+    }
   }
 }
 
@@ -149,7 +150,8 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
   const selectedText = info.selectionText.trim();
   if (!selectedText) return;
 
-  const { GEMINI_API_KEY, TRANSLATE_LANG } = await browser.storage.local.get(["GEMINI_API_KEY", "TRANSLATE_LANG"]);
+  const { GEMINI_API_KEY } = await browser.storage.local.get("GEMINI_API_KEY");
+  const { TRANSLATE_LANG } = await browser.storage.local.get("TRANSLATE_LANG");
   const targetLang = TRANSLATE_LANG || "繁體中文";
 
   let useGoogleTranslate = false;
@@ -161,13 +163,11 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     useGoogleTranslate = wordCount <= 3 && characterCount < 30;
   }
 
-  if (useGoogleTranslate) {
-    await translateWithGoogle(selectedText, targetLang, tab.id);
-  } else {
-    if (!GEMINI_API_KEY) {
-      browser.tabs.sendMessage(tab.id, { type: "showTranslation", text: "錯誤：翻譯句子需要 Gemini API Key，請先在設定頁輸入。" });
-      return;
-    }
+  // 最終決策：如果不是簡單文字，且有輸入 API Key，才嘗試使用 Gemini
+  if (!useGoogleTranslate && GEMINI_API_KEY) {
     await translateWithGemini(selectedText, GEMINI_API_KEY, targetLang, tab.id);
+  } else {
+    // 其他所有情況 (簡單文字、未輸入Key) 都使用 Google 翻譯
+    await translateWithGoogle(selectedText, targetLang, tab.id);
   }
 });

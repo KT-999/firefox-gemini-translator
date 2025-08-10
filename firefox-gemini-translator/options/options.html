@@ -10,29 +10,25 @@
     <div class="card">
       <h2>Gemini 翻譯設定</h2>
 
-      <label>Gemini API Key:
-        <input type="password" id="apiKey" placeholder="請輸入您的 API Key">
-      </label>
+      <label for="apiKey">Gemini API Key: <span id="apiKeyStatus" class="key-status"></span></label>
+      <input type="password" id="apiKey" placeholder="請輸入您的 API Key">
 
-      <label>目標語言:
-        <select id="lang">
-          <option value="繁體中文">繁體中文</option>
-          <option value="簡體中文">簡體中文</option>
-          <option value="英文">英文</option>
-          <option value="日文">日文</option>
-        </select>
-      </label>
+      <label for="lang">目標語言:</label>
+      <select id="lang">
+        <option value="繁體中文">繁體中文</option>
+        <option value="簡體中文">簡體中文</option>
+        <option value="英文">英文</option>
+        <option value="日文">日文</option>
+      </select>
 
-      <label>主題:
-        <select id="theme">
-          <option value="light">明亮</option>
-          <option value="dark">黑暗</option>
-        </select>
-      </label>
+      <label for="theme">主題:</label>
+      <select id="theme">
+        <option value="light">明亮</option>
+        <option value="dark">黑暗</option>
+      </select>
       
-      <label>最大紀錄數量:
-        <input type="number" id="maxHistorySize" min="0" max="100" value="20">
-      </label>
+      <label for="maxHistorySize">最大紀錄數量:</label>
+      <input type="number" id="maxHistorySize" min="0" max="100" value="20">
 
       <button id="saveBtn">儲存設定</button>
       <div id="status"></div>
