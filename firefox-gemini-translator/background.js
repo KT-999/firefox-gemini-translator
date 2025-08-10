@@ -2,11 +2,22 @@
 
 /**
  * 儲存一筆翻譯紀錄。
+ * @param {string} original - 原始文字。
+ * @param {string} translated - 翻譯後的文字。
+ * @param {string} engine - 使用的翻譯引擎 ('google' 或 'gemini')。
  */
-async function saveToHistory(original, translated) {
+async function saveToHistory(original, translated, engine) {
   try {
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
-    const newEntry = { original, translated, timestamp: new Date().toISOString() };
+
+    // 建立新的紀錄項目，包含引擎資訊
+    const newEntry = {
+      original,
+      translated,
+      engine, // 新增
+      timestamp: new Date().toISOString()
+    };
+
     const updatedHistory = [newEntry, ...translationHistory];
     if (updatedHistory.length > maxHistorySize) {
       updatedHistory.length = maxHistorySize;
@@ -79,7 +90,8 @@ async function translateWithGoogle(text, targetLang, tabId) {
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
 
-    await saveToHistory(text, translatedText.replace(/__NEWLINE__/g, '\n'));
+    // 儲存紀錄時，傳入 'google'
+    await saveToHistory(text, translatedText.replace(/__NEWLINE__/g, '\n'), 'google');
     browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'google' });
   } catch (err) {
     console.error("Google 翻譯發生錯誤", err);
@@ -104,33 +116,25 @@ async function translateWithGemini(text, apiKey, targetLang, tabId) {
       })
     });
 
-    // 如果 API 回應明確表示金鑰無效 (例如 400 錯誤)
-    if (!response.ok && response.status === 400) {
-      throw new Error('Invalid API Key');
-    }
-    if (!response.ok) {
-      throw new Error(`API 網路錯誤: ${response.status}`);
-    }
+    if (!response.ok && response.status === 400) throw new Error('Invalid API Key');
+    if (!response.ok) throw new Error(`API 網路錯誤: ${response.status}`);
 
     const data = await response.json();
     const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!translatedText) throw new Error("從 Gemini 未收到翻譯結果");
 
-    // 翻譯成功，標記金鑰為有效
     await browser.storage.local.set({ geminiKeyValid: true });
-    await saveToHistory(text, translatedText);
+    // 儲存紀錄時，傳入 'gemini'
+    await saveToHistory(text, translatedText, 'gemini');
     browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'gemini' });
 
   } catch (err) {
     console.error("Gemini 翻譯發生錯誤:", err.message);
-    // 如果錯誤是金鑰無效，則標記並降級
     if (err.message === 'Invalid API Key') {
       console.log("偵測到無效的 Gemini API Key，自動降級為 Google 翻譯。");
       await browser.storage.local.set({ geminiKeyValid: false });
-      // 自動使用 Google 翻譯作為備援
       await translateWithGoogle(text, targetLang, tabId);
     } else {
-      // 其他錯誤（如網路問題）
       browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "❌ Gemini 翻譯失敗" });
     }
   }
@@ -146,12 +150,10 @@ browser.contextMenus.create({
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "smart-translate") return;
-
   const selectedText = info.selectionText.trim();
   if (!selectedText) return;
 
-  const { GEMINI_API_KEY } = await browser.storage.local.get("GEMINI_API_KEY");
-  const { TRANSLATE_LANG } = await browser.storage.local.get("TRANSLATE_LANG");
+  const { GEMINI_API_KEY, TRANSLATE_LANG } = await browser.storage.local.get(["GEMINI_API_KEY", "TRANSLATE_LANG"]);
   const targetLang = TRANSLATE_LANG || "繁體中文";
 
   let useGoogleTranslate = false;
@@ -163,11 +165,9 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     useGoogleTranslate = wordCount <= 3 && characterCount < 30;
   }
 
-  // 最終決策：如果不是簡單文字，且有輸入 API Key，才嘗試使用 Gemini
   if (!useGoogleTranslate && GEMINI_API_KEY) {
     await translateWithGemini(selectedText, GEMINI_API_KEY, targetLang, tab.id);
   } else {
-    // 其他所有情況 (簡單文字、未輸入Key) 都使用 Google 翻譯
     await translateWithGoogle(selectedText, targetLang, tab.id);
   }
 });

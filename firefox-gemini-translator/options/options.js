@@ -7,34 +7,28 @@ function applyTheme(theme) {
 
 /**
  * 顯示 API Key 的狀態，並在需要時提供可點擊的連結。
- * @param {string} apiKey - 使用者儲存的 API Key。
- * @param {boolean|undefined} isValid - 金鑰是否有效的旗標。
  */
 function displayApiKeyStatus(apiKey, isValid) {
   const statusEl = document.getElementById("apiKeyStatus");
   if (!statusEl) return;
-
-  statusEl.innerHTML = ''; // 清空現有內容
-
-  // 建立一個可點擊的連結
+  statusEl.innerHTML = '';
   const createLink = (text) => {
     const link = document.createElement('a');
     link.href = "https://aistudio.google.com/app/apikey";
-    link.target = "_blank"; // 在新分頁中開啟
+    link.target = "_blank";
     link.textContent = text;
     return link;
   };
 
   if (!apiKey) {
     const link = createLink("(尚未輸入，點此獲取)");
-    statusEl.className = "key-status invalid"; // 使用 'invalid' class 來顯示紅色
+    statusEl.className = "key-status invalid";
     statusEl.appendChild(link);
   } else if (isValid === false) {
     const link = createLink("(金鑰無效，點此獲取)");
     statusEl.className = "key-status invalid";
     statusEl.appendChild(link);
   } else {
-    // isValid 為 true 或 undefined (尚未驗證) 時
     const span = document.createElement('span');
     span.textContent = "(已儲存)";
     statusEl.className = "key-status valid";
@@ -53,19 +47,36 @@ function renderHistory(history = []) {
     container.textContent = "尚無翻譯紀錄。";
     return;
   }
+
   history.forEach(item => {
     const itemDiv = document.createElement("div");
     itemDiv.className = "history-item";
+
+    // --- 新增：引擎標籤 ---
+    if (item.engine) {
+      const engineTag = document.createElement("span");
+      engineTag.className = `engine-tag engine-${item.engine}`;
+      engineTag.textContent = item.engine;
+      itemDiv.appendChild(engineTag);
+    }
+
     const originalP = document.createElement("p");
     originalP.className = "original-text";
     originalP.textContent = item.original;
+
     const translatedP = document.createElement("p");
     translatedP.className = "translated-text";
     translatedP.textContent = item.translated;
+
     const footerDiv = document.createElement("div");
     footerDiv.className = "history-item-footer";
+
     const timeSpan = document.createElement("span");
     timeSpan.textContent = new Date(item.timestamp).toLocaleString();
+
+    const buttonGroup = document.createElement("div");
+    buttonGroup.className = "history-item-buttons";
+
     const copyBtn = document.createElement("button");
     copyBtn.className = "copy-history-btn";
     copyBtn.textContent = "複製";
@@ -75,11 +86,28 @@ function renderHistory(history = []) {
         setTimeout(() => { copyBtn.textContent = "複製"; }, 1500);
       });
     };
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-history-btn";
+    deleteBtn.textContent = "刪除";
+    deleteBtn.onclick = async () => {
+      if (confirm(`確定要刪除這筆紀錄嗎？\n\n原文：${item.original}`)) {
+        const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
+        const updatedHistory = translationHistory.filter(historyItem => historyItem.timestamp !== item.timestamp);
+        await browser.storage.local.set({ translationHistory: updatedHistory });
+        renderHistory(updatedHistory);
+      }
+    };
+
+    buttonGroup.appendChild(copyBtn);
+    buttonGroup.appendChild(deleteBtn);
     footerDiv.appendChild(timeSpan);
-    footerDiv.appendChild(copyBtn);
+    footerDiv.appendChild(buttonGroup);
+    
     itemDiv.appendChild(originalP);
     itemDiv.appendChild(translatedP);
     itemDiv.appendChild(footerDiv);
+
     container.appendChild(itemDiv);
   });
 }
@@ -115,8 +143,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const newMaxHistorySize = parseInt(maxHistoryInput.value, 10);
     const validMaxHistorySize = isNaN(newMaxHistorySize) ? 20 : newMaxHistorySize;
     const newApiKey = apiKeyInput.value.trim();
-
-    // 根據是否有輸入金鑰來決定其初始有效性狀態
     const isNewKeyPresent = !!newApiKey;
 
     const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
@@ -124,8 +150,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       translationHistory.length = validMaxHistorySize;
     }
 
-    // 當使用者儲存金鑰時，如果金鑰為空，則立即標記為無效；
-    // 如果不為空，則樂觀地假設它是有效的，直到翻譯失敗為止。
     await browser.storage.local.set({
       GEMINI_API_KEY: newApiKey,
       TRANSLATE_LANG: langSelect.value,
@@ -135,9 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       geminiKeyValid: isNewKeyPresent 
     });
 
-    // 立即根據金鑰是否存在來更新 UI
     displayApiKeyStatus(newApiKey, isNewKeyPresent);
-
     status.textContent = "✅ 設定已儲存";
     setTimeout(() => { status.textContent = ''; }, 2000);
   };
@@ -151,14 +173,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
   
-  // 監聽儲存空間變化，即時更新金鑰狀態和紀錄列表
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === 'local') {
       if (changes.translationHistory) {
         renderHistory(changes.translationHistory.newValue);
       }
       if (changes.geminiKeyValid || changes.GEMINI_API_KEY) {
-        // 如果金鑰本身或其有效性狀態被改變，就重新讀取並更新狀態顯示
         browser.storage.local.get(["GEMINI_API_KEY", "geminiKeyValid"]).then(data => {
             displayApiKeyStatus(data.GEMINI_API_KEY, data.geminiKeyValid);
         });
