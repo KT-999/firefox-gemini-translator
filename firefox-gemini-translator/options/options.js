@@ -1,12 +1,18 @@
 /**
- * 根據主題設定調整頁面樣式。
+ * 根據主題設定調整頁面樣式，新增支援 'auto' 模式。
+ * @param {string} theme - 'light', 'dark', 或 'auto'
  */
 function applyTheme(theme) {
-  document.body.className = theme;
+  let finalTheme = theme;
+  if (theme === 'auto') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    finalTheme = prefersDark ? 'dark' : 'light';
+  }
+  document.body.className = finalTheme;
 }
 
 /**
- * 顯示 API Key 的狀態，並在需要時提供可點擊的連結。
+ * 顯示 API Key 的狀態。
  */
 function displayApiKeyStatus(apiKey, isValid) {
   const statusEl = document.getElementById("apiKeyStatus");
@@ -21,13 +27,11 @@ function displayApiKeyStatus(apiKey, isValid) {
   };
 
   if (!apiKey) {
-    const link = createLink("(尚未輸入，點此獲取)");
+    statusEl.appendChild(createLink("(尚未輸入，點此獲取)"));
     statusEl.className = "key-status invalid";
-    statusEl.appendChild(link);
   } else if (isValid === false) {
-    const link = createLink("(金鑰無效，點此獲取)");
+    statusEl.appendChild(createLink("(金鑰無效，點此獲取)"));
     statusEl.className = "key-status invalid";
-    statusEl.appendChild(link);
   } else {
     const span = document.createElement('span');
     span.textContent = "(已儲存)";
@@ -62,21 +66,15 @@ function renderHistory(history = []) {
     const originalP = document.createElement("p");
     originalP.className = "original-text";
     originalP.textContent = item.original;
-
     const translatedP = document.createElement("p");
     translatedP.className = "translated-text";
     translatedP.textContent = item.translated;
-
     const footerDiv = document.createElement("div");
     footerDiv.className = "history-item-footer";
-
     const timeSpan = document.createElement("span");
     timeSpan.textContent = new Date(item.timestamp).toLocaleString();
-
     const buttonGroup = document.createElement("div");
     buttonGroup.className = "history-item-buttons";
-
-    // --- 新增：複製原文按鈕 ---
     const copyOriginalBtn = document.createElement("button");
     copyOriginalBtn.className = "copy-history-btn";
     copyOriginalBtn.textContent = "複製原文";
@@ -86,8 +84,6 @@ function renderHistory(history = []) {
         setTimeout(() => { copyOriginalBtn.textContent = "複製原文"; }, 1500);
       });
     };
-
-    // 修改：將原有的「複製」按鈕改名為「複製譯文」以作區分
     const copyTranslatedBtn = document.createElement("button");
     copyTranslatedBtn.className = "copy-history-btn";
     copyTranslatedBtn.textContent = "複製譯文";
@@ -97,29 +93,24 @@ function renderHistory(history = []) {
         setTimeout(() => { copyTranslatedBtn.textContent = "複製譯文"; }, 1500);
       });
     };
-
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-history-btn";
     deleteBtn.textContent = "刪除";
     deleteBtn.onclick = async () => {
       if (confirm(`確定要刪除這筆紀錄嗎？\n\n原文：${item.original}`)) {
         const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
-        const updatedHistory = translationHistory.filter(historyItem => historyItem.timestamp !== item.timestamp);
+        const updatedHistory = translationHistory.filter(h => h.timestamp !== item.timestamp);
         await browser.storage.local.set({ translationHistory: updatedHistory });
-        renderHistory(updatedHistory);
       }
     };
-
     buttonGroup.appendChild(copyOriginalBtn);
     buttonGroup.appendChild(copyTranslatedBtn);
     buttonGroup.appendChild(deleteBtn);
     footerDiv.appendChild(timeSpan);
     footerDiv.appendChild(buttonGroup);
-    
     itemDiv.appendChild(originalP);
     itemDiv.appendChild(translatedP);
     itemDiv.appendChild(footerDiv);
-
     container.appendChild(itemDiv);
   });
 }
@@ -128,7 +119,14 @@ function renderHistory(history = []) {
  * 頁面載入完成後執行的主要函式。
  */
 document.addEventListener("DOMContentLoaded", async () => {
+  // 取得所有需要的 DOM 元素
+  const tabSettingsBtn = document.getElementById('tab-settings');
+  const tabHistoryBtn = document.getElementById('tab-history');
+  const viewSettings = document.getElementById('view-settings');
+  const viewHistory = document.getElementById('view-history');
+  
   const apiKeyInput = document.getElementById("apiKey");
+  const toggleApiKeyBtn = document.getElementById("toggleApiKey");
   const langSelect = document.getElementById("lang");
   const themeSelect = document.getElementById("theme");
   const maxHistoryInput = document.getElementById("maxHistorySize");
@@ -136,65 +134,100 @@ document.addEventListener("DOMContentLoaded", async () => {
   const clearHistoryBtn = document.getElementById("clearHistoryBtn");
   const status = document.getElementById("status");
 
+  // --- 頁籤切換邏輯 ---
+  function switchTab(activeTab) {
+    if (activeTab === 'settings') {
+      tabSettingsBtn.classList.add('active');
+      tabHistoryBtn.classList.remove('active');
+      viewSettings.classList.add('active');
+      viewHistory.classList.remove('active');
+    } else {
+      tabSettingsBtn.classList.remove('active');
+      tabHistoryBtn.classList.add('active');
+      viewSettings.classList.remove('active');
+      viewHistory.classList.add('active');
+    }
+  }
+  tabSettingsBtn.addEventListener('click', () => switchTab('settings'));
+  tabHistoryBtn.addEventListener('click', () => switchTab('history'));
+
+  // --- 狀態通知 ---
+  const showStatus = (message) => {
+    status.textContent = message;
+    status.classList.add('show');
+    setTimeout(() => { status.classList.remove('show'); }, 2500);
+  };
+
+  // --- 載入設定 ---
   const settings = await browser.storage.local.get([
     "GEMINI_API_KEY", "TRANSLATE_LANG", "THEME", "maxHistorySize", "translationHistory", "geminiKeyValid"
   ]);
 
-  if (settings.GEMINI_API_KEY) apiKeyInput.value = settings.GEMINI_API_KEY;
-  if (settings.TRANSLATE_LANG) langSelect.value = settings.TRANSLATE_LANG;
-  if (settings.THEME) themeSelect.value = settings.THEME;
-  if (settings.maxHistorySize) maxHistoryInput.value = settings.maxHistorySize;
-  
-  applyTheme(settings.THEME || 'light');
+  // 填入設定值
+  apiKeyInput.value = settings.GEMINI_API_KEY || '';
+  langSelect.value = settings.TRANSLATE_LANG || '繁體中文';
+  themeSelect.value = settings.THEME || 'auto';
+  maxHistoryInput.value = settings.maxHistorySize || 20;
+
+  // 應用主題與渲染歷史紀錄
+  applyTheme(themeSelect.value);
   renderHistory(settings.translationHistory);
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
 
-  themeSelect.onchange = () => applyTheme(themeSelect.value);
+  // --- 事件監聽 ---
+  themeSelect.addEventListener('change', () => {
+    applyTheme(themeSelect.value);
+  });
 
-  saveBtn.onclick = async () => {
-    const newMaxHistorySize = parseInt(maxHistoryInput.value, 10);
-    const validMaxHistorySize = isNaN(newMaxHistorySize) ? 20 : newMaxHistorySize;
-    const newApiKey = apiKeyInput.value.trim();
-    const isNewKeyPresent = !!newApiKey;
-
-    const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
-    if (translationHistory.length > validMaxHistorySize) {
-      translationHistory.length = validMaxHistorySize;
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (themeSelect.value === 'auto') {
+      applyTheme('auto');
     }
+  });
 
+  toggleApiKeyBtn.addEventListener('click', () => {
+    const isPassword = apiKeyInput.type === 'password';
+    apiKeyInput.type = isPassword ? 'text' : 'password';
+    toggleApiKeyBtn.querySelector('.icon-eye').classList.toggle('hidden', isPassword);
+    toggleApiKeyBtn.querySelector('.icon-eye-off').classList.toggle('hidden', !isPassword);
+  });
+
+  saveBtn.addEventListener('click', async () => {
+    const newMaxHistorySize = parseInt(maxHistoryInput.value, 10);
     await browser.storage.local.set({
-      GEMINI_API_KEY: newApiKey,
+      GEMINI_API_KEY: apiKeyInput.value.trim(),
       TRANSLATE_LANG: langSelect.value,
       THEME: themeSelect.value,
-      maxHistorySize: validMaxHistorySize,
-      translationHistory: translationHistory,
-      geminiKeyValid: isNewKeyPresent 
+      maxHistorySize: isNaN(newMaxHistorySize) ? 20 : newMaxHistorySize,
+      geminiKeyValid: !!apiKeyInput.value.trim()
     });
+    showStatus("設定已儲存");
+    // 立即更新 API Key 狀態顯示
+    displayApiKeyStatus(apiKeyInput.value.trim(), !!apiKeyInput.value.trim());
+  });
 
-    displayApiKeyStatus(newApiKey, isNewKeyPresent);
-    status.textContent = "✅ 設定已儲存";
-    setTimeout(() => { status.textContent = ''; }, 2000);
-  };
-
-  clearHistoryBtn.onclick = async () => {
+  clearHistoryBtn.addEventListener('click', async () => {
     if (confirm("確定要清除所有翻譯紀錄嗎？此操作無法復原。")) {
-      await browser.storage.local.remove("translationHistory");
-      renderHistory([]);
-      status.textContent = "✅ 紀錄已清除";
-      setTimeout(() => { status.textContent = ''; }, 2000);
+      await browser.storage.local.set({ translationHistory: [] });
+      showStatus("紀錄已清除");
     }
-  };
+  });
   
+  // 監聽 storage 變化以即時更新 UI
   browser.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local') {
-      if (changes.translationHistory) {
-        renderHistory(changes.translationHistory.newValue);
-      }
-      if (changes.geminiKeyValid || changes.GEMINI_API_KEY) {
-        browser.storage.local.get(["GEMINI_API_KEY", "geminiKeyValid"]).then(data => {
-            displayApiKeyStatus(data.GEMINI_API_KEY, data.geminiKeyValid);
-        });
-      }
+    if (area !== 'local') return;
+
+    if (changes.translationHistory) {
+      renderHistory(changes.translationHistory.newValue);
+    }
+    if (changes.geminiKeyValid || changes.GEMINI_API_KEY) {
+      browser.storage.local.get(["GEMINI_API_KEY", "geminiKeyValid"]).then(data => {
+        displayApiKeyStatus(data.GEMINI_API_KEY, data.geminiKeyValid);
+      });
+    }
+    if (changes.THEME) {
+      themeSelect.value = changes.THEME.newValue || 'auto';
+      applyTheme(themeSelect.value);
     }
   });
 });

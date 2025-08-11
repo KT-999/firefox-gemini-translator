@@ -1,26 +1,44 @@
 :root {
-  --bg-color-light: #f4f4f9;
+  --bg-color-light: #f7f7f8;
   --text-color-light: #333;
-  --bg-color-dark: #222;
-  --text-color-dark: #eee;
-  --card-bg-light: #fff;
-  --card-bg-dark: #333;
-  --border-color-light: #ddd;
-  --border-color-dark: #555;
+  --bg-color-dark: #202124;
+  --text-color-dark: #e8eaed;
+  --card-bg-light: #ffffff;
+  --card-bg-dark: #2d2e30;
+  --border-color-light: #e0e0e0;
+  --border-color-dark: #444;
   --primary-color: #007bff;
   --primary-color-hover: #0056b3;
   --danger-color: #dc3545;
   --danger-color-hover: #c82333;
   --success-color: #28a745;
-  --warning-color: #ffc107;
+}
+
+/* --- 1. 全局與彈窗尺寸設定 (已修改) --- */
+html {
+  /* 移除固定的寬度，讓 body 來控制尺寸，避免裁切問題 */
+  box-sizing: border-box;
+  /* 讓捲動條樣式在深色模式下更好看 (可選) */
+  color-scheme: light dark;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* 設定彈窗的尺寸 */
+  width: 480px;
+  height: 580px;
   margin: 0;
-  padding: 1em;
-  transition: background-color .3s ease, color .3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  /* 關鍵修改：只隱藏水平捲動條，避免內容被裁切 */
+  overflow-x: hidden; 
+  box-sizing: border-box;
+}
+
+/* 通用 box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body.light {
@@ -33,23 +51,68 @@ body.dark {
   color: var(--text-color-dark);
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
+.wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1.5em;
+  height: 100%;
 }
 
+/* --- 2. 頁籤導覽列樣式 --- */
+.tab-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border-color-light);
+  flex-shrink: 0;
+}
+body.dark .tab-nav {
+  border-bottom-color: var(--border-color-dark);
+}
+
+.tab-btn {
+  flex-grow: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: inherit;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -1px;
+}
+.tab-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+body.dark .tab-btn:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+/* --- 3. 主要內容區樣式 (已修改) --- */
+.content {
+  flex-grow: 1;
+  /* 確保內容區可以垂直捲動 */
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.tab-view {
+  display: none;
+}
+.tab-view.active {
+  display: block;
+}
+
+/* --- 4. 表單與卡片元素樣式 --- */
 .card {
-  background-color: var(--card-bg, #fff);
+  background-color: var(--card-bg-light);
   padding: 1.5em;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  color: inherit;
   border: 1px solid var(--border-color-light);
 }
-
 body.dark .card {
   background-color: var(--card-bg-dark);
   border-color: var(--border-color-dark);
@@ -57,45 +120,51 @@ body.dark .card {
 
 h2 {
   margin-top: 0;
-  font-size: 1.5em;
-  border-bottom: 1px solid var(--border-color-light);
+  margin-bottom: 1.5em;
+  font-size: 1.2em;
   padding-bottom: 0.5em;
-  margin-bottom: 1em;
+  border-bottom: 1px solid var(--border-color-light);
 }
-
 body.dark h2 {
-    border-bottom-color: var(--border-color-dark);
+  border-bottom-color: var(--border-color-dark);
 }
 
 label {
   display: block;
-  margin: 1em 0 .5em;
+  margin-bottom: .5em;
   font-weight: 500;
+  color: #5f6368;
+  /* 關鍵修復：強制文字換行，避免撐開版面 */
+  overflow-wrap: break-word;
+  word-wrap: break-word; /* 舊版瀏覽器支援 */
+}
+body.dark label {
+  color: #bdc1c6;
 }
 
 input[type="password"],
+input[type="text"],
 input[type="number"],
 select {
   width: 100%;
-  padding: .6em;
-  margin-top: .2em;
-  box-sizing: border-box;
+  padding: .8em;
+  margin-bottom: 1.5em;
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 1em;
   background-color: #fff;
   color: #333;
 }
-
 body.dark input, body.dark select {
-    background-color: #444;
-    color: #eee;
-    border-color: #666;
+  background-color: #3c4043;
+  color: #e8eaed;
+  border-color: #5f6368;
 }
 
-button {
-  margin-top: 1.5em;
-  padding: .7em 1.2em;
+button#saveBtn {
+  width: 100%;
+  margin-top: 1em;
+  padding: .8em;
   background: var(--primary-color);
   color: #fff;
   border: none;
@@ -103,176 +172,66 @@ button {
   cursor: pointer;
   font-size: 1em;
   font-weight: 500;
-  transition: background-color 0.2s;
 }
 
-button:hover {
-  background: var(--primary-color-hover);
-}
-
-#status {
-  margin-top: 1em;
-  color: var(--success-color);
-  font-weight: 500;
-}
-
-/* Key Status Styles */
-.key-status {
-  font-size: 0.9em;
-  font-weight: normal;
-  margin-left: 8px;
-}
-.key-status a {
-    color: inherit;
-    text-decoration: underline;
-    cursor: pointer;
-}
-.key-status.valid {
-  color: var(--success-color);
-}
-.key-status.invalid {
-  color: var(--danger-color);
-}
-.key-status.missing {
-  color: #888;
-}
-body.dark .key-status.missing {
-    color: #aaa;
-}
-
-
-/* History Section Styles */
+/* --- 5. 歷史紀錄區樣式 --- */
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1em;
 }
-
-.history-header h2 {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
 .clear-btn {
-  background-color: var(--danger-color);
-  margin-top: 0;
-  padding: .5em 1em;
+  background: none;
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
+  padding: .4em .8em;
+  border-radius: 4px;
+  cursor: pointer;
   font-size: 0.9em;
 }
-
 .clear-btn:hover {
-  background-color: var(--danger-color-hover);
+  background: var(--danger-color);
+  color: #fff;
 }
 
 #historyContainer {
-  margin-top: 1em;
-  max-height: 400px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1em;
 }
 
-.history-item {
-  border: 1px solid var(--border-color-light);
-  border-radius: 6px;
-  padding: 1em;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8em;
-  position: relative; /* 為了引擎標籤的定位 */
-}
+/* --- 其他元件樣式 --- */
+.password-wrapper { position: relative; }
+#apiKey { padding-right: 45px; }
+.toggle-vis { position: absolute; right: 1px; top: 0; bottom: 0; margin-bottom: 1.5em; padding: 0 12px; background: transparent; border: none; cursor: pointer; color: #666; display: flex; align-items: center; }
+body.dark .toggle-vis { color: #ccc; }
+.toggle-vis svg { width: 16px; height: 16px; }
+.hidden { display: none; }
 
-body.dark .history-item {
-    border-color: var(--border-color-dark);
-}
+.key-status { font-size: 0.9em; font-weight: normal; margin-left: 8px; }
+.key-status a { color: inherit; }
+.key-status.valid { color: var(--success-color); }
+.key-status.invalid { color: var(--danger-color); }
 
-.history-item p {
-  margin: 0;
-  line-height: 1.5;
-}
+#status { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--success-color); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: bottom 0.4s ease-in-out; z-index: 1000; font-weight: 500; }
+#status.show { bottom: 20px; }
 
-.history-item .original-text {
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.history-item .translated-text {
-  white-space: pre-wrap;
-}
-
-.history-item-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.5em;
-    font-size: 0.8em;
-    color: #888;
-}
-
-body.dark .history-item-footer {
-    color: #aaa;
-}
-
-.history-item-buttons {
-    display: flex;
-    gap: 0.5em;
-}
-
-.copy-history-btn, .delete-history-btn {
-    background: none;
-    border: 1px solid #ccc;
-    color: #555;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em;
-    margin: 0;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.delete-history-btn {
-    border-color: var(--danger-color);
-    color: var(--danger-color);
-}
-
-.delete-history-btn:hover {
-    background-color: var(--danger-color);
-    color: #fff;
-}
-
-body.dark .copy-history-btn {
-    color: #ccc;
-    border-color: #666;
-}
-
-body.dark .delete-history-btn {
-    border-color: var(--danger-color);
-    color: var(--danger-color);
-}
-
-body.dark .delete-history-btn:hover {
-    background-color: var(--danger-color);
-    color: #fff;
-}
-
-/* Engine Tag Styles */
-.engine-tag {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 2px 6px;
-    font-size: 0.75em;
-    font-weight: bold;
-    color: #fff;
-    border-radius: 0 6px 0 6px;
-    text-transform: uppercase;
-}
-
-.engine-google {
-    background-color: #888;
-}
-
-.engine-gemini {
-    background-color: var(--primary-color);
-}
+/* 歷史紀錄項目 */
+.history-item { border: 1px solid var(--border-color-light); border-radius: 6px; padding: 1em; display: flex; flex-direction: column; gap: 0.8em; position: relative; }
+body.dark .history-item { border-color: var(--border-color-dark); }
+.history-item p { margin: 0; line-height: 1.5; }
+.history-item .original-text { font-weight: 600; color: var(--primary-color); }
+.history-item .translated-text { white-space: pre-wrap; }
+.history-item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5em; font-size: 0.8em; color: #888; }
+body.dark .history-item-footer { color: #aaa; }
+.history-item-buttons { display: flex; gap: 0.5em; }
+.copy-history-btn, .delete-history-btn { background: none; border: 1px solid #ccc; color: #555; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em; margin: 0; }
+.delete-history-btn { border-color: var(--danger-color); color: var(--danger-color); }
+.delete-history-btn:hover { background-color: var(--danger-color); color: #fff; }
+body.dark .copy-history-btn { color: #ccc; border-color: #666; }
+body.dark .delete-history-btn { border-color: var(--danger-color); color: var(--danger-color); }
+body.dark .delete-history-btn:hover { background-color: var(--danger-color); color: #fff; }
+.engine-tag { position: absolute; top: 0; right: 0; padding: 2px 6px; font-size: 0.75em; font-weight: bold; color: #fff; border-radius: 0 6px 0 6px; text-transform: uppercase; }
+.engine-google { background-color: #888; }
+.engine-gemini { background-color: var(--primary-color); }

@@ -10,11 +10,10 @@ async function saveToHistory(original, translated, engine) {
   try {
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
 
-    // 建立新的紀錄項目，包含引擎資訊
     const newEntry = {
       original,
       translated,
-      engine, // 新增
+      engine,
       timestamp: new Date().toISOString()
     };
 
@@ -42,47 +41,51 @@ function containsCjk(text) {
  */
 async function translateWithGoogle(text, targetLang, tabId) {
   try {
-    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja" };
+    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
     const tl = langCodeMap[targetLang] || "zh-TW";
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Google API 錯誤: ${response.status}`);
+    
     const data = await response.json();
     let translatedText = '';
+    
     const allDefinitions = {};
-
-    const synonymBlocks = [data[1], data[5]].filter(Boolean);
-    synonymBlocks.forEach(block => {
-      if (Array.isArray(block)) {
-        block.forEach(part => {
-          if (!Array.isArray(part) || part.length < 2) return;
-          const partOfSpeech = part[0];
-          const words = part[1];
-          if (typeof partOfSpeech === 'string' && Array.isArray(words)) {
-            if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
-            words.forEach(word => allDefinitions[partOfSpeech].add(word));
-          }
+    if (data[1] || data[5] || (data[12] && data[12].length > 0)) {
+        const synonymBlocks = [data[1], data[5]].filter(Boolean);
+        synonymBlocks.forEach(block => {
+            if (Array.isArray(block)) {
+                block.forEach(part => {
+                    if (!Array.isArray(part) || part.length < 2) return;
+                    const partOfSpeech = part[0];
+                    const words = part[1];
+                    if (typeof partOfSpeech === 'string' && Array.isArray(words)) {
+                        if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
+                        words.forEach(word => allDefinitions[partOfSpeech].add(word));
+                    }
+                });
+            }
         });
-      }
-    });
 
-    const dictionaryBlock = data.find(block => Array.isArray(block) && block.length > 0 && block[0] && typeof block[0][0] === 'string' && Array.isArray(block[0][1]));
-    if (dictionaryBlock) {
-      dictionaryBlock.forEach(part => {
-        if (!Array.isArray(part) || part.length < 2) return;
-        const partOfSpeech = part[0];
-        const definitions = part[1];
-        if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
-          if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
-          definitions.forEach(def => {
-            if (def && typeof def[0] === 'string') allDefinitions[partOfSpeech].add(def[0]);
-          });
+        if (data[12] && Array.isArray(data[12])) {
+             data[12].forEach(part => {
+                if (!Array.isArray(part) || part.length < 2) return;
+                const partOfSpeech = part[0];
+                const definitions = part[1];
+                 if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
+                    if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
+                    definitions.forEach(def => {
+                        if (def && typeof def[0] === 'string') allDefinitions[partOfSpeech].add(def[0]);
+                    });
+                }
+            });
         }
-      });
     }
-
-    translatedText = Object.entries(allDefinitions).map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`).join('__NEWLINE__');
+    
+    translatedText = Object.entries(allDefinitions)
+      .map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`)
+      .join('__NEWLINE__');
 
     if (!translatedText && data[0] && Array.isArray(data[0])) {
       translatedText = data[0].map(item => item[0]).join('');
@@ -90,9 +93,9 @@ async function translateWithGoogle(text, targetLang, tabId) {
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
 
-    // 儲存紀錄時，傳入 'google'
     await saveToHistory(text, translatedText.replace(/__NEWLINE__/g, '\n'), 'google');
     browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'google' });
+
   } catch (err) {
     console.error("Google 翻譯發生錯誤", err);
     browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "❌ Google 翻譯失敗" });
@@ -124,7 +127,6 @@ async function translateWithGemini(text, apiKey, targetLang, tabId) {
     if (!translatedText) throw new Error("從 Gemini 未收到翻譯結果");
 
     await browser.storage.local.set({ geminiKeyValid: true });
-    // 儲存紀錄時，傳入 'gemini'
     await saveToHistory(text, translatedText, 'gemini');
     browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'gemini' });
 
