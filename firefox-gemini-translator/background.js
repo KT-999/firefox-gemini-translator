@@ -1,12 +1,13 @@
 // --- Helper Functions ---
 
 /**
- * 儲存一筆翻譯紀錄。
+ * 【修改】儲存一筆翻譯紀錄，新增 targetLang 參數。
  * @param {string} original - 原始文字。
  * @param {string} translated - 翻譯後的文字。
  * @param {string} engine - 使用的翻譯引擎 ('google' 或 'gemini')。
+ * @param {string} targetLang - 目標語言。
  */
-async function saveToHistory(original, translated, engine) {
+async function saveToHistory(original, translated, engine, targetLang) {
   try {
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
 
@@ -14,6 +15,7 @@ async function saveToHistory(original, translated, engine) {
       original,
       translated,
       engine,
+      targetLang, // 儲存目標語言
       timestamp: new Date().toISOString()
     };
 
@@ -37,8 +39,6 @@ function containsCjk(text) {
 
 /**
  * 安全地向分頁發送訊息，並處理可能的連線錯誤。
- * @param {number} tabId - 目標分頁的 ID。
- * @param {object} message - 要發送的訊息物件。
  */
 async function sendMessageToTab(tabId, message) {
   try {
@@ -70,7 +70,6 @@ async function translateWithGoogle(text, targetLang, tabId) {
     const data = await response.json();
     let translatedText = '';
     
-    // ... (此處解析邏輯不變)
     const allDefinitions = {};
     if (data[1] || data[5] || (data[12] && data[12].length > 0)) {
         const synonymBlocks = [data[1], data[5]].filter(Boolean);
@@ -110,7 +109,8 @@ async function translateWithGoogle(text, targetLang, tabId) {
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
 
-    await saveToHistory(text, translatedText.replace(/__NEWLINE__/g, '\n'), 'google');
+    // 【修改】儲存時傳入 targetLang
+    await saveToHistory(text, translatedText.replace(/__NEWLINE__/g, '\n'), 'google', targetLang);
     await sendMessageToTab(tabId, { type: "showTranslation", text: translatedText, engine: 'google', ui: uiStrings });
 
   } catch (err) {
@@ -150,7 +150,8 @@ async function translateWithGemini(text, apiKey, targetLang, tabId) {
     if (!translatedText) throw new Error("從 Gemini 未收到翻譯結果");
 
     await browser.storage.local.set({ geminiKeyValid: true });
-    await saveToHistory(text, translatedText, 'gemini');
+    // 【修改】儲存時傳入 targetLang
+    await saveToHistory(text, translatedText, 'gemini', targetLang);
     await sendMessageToTab(tabId, { type: "showTranslation", text: translatedText, engine: 'gemini', ui: uiStrings });
 
   } catch (err) {

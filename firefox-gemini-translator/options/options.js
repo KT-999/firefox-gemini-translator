@@ -1,18 +1,20 @@
 /**
- * 儲存一筆翻譯紀錄。
+ * 【修改】儲存一筆翻譯紀錄，新增 targetLang 參數。
  * @param {string} original - 原始文字。
  * @param {string} translated - 翻譯後的文字。
  * @param {string} engine - 使用的翻譯引擎 ('google' 或 'gemini')。
+ * @param {string} targetLang - 目標語言。
  */
-async function saveToHistory(original, translated, engine) {
+async function saveToHistory(original, translated, engine, targetLang) {
   try {
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
-    if (!original || !translated) return; // 確保有內容才儲存
+    if (!original || !translated) return;
 
     const newEntry = {
       original,
       translated,
       engine,
+      targetLang, // 儲存目標語言
       timestamp: new Date().toISOString()
     };
 
@@ -27,11 +29,31 @@ async function saveToHistory(original, translated, engine) {
 }
 
 /**
- * 【新增】檢查文字是否包含中日韓 (CJK) 字元。
+ * 檢查文字是否包含中日韓 (CJK) 字元。
  */
 function containsCjk(text) {
   const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
   return cjkRegex.test(text);
+}
+
+/**
+ * 【新增】播放翻譯結果的語音。
+ * @param {string} text - 要朗讀的文字。
+ * @param {string} langName - 語言的完整名稱 (e.g., "繁體中文")。
+ */
+function playTTS(text, langName) {
+    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
+    const langCode = langCodeMap[langName];
+    if (!langCode) {
+        console.error("找不到對應的語言代碼:", langName);
+        return;
+    }
+    
+    // Google TTS URL，使用 'tw-ob' client 參數以避免 reCAPTCHA
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${langCode}&client=tw-ob`;
+    
+    const audio = new Audio(url);
+    audio.play().catch(e => console.error("播放語音失敗:", e));
 }
 
 
@@ -147,6 +169,14 @@ function renderHistory(history = []) {
     const buttonGroup = document.createElement("div");
     buttonGroup.className = "history-item-buttons";
     
+    // 【新增】歷史紀錄中的聆聽按鈕
+    const listenBtn = document.createElement("button");
+    listenBtn.className = "listen-btn";
+    listenBtn.title = i18n.t("listenButtonTooltip");
+    listenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+    listenBtn.onclick = () => playTTS(item.translated, item.targetLang);
+    buttonGroup.appendChild(listenBtn);
+
     const copyOriginalBtn = document.createElement("button");
     copyOriginalBtn.className = "copy-history-btn";
     copyOriginalBtn.textContent = i18n.t("copyOriginal");
@@ -193,10 +223,9 @@ function renderHistory(history = []) {
 
 // --- Popup 翻譯邏輯 ---
 
-/**
- * 【新增】使用 Google Translate API 進行翻譯。
- */
 async function handleGooglePopupTranslate(text, targetLang, resultEl) {
+    const popupListenBtn = document.getElementById('popupListenBtn');
+    popupListenBtn.classList.add('hidden');
     resultEl.innerHTML = '<div class="loading-spinner"></div>';
     try {
         const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
@@ -205,7 +234,6 @@ async function handleGooglePopupTranslate(text, targetLang, resultEl) {
 
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Google API 錯誤: ${response.status}`);
-        
         const data = await response.json();
         let translatedText = '';
         
@@ -225,7 +253,6 @@ async function handleGooglePopupTranslate(text, targetLang, resultEl) {
                     });
                 }
             });
-
             if (data[12] && Array.isArray(data[12])) {
                  data[12].forEach(part => {
                     if (!Array.isArray(part) || part.length < 2) return;
@@ -240,19 +267,16 @@ async function handleGooglePopupTranslate(text, targetLang, resultEl) {
                 });
             }
         }
-        
-        translatedText = Object.entries(allDefinitions)
-          .map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`)
-          .join('\n');
-
+        translatedText = Object.entries(allDefinitions).map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`).join('\n');
         if (!translatedText && data[0] && Array.isArray(data[0])) {
           translatedText = data[0].map(item => item[0]).join('');
         }
-
         if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
         
         resultEl.textContent = translatedText;
-        await saveToHistory(text, translatedText, 'google');
+        popupListenBtn.classList.remove('hidden'); // 【修改】顯示聆聽按鈕
+        popupListenBtn.onclick = () => playTTS(translatedText, targetLang);
+        await saveToHistory(text, translatedText, 'google', targetLang);
 
     } catch (err) {
         console.error("Popup Google 翻譯發生錯誤", err);
@@ -260,17 +284,13 @@ async function handleGooglePopupTranslate(text, targetLang, resultEl) {
     }
 }
 
-
-/**
- * 【修改】原 handlePopupTranslate 更名為 handleGeminiPopupTranslate
- */
 async function handleGeminiPopupTranslate(text, apiKey, targetLang, resultEl) {
+    const popupListenBtn = document.getElementById('popupListenBtn');
+    popupListenBtn.classList.add('hidden');
     resultEl.innerHTML = '<div class="loading-spinner"></div>';
-    
     try {
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const prompt = i18n.t("promptSystem", [targetLang, text]);
-
         const response = await fetch(GEMINI_API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -279,20 +299,15 @@ async function handleGeminiPopupTranslate(text, apiKey, targetLang, resultEl) {
                 generationConfig: { maxOutputTokens: 1024, temperature: 0.1 }
             })
         });
-
-        if (!response.ok) {
-            throw new Error(`API 錯誤: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`API 錯誤: ${response.status}`);
         const data = await response.json();
         const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-        if (!translatedText) {
-            throw new Error("從 Gemini 未收到翻譯結果");
-        }
+        if (!translatedText) throw new Error("從 Gemini 未收到翻譯結果");
         
         resultEl.textContent = translatedText;
-        await saveToHistory(text, translatedText, 'gemini');
+        popupListenBtn.classList.remove('hidden'); // 【修改】顯示聆聽按鈕
+        popupListenBtn.onclick = () => playTTS(translatedText, targetLang);
+        await saveToHistory(text, translatedText, 'gemini', targetLang);
 
     } catch (error) {
         console.error("Popup Gemini 翻譯失敗:", error);
@@ -385,7 +400,6 @@ async function main() {
     
     const { GEMINI_API_KEY } = await browser.storage.local.get("GEMINI_API_KEY");
     
-    // 【修改處】加入智慧判斷邏輯
     let useGoogleTranslate = false;
     if (containsCjk(text)) {
         useGoogleTranslate = text.length <= 5;

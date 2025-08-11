@@ -9,6 +9,7 @@
   "popupCopy": { "message": "복사" },
   "popupCopied": { "message": "복사됨!" },
   "popupClose": { "message": "닫기" },
+  "listenButtonTooltip": { "message": "듣기" },
   "optionsTitle": { "message": "Gemini 번역 설정" },
   "tabTranslate": { "message": "번역" },
   "tabSettings": { "message": "설정" },

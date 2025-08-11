@@ -9,6 +9,7 @@
   "popupCopy": { "message": "Kopieren" },
   "popupCopied": { "message": "Kopiert!" },
   "popupClose": { "message": "Schließen" },
+  "listenButtonTooltip": { "message": "Anhören" },
   "optionsTitle": { "message": "Gemini-Übersetzungseinstellungen" },
   "tabTranslate": { "message": "Übersetzen" },
   "tabSettings": { "message": "Einstellungen" },

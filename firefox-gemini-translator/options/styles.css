@@ -17,28 +17,11 @@
 }
 
 /* --- 1. 全局與彈窗尺寸設定 --- */
-html {
-  box-sizing: border-box;
-  color-scheme: light dark;
-}
-
-body {
-  width: 480px;
-  height: 580px;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden; 
-  box-sizing: border-box;
-}
-
+html { box-sizing: border-box; color-scheme: light dark; }
+body { width: 480px; height: 580px; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; display: flex; flex-direction: column; overflow-x: hidden; box-sizing: border-box; }
 body.light { background-color: var(--bg-color-light); color: var(--text-color-light); }
 body.dark { background-color: var(--bg-color-dark); color: var(--text-color-dark); }
-
 *, *::before, *::after { box-sizing: border-box; }
-
 .wrapper { display: flex; flex-direction: column; height: 100%; }
 
 /* --- 2. 頁籤導覽列樣式 --- */
@@ -65,7 +48,8 @@ body.dark #translateInput { background-color: #3c4043; color: #e8eaed; border-co
 .translate-btn:hover { background: var(--primary-color-hover); }
 .result-card { display: flex; flex-direction: column; flex-grow: 1; background-color: var(--card-bg-light); padding: 1em; border-radius: 8px; border: 1px solid var(--border-color-light); }
 body.dark .result-card { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); }
-.result-card h3 { margin-top: 0; margin-bottom: 0.5em; font-size: 1.1em; padding-bottom: 0.5em; border-bottom: 1px solid var(--border-color-light); }
+.result-header { display: flex; justify-content: space-between; align-items: center; } /* 【新增】 */
+.result-card h3 { margin-top: 0; margin-bottom: 0.5em; font-size: 1.1em; padding-bottom: 0.5em; border-bottom: 1px solid var(--border-color-light); flex-grow: 1; }
 body.dark .result-card h3 { border-bottom-color: var(--border-color-dark); }
 #translateResult { flex-grow: 1; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; padding: 8px; background-color: var(--result-bg-light); border-radius: 4px; }
 body.dark #translateResult { background-color: var(--result-bg-dark); }
@@ -95,7 +79,7 @@ body.dark .history-item { border-color: var(--border-color-dark); }
 .history-item .translated-text { white-space: pre-wrap; }
 .history-item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5em; font-size: 0.8em; color: #888; }
 body.dark .history-item-footer { color: #aaa; }
-.history-item-buttons { display: flex; gap: 0.5em; }
+.history-item-buttons { display: flex; gap: 0.5em; align-items: center; }
 .copy-history-btn, .delete-history-btn { background: none; border: 1px solid #ccc; color: #555; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em; margin: 0; }
 .delete-history-btn { border-color: var(--danger-color); color: var(--danger-color); }
 .delete-history-btn:hover { background-color: var(--danger-color); color: #fff; }
@@ -107,6 +91,9 @@ body.dark .delete-history-btn:hover { background-color: var(--danger-color); col
 .engine-gemini { background-color: var(--primary-color); }
 
 /* --- 7. 其他元件樣式 --- */
+.listen-btn { background: none; border: none; padding: 4px; cursor: pointer; color: #666; opacity: 0.7; } /* 【新增】 */
+.listen-btn:hover { opacity: 1; color: var(--primary-color); } /* 【新增】 */
+body.dark .listen-btn { color: #ccc; } /* 【新增】 */
 .password-wrapper { position: relative; }
 #apiKey { padding-right: 45px; }
 .toggle-vis { position: absolute; right: 1px; top: 0; bottom: 0; margin-bottom: 1.5em; padding: 0 12px; background: transparent; border: none; cursor: pointer; color: #666; display: flex; align-items: center; }

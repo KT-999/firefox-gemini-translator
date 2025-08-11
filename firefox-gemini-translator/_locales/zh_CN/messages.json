@@ -9,6 +9,7 @@
   "popupCopy": { "message": "复制" },
   "popupCopied": { "message": "已复制！" },
   "popupClose": { "message": "关闭" },
+  "listenButtonTooltip": { "message": "聆听" },
   "optionsTitle": { "message": "Gemini 翻译设置" },
   "tabTranslate": { "message": "翻译" },
   "tabSettings": { "message": "设置" },
