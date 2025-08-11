@@ -52,7 +52,6 @@ function renderHistory(history = []) {
     const itemDiv = document.createElement("div");
     itemDiv.className = "history-item";
 
-    // --- 新增：引擎標籤 ---
     if (item.engine) {
       const engineTag = document.createElement("span");
       engineTag.className = `engine-tag engine-${item.engine}`;
@@ -77,13 +76,25 @@ function renderHistory(history = []) {
     const buttonGroup = document.createElement("div");
     buttonGroup.className = "history-item-buttons";
 
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "copy-history-btn";
-    copyBtn.textContent = "複製";
-    copyBtn.onclick = () => {
+    // --- 新增：複製原文按鈕 ---
+    const copyOriginalBtn = document.createElement("button");
+    copyOriginalBtn.className = "copy-history-btn";
+    copyOriginalBtn.textContent = "複製原文";
+    copyOriginalBtn.onclick = () => {
+      navigator.clipboard.writeText(item.original).then(() => {
+        copyOriginalBtn.textContent = "已複製!";
+        setTimeout(() => { copyOriginalBtn.textContent = "複製原文"; }, 1500);
+      });
+    };
+
+    // 修改：將原有的「複製」按鈕改名為「複製譯文」以作區分
+    const copyTranslatedBtn = document.createElement("button");
+    copyTranslatedBtn.className = "copy-history-btn";
+    copyTranslatedBtn.textContent = "複製譯文";
+    copyTranslatedBtn.onclick = () => {
       navigator.clipboard.writeText(item.translated).then(() => {
-        copyBtn.textContent = "已複製!";
-        setTimeout(() => { copyBtn.textContent = "複製"; }, 1500);
+        copyTranslatedBtn.textContent = "已複製!";
+        setTimeout(() => { copyTranslatedBtn.textContent = "複製譯文"; }, 1500);
       });
     };
 
@@ -99,7 +110,8 @@ function renderHistory(history = []) {
       }
     };
 
-    buttonGroup.appendChild(copyBtn);
+    buttonGroup.appendChild(copyOriginalBtn);
+    buttonGroup.appendChild(copyTranslatedBtn);
     buttonGroup.appendChild(deleteBtn);
     footerDiv.appendChild(timeSpan);
     footerDiv.appendChild(buttonGroup);
