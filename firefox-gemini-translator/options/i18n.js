@@ -31,16 +31,20 @@ const i18n = (() => {
       const { UI_LANG } = await browser.storage.local.get('UI_LANG');
       let lang = UI_LANG;
 
-      // 【修改處】如果使用者從未設定過語言 (初次使用)
+      // 【修改處】如果使用者從未設定過語言 (初次使用)，偵測瀏覽器語言
       if (!lang) {
-        // 偵測瀏覽器本身的語言
-        const browserLang = browser.i18n.getUILanguage(); // e.g., "zh-TW", "en-US"
-        
-        // 根據偵測結果設定預設語言
-        if (browserLang.startsWith('zh')) {
-          lang = 'zh_TW'; // 所有中文變體 (zh-TW, zh-CN) 都預設為繁體中文
+        const browserLang = browser.i18n.getUILanguage(); // e.g., "zh-TW", "fr-CA"
+        const supportedLangs = ['en', 'zh_TW', 'zh_CN', 'ja', 'ko', 'fr', 'de', 'es', 'ru'];
+        const baseLang = browserLang.split('-')[0]; // e.g., "zh", "fr"
+
+        if (browserLang === 'zh-CN') {
+            lang = 'zh_CN';
+        } else if (baseLang === 'zh') {
+            lang = 'zh_TW';
+        } else if (supportedLangs.includes(baseLang)) {
+            lang = baseLang;
         } else {
-          lang = 'en'; // 其他所有語言都預設為英文
+            lang = 'en'; // 預設為英文
         }
       }
       

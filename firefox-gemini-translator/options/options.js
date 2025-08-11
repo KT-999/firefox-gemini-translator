@@ -14,11 +14,33 @@ function applyTheme(theme) {
  * 使用 i18n 管理器來渲染整個頁面的 UI 文字。
  */
 function renderUI() {
+  // 【新增】定義語言的原生名稱
+  const nativeLangNames = {
+    'langUiEn': 'English',
+    'langUiZhTw': '繁體中文',
+    'langUiZhCn': '简体中文',
+    'langUiJa': '日本語',
+    'langUiKo': '한국어',
+    'langUiFr': 'Français',
+    'langUiDe': 'Deutsch',
+    'langUiEs': 'Español',
+    'langUiRu': 'Русский'
+  };
+
   // 更新所有帶有 data-i18n 屬性的元素
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
     elem.textContent = i18n.t(key);
   });
+
+  // 【修改處】特別處理 UI 語言下拉選單，使其顯示原生語言名稱
+  document.querySelectorAll('#uiLang option').forEach(option => {
+    const key = option.getAttribute('data-i18n');
+    if (nativeLangNames[key]) {
+      option.textContent = nativeLangNames[key];
+    }
+  });
+
 
   // 更新 placeholder
   document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
@@ -205,14 +227,22 @@ async function main() {
   apiKeyInput.value = settings.GEMINI_API_KEY || '';
   langSelect.value = settings.TRANSLATE_LANG || i18n.t("langZhTw");
   
-  // 【修改處】修正初次載入時 UI 語言下拉選單的預設值
+  // 修正初次載入時 UI 語言下拉選單的預設值
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
     const browserLang = browser.i18n.getUILanguage();
-    if (browserLang.startsWith('zh')) {
-      initialUiLang = 'zh_TW';
+    const baseLang = browserLang.split('-')[0];
+    if (browserLang === 'zh-CN') {
+        initialUiLang = 'zh_CN';
+    } else if (baseLang === 'zh') {
+        initialUiLang = 'zh_TW';
     } else {
-      initialUiLang = 'en';
+        const availableOptions = Array.from(uiLangSelect.options).map(o => o.value);
+        if (availableOptions.includes(baseLang)) {
+            initialUiLang = baseLang;
+        } else {
+            initialUiLang = 'en';
+        }
     }
   }
   uiLangSelect.value = initialUiLang;
