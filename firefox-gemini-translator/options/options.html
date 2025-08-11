@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Gemini 翻譯設定</title>
+  <title>Gemini Translate Settings</title> <!-- 將由 JS 更新 -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -10,8 +10,8 @@
   <div class="wrapper">
     <!-- 頁籤導覽列 -->
     <nav class="tab-nav">
-      <button id="tab-settings" class="tab-btn active" type="button">設定</button>
-      <button id="tab-history" class="tab-btn" type="button">翻譯紀錄</button>
+      <button id="tab-settings" class="tab-btn active" type="button" data-i18n="tabSettings"></button>
+      <button id="tab-history" class="tab-btn" type="button" data-i18n="tabHistory"></button>
     </nav>
 
     <!-- 主要內容區 -->
@@ -20,43 +20,51 @@
       <div id="view-settings" class="tab-view active">
         <div class="card">
           <form id="settingsForm">
-            <h2>核心設定</h2>
+            <h2 data-i18n="coreSettings"></h2>
             <label for="apiKey">
-              Gemini API Key: <span id="apiKeyStatus" class="key-status"></span>
+              <span data-i18n="geminiApiKey"></span>
+              <span id="apiKeyStatus" class="key-status"></span>
             </label>
             <div class="password-wrapper">
-              <input type="password" id="apiKey" placeholder="請輸入您的 API Key">
-              <button type="button" id="toggleApiKey" class="toggle-vis" title="顯示/隱藏金鑰">
+              <input type="password" id="apiKey" data-i18n-placeholder="apiKeyPlaceholder">
+              <button type="button" id="toggleApiKey" class="toggle-vis" data-i18n-title="apiKeyToggle">
                 <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
               </button>
             </div>
 
-            <label for="lang">目標語言:</label>
+            <label for="lang" data-i18n="targetLanguage"></label>
             <select id="lang">
-              <option value="繁體中文">繁體中文</option>
-              <option value="簡體中文">簡體中文</option>
-              <option value="英文">英文</option>
-              <option value="日文">日文</option>
-              <option value="韓文">韓文</option>
-              <option value="法文">法文</option>
-              <option value="德文">德文</option>
-              <option value="西班牙文">西班牙文</option>
-              <option value="俄文">俄文</option>
+              <option value="繁體中文" data-i18n="langZhTw"></option>
+              <option value="簡體中文" data-i18n="langZhCn"></option>
+              <option value="英文" data-i18n="langEn"></option>
+              <option value="日文" data-i18n="langJa"></option>
+              <option value="韓文" data-i18n="langKo"></option>
+              <option value="法文" data-i18n="langFr"></option>
+              <option value="德文" data-i18n="langDe"></option>
+              <option value="西班牙文" data-i18n="langEs"></option>
+              <option value="俄文" data-i18n="langRu"></option>
             </select>
             
-            <h2>個人化</h2>
-            <label for="theme">主題:</label>
+            <h2 data-i18n="personalization"></h2>
+
+            <label for="uiLang" data-i18n="uiLanguage"></label>
+            <select id="uiLang">
+              <option value="en" data-i18n="langUiEn"></option>
+              <option value="zh_TW" data-i18n="langUiZhTw"></option>
+            </select>
+
+            <label for="theme" data-i18n="theme"></label>
             <select id="theme">
-              <option value="auto">跟隨系統</option>
-              <option value="light">明亮</option>
-              <option value="dark">黑暗</option>
+              <option value="auto" data-i18n="themeAuto"></option>
+              <option value="light" data-i18n="themeLight"></option>
+              <option value="dark" data-i18n="themeDark"></option>
             </select>
             
-            <label for="maxHistorySize">最大紀錄數量:</label>
+            <label for="maxHistorySize" data-i18n="maxHistory"></label>
             <input type="number" id="maxHistorySize" min="0" max="100" value="20">
             
-            <button type="button" id="saveBtn">儲存設定</button>
+            <button type="button" id="saveBtn" data-i18n="saveButton"></button>
           </form>
         </div>
       </div>
@@ -64,8 +72,8 @@
       <!-- 歷史紀錄頁籤內容 -->
       <div id="view-history" class="tab-view">
         <div class="history-header">
-          <h2>紀錄列表</h2>
-          <button id="clearHistoryBtn" class="clear-btn" type="button">清除所有紀錄</button>
+          <h2 data-i18n="historyList"></h2>
+          <button id="clearHistoryBtn" class="clear-btn" type="button" data-i18n="clearHistoryButton"></button>
         </div>
         <div id="historyContainer">
           <!-- 翻譯紀錄將會顯示在這裡 -->
@@ -77,6 +85,7 @@
   <!-- 狀態通知 Toast -->
   <div id="status"></div>
 
+  <script src="i18n.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

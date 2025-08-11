@@ -29,7 +29,7 @@ browser.runtime.onMessage.addListener(async (message) => {
       currentPopup = null;
     }
 
-    const { text, engine } = message;
+    const { text, engine, ui } = message;
 
     const { THEME, CUSTOM_BG, CUSTOM_TEXT } = await browser.storage.local.get([
       "THEME", "CUSTOM_BG", "CUSTOM_TEXT"
@@ -83,10 +83,8 @@ browser.runtime.onMessage.addListener(async (message) => {
     contentDiv.style.wordBreak = 'break-word';
     contentDiv.style.lineHeight = '1.6';
 
-    // --- 全新的換行處理邏輯 ---
-    // 將特殊標記 __NEWLINE__ 轉換為 <br> 元素來顯示
     const parts = text.trim().split('__NEWLINE__');
-    contentDiv.innerHTML = ''; // 先清空內容
+    contentDiv.innerHTML = '';
     parts.forEach((part, index) => {
         contentDiv.appendChild(document.createTextNode(part));
         if (index < parts.length - 1) {
@@ -102,7 +100,7 @@ browser.runtime.onMessage.addListener(async (message) => {
     footer.style.gap = '8px';
 
     const copyButton = document.createElement('button');
-    copyButton.textContent = '複製';
+    copyButton.textContent = ui.copy || 'Copy'; // 使用從 background 傳來的字串
     const buttonStyles = {
         background: buttonBgColor,
         color: buttonTextColor,
@@ -117,13 +115,13 @@ browser.runtime.onMessage.addListener(async (message) => {
     copyButton.onclick = (e) => {
       e.stopPropagation();
       navigator.clipboard.writeText(contentDiv.innerText).then(() => {
-        copyButton.textContent = '已複製!';
-        setTimeout(() => { copyButton.textContent = '複製'; }, 1500);
+        copyButton.textContent = ui.copied || 'Copied!'; // 使用從 background 傳來的字串
+        setTimeout(() => { copyButton.textContent = ui.copy || 'Copy'; }, 1500);
       });
     };
 
     const closeButton = document.createElement('button');
-    closeButton.textContent = '關閉';
+    closeButton.textContent = ui.close || 'Close'; // 使用從 background 傳來的字串
     Object.assign(closeButton.style, buttonStyles);
 
     footer.appendChild(copyButton);

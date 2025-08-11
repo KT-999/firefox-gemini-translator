@@ -35,11 +35,30 @@ function containsCjk(text) {
   return cjkRegex.test(text);
 }
 
+/**
+ * 安全地向分頁發送訊息，並處理可能的連線錯誤。
+ * @param {number} tabId - 目標分頁的 ID。
+ * @param {object} message - 要發送的訊息物件。
+ */
+async function sendMessageToTab(tabId, message) {
+  try {
+    await browser.tabs.sendMessage(tabId, message);
+  } catch (e) {
+    console.warn(`無法將訊息傳送至分頁 ${tabId}。Content script 可能未被注入或分頁不支援。`, e.message);
+  }
+}
+
 
 /**
  * 使用 Google Translate API 進行翻譯。
  */
 async function translateWithGoogle(text, targetLang, tabId) {
+  const uiStrings = {
+      copy: i18n.t("popupCopy"),
+      copied: i18n.t("popupCopied"),
+      close: i18n.t("popupClose")
+  };
+
   try {
     const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
     const tl = langCodeMap[targetLang] || "zh-TW";
@@ -51,6 +70,7 @@ async function translateWithGoogle(text, targetLang, tabId) {
     const data = await response.json();
     let translatedText = '';
     
+    // ... (此處解析邏輯不變)
     const allDefinitions = {};
     if (data[1] || data[5] || (data[12] && data[12].length > 0)) {
         const synonymBlocks = [data[1], data[5]].filter(Boolean);
@@ -67,7 +87,6 @@ async function translateWithGoogle(text, targetLang, tabId) {
                 });
             }
         });
-
         if (data[12] && Array.isArray(data[12])) {
              data[12].forEach(part => {
                 if (!Array.isArray(part) || part.length < 2) return;
@@ -82,11 +101,9 @@ async function translateWithGoogle(text, targetLang, tabId) {
             });
         }
     }
-    
     translatedText = Object.entries(allDefinitions)
       .map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`)
       .join('__NEWLINE__');
-
     if (!translatedText && data[0] && Array.isArray(data[0])) {
       translatedText = data[0].map(item => item[0]).join('');
     }
@@ -94,21 +111,27 @@ async function translateWithGoogle(text, targetLang, tabId) {
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
 
     await saveToHistory(text, translatedText.replace(/__NEWLINE__/g, '\n'), 'google');
-    browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'google' });
+    await sendMessageToTab(tabId, { type: "showTranslation", text: translatedText, engine: 'google', ui: uiStrings });
 
   } catch (err) {
     console.error("Google 翻譯發生錯誤", err);
-    browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "❌ Google 翻譯失敗" });
+    await sendMessageToTab(tabId, { type: "showTranslation", text: i18n.t("errorGoogle"), engine: 'google', ui: uiStrings });
   }
 }
 
 /**
- * 使用 Gemini API 進行翻譯，如果失敗則自動降級為 Google 翻譯。
+ * 使用 Gemini API 進行翻譯。
  */
 async function translateWithGemini(text, apiKey, targetLang, tabId) {
+  const uiStrings = {
+      copy: i18n.t("popupCopy"),
+      copied: i18n.t("popupCopied"),
+      close: i18n.t("popupClose")
+  };
+
   try {
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const prompt = `你是一個專業的翻譯引擎。請嚴格按照以下規則，將「」中的文字翻譯成${targetLang}。\n\n規則：\n1. **絕對不要**有任何解釋、前言、或額外補充說明。\n2. 如果原文是單一詞彙且有多種常見意思，請用「、」分隔後直接列出，例如：「令牌、象徵、代幣」。\n3. 如果原文是句子或片語，請直接提供最通順、最自然的單一翻譯結果。\n4. **絕對不要**使用任何 Markdown 格式，例如 * 或 -。\n\n原文：「${text}」`;
+    const prompt = i18n.t("promptSystem", [targetLang, text]);
 
     const response = await fetch(GEMINI_API_URL, {
       method: "POST",
@@ -128,35 +151,56 @@ async function translateWithGemini(text, apiKey, targetLang, tabId) {
 
     await browser.storage.local.set({ geminiKeyValid: true });
     await saveToHistory(text, translatedText, 'gemini');
-    browser.tabs.sendMessage(tabId, { type: "showTranslation", text: translatedText, engine: 'gemini' });
+    await sendMessageToTab(tabId, { type: "showTranslation", text: translatedText, engine: 'gemini', ui: uiStrings });
 
   } catch (err) {
     console.error("Gemini 翻譯發生錯誤:", err.message);
     if (err.message === 'Invalid API Key') {
-      console.log("偵測到無效的 Gemini API Key，自動降級為 Google 翻譯。");
+      console.log(i18n.t("errorInvalidKey"));
       await browser.storage.local.set({ geminiKeyValid: false });
       await translateWithGoogle(text, targetLang, tabId);
     } else {
-      browser.tabs.sendMessage(tabId, { type: "showTranslation", text: "❌ Gemini 翻譯失敗" });
+      await sendMessageToTab(tabId, { type: "showTranslation", text: i18n.t("errorGemini"), engine: 'gemini', ui: uiStrings });
     }
   }
 }
 
 // --- Main Logic ---
 
-browser.contextMenus.create({
-  id: "smart-translate",
-  title: "智慧翻譯",
-  contexts: ["selection"]
+// 創建或更新右鍵選單
+function setupContextMenu() {
+    browser.contextMenus.create({
+        id: "smart-translate",
+        title: i18n.t("contextMenuTitle"),
+        contexts: ["selection"]
+    });
+}
+
+// 監聽來自設定頁的語言變更請求
+browser.runtime.onMessage.addListener((message) => {
+    if (message.type === 'languageChanged') {
+        // 重新初始化語言並更新右鍵選單
+        i18n.init().then(() => {
+            browser.contextMenus.update("smart-translate", {
+                title: i18n.t("contextMenuTitle")
+            });
+        });
+    }
 });
+
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "smart-translate") return;
   const selectedText = info.selectionText.trim();
   if (!selectedText) return;
 
+  if (!tab || typeof tab.id === 'undefined') {
+      console.error("無法獲取有效的 Tab ID。");
+      return;
+  }
+
   const { GEMINI_API_KEY, TRANSLATE_LANG } = await browser.storage.local.get(["GEMINI_API_KEY", "TRANSLATE_LANG"]);
-  const targetLang = TRANSLATE_LANG || "繁體中文";
+  const targetLang = TRANSLATE_LANG || i18n.t("langZhTw");
 
   let useGoogleTranslate = false;
   if (containsCjk(selectedText)) {
@@ -173,3 +217,6 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     await translateWithGoogle(selectedText, targetLang, tab.id);
   }
 });
+
+// 初始化 i18n 管理器並設定右鍵選單
+i18n.init().then(setupContextMenu);
