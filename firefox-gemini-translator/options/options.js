@@ -1,4 +1,41 @@
 /**
+ * 儲存一筆翻譯紀錄。
+ * @param {string} original - 原始文字。
+ * @param {string} translated - 翻譯後的文字。
+ * @param {string} engine - 使用的翻譯引擎 ('google' 或 'gemini')。
+ */
+async function saveToHistory(original, translated, engine) {
+  try {
+    const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
+    if (!original || !translated) return; // 確保有內容才儲存
+
+    const newEntry = {
+      original,
+      translated,
+      engine,
+      timestamp: new Date().toISOString()
+    };
+
+    const updatedHistory = [newEntry, ...translationHistory];
+    if (updatedHistory.length > maxHistorySize) {
+      updatedHistory.length = maxHistorySize;
+    }
+    await browser.storage.local.set({ translationHistory: updatedHistory });
+  } catch (err) {
+    console.error("儲存翻譯紀錄失敗：", err);
+  }
+}
+
+/**
+ * 【新增】檢查文字是否包含中日韓 (CJK) 字元。
+ */
+function containsCjk(text) {
+  const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
+  return cjkRegex.test(text);
+}
+
+
+/**
  * 根據主題設定調整頁面樣式。
  */
 function applyTheme(theme) {
@@ -14,26 +51,17 @@ function applyTheme(theme) {
  * 使用 i18n 管理器來渲染整個頁面的 UI 文字。
  */
 function renderUI() {
-  // 【新增】定義語言的原生名稱
   const nativeLangNames = {
-    'langUiEn': 'English',
-    'langUiZhTw': '繁體中文',
-    'langUiZhCn': '简体中文',
-    'langUiJa': '日本語',
-    'langUiKo': '한국어',
-    'langUiFr': 'Français',
-    'langUiDe': 'Deutsch',
-    'langUiEs': 'Español',
-    'langUiRu': 'Русский'
+    'langUiEn': 'English', 'langUiZhTw': '繁體中文', 'langUiZhCn': '简体中文',
+    'langUiJa': '日本語', 'langUiKo': '한국어', 'langUiFr': 'Français',
+    'langUiDe': 'Deutsch', 'langUiEs': 'Español', 'langUiRu': 'Русский'
   };
 
-  // 更新所有帶有 data-i18n 屬性的元素
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
     elem.textContent = i18n.t(key);
   });
-
-  // 【修改處】特別處理 UI 語言下拉選單，使其顯示原生語言名稱
+  
   document.querySelectorAll('#uiLang option').forEach(option => {
     const key = option.getAttribute('data-i18n');
     if (nativeLangNames[key]) {
@@ -41,23 +69,18 @@ function renderUI() {
     }
   });
 
-
-  // 更新 placeholder
   document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
     const key = elem.getAttribute('data-i18n-placeholder');
     elem.placeholder = i18n.t(key);
   });
 
-  // 更新 title
   document.querySelectorAll('[data-i18n-title]').forEach(elem => {
     const key = elem.getAttribute('data-i18n-title');
     elem.title = i18n.t(key);
   });
 
-  // 更新頁面標題
   document.title = i18n.t('optionsTitle');
 }
-
 
 /**
  * 顯示 API Key 的狀態。
@@ -168,22 +191,129 @@ function renderHistory(history = []) {
   });
 }
 
+// --- Popup 翻譯邏輯 ---
+
+/**
+ * 【新增】使用 Google Translate API 進行翻譯。
+ */
+async function handleGooglePopupTranslate(text, targetLang, resultEl) {
+    resultEl.innerHTML = '<div class="loading-spinner"></div>';
+    try {
+        const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
+        const tl = langCodeMap[targetLang] || "zh-TW";
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Google API 錯誤: ${response.status}`);
+        
+        const data = await response.json();
+        let translatedText = '';
+        
+        const allDefinitions = {};
+        if (data[1] || data[5] || (data[12] && data[12].length > 0)) {
+            const synonymBlocks = [data[1], data[5]].filter(Boolean);
+            synonymBlocks.forEach(block => {
+                if (Array.isArray(block)) {
+                    block.forEach(part => {
+                        if (!Array.isArray(part) || part.length < 2) return;
+                        const partOfSpeech = part[0];
+                        const words = part[1];
+                        if (typeof partOfSpeech === 'string' && Array.isArray(words)) {
+                            if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
+                            words.forEach(word => allDefinitions[partOfSpeech].add(word));
+                        }
+                    });
+                }
+            });
+
+            if (data[12] && Array.isArray(data[12])) {
+                 data[12].forEach(part => {
+                    if (!Array.isArray(part) || part.length < 2) return;
+                    const partOfSpeech = part[0];
+                    const definitions = part[1];
+                     if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
+                        if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
+                        definitions.forEach(def => {
+                            if (def && typeof def[0] === 'string') allDefinitions[partOfSpeech].add(def[0]);
+                        });
+                    }
+                });
+            }
+        }
+        
+        translatedText = Object.entries(allDefinitions)
+          .map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`)
+          .join('\n');
+
+        if (!translatedText && data[0] && Array.isArray(data[0])) {
+          translatedText = data[0].map(item => item[0]).join('');
+        }
+
+        if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
+        
+        resultEl.textContent = translatedText;
+        await saveToHistory(text, translatedText, 'google');
+
+    } catch (err) {
+        console.error("Popup Google 翻譯發生錯誤", err);
+        resultEl.textContent = i18n.t("errorGoogle");
+    }
+}
+
+
+/**
+ * 【修改】原 handlePopupTranslate 更名為 handleGeminiPopupTranslate
+ */
+async function handleGeminiPopupTranslate(text, apiKey, targetLang, resultEl) {
+    resultEl.innerHTML = '<div class="loading-spinner"></div>';
+    
+    try {
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const prompt = i18n.t("promptSystem", [targetLang, text]);
+
+        const response = await fetch(GEMINI_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 1024, temperature: 0.1 }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API 錯誤: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        if (!translatedText) {
+            throw new Error("從 Gemini 未收到翻譯結果");
+        }
+        
+        resultEl.textContent = translatedText;
+        await saveToHistory(text, translatedText, 'gemini');
+
+    } catch (error) {
+        console.error("Popup Gemini 翻譯失敗:", error);
+        resultEl.textContent = i18n.t("errorGemini");
+    }
+}
+
+
 /**
  * 頁面載入完成後執行的主要函式。
  */
 async function main() {
-  // 優先初始化 i18n 管理器
   await i18n.init();
-  
-  // 然後才渲染 UI
   renderUI();
 
-  // 取得所有需要的 DOM 元素
-  const tabSettingsBtn = document.getElementById('tab-settings');
-  const tabHistoryBtn = document.getElementById('tab-history');
-  const viewSettings = document.getElementById('view-settings');
-  const viewHistory = document.getElementById('view-history');
-  
+  // --- DOM 元素 ---
+  const tabs = {
+    translate: { btn: document.getElementById('tab-translate'), view: document.getElementById('view-translate') },
+    settings: { btn: document.getElementById('tab-settings'), view: document.getElementById('view-settings') },
+    history: { btn: document.getElementById('tab-history'), view: document.getElementById('view-history') },
+  };
   const apiKeyInput = document.getElementById("apiKey");
   const toggleApiKeyBtn = document.getElementById("toggleApiKey");
   const langSelect = document.getElementById("lang");
@@ -193,23 +323,22 @@ async function main() {
   const saveBtn = document.getElementById("saveBtn");
   const clearHistoryBtn = document.getElementById("clearHistoryBtn");
   const status = document.getElementById("status");
+  const translateInput = document.getElementById('translateInput');
+  const translateBtn = document.getElementById('translateBtn');
+  const translateResult = document.getElementById('translateResult');
+  const popupTargetLang = document.getElementById('popupTargetLang');
 
   // --- 頁籤切換邏輯 ---
-  function switchTab(activeTab) {
-    if (activeTab === 'settings') {
-      tabSettingsBtn.classList.add('active');
-      tabHistoryBtn.classList.remove('active');
-      viewSettings.classList.add('active');
-      viewHistory.classList.remove('active');
-    } else {
-      tabSettingsBtn.classList.remove('active');
-      tabHistoryBtn.classList.add('active');
-      viewSettings.classList.remove('active');
-      viewHistory.classList.add('active');
-    }
+  function switchTab(activeKey) {
+    Object.keys(tabs).forEach(key => {
+        const isActive = key === activeKey;
+        tabs[key].btn.classList.toggle('active', isActive);
+        tabs[key].view.classList.toggle('active', isActive);
+    });
   }
-  tabSettingsBtn.addEventListener('click', () => switchTab('settings'));
-  tabHistoryBtn.addEventListener('click', () => switchTab('history'));
+  Object.keys(tabs).forEach(key => {
+    tabs[key].btn.addEventListener('click', () => switchTab(key));
+  });
 
   // --- 狀態通知 ---
   const showStatus = (messageKey) => {
@@ -223,44 +352,69 @@ async function main() {
     "GEMINI_API_KEY", "TRANSLATE_LANG", "UI_LANG", "THEME", "maxHistorySize", "translationHistory", "geminiKeyValid"
   ]);
 
-  // 填入設定值
+  const defaultTargetLang = i18n.t("langZhTw");
   apiKeyInput.value = settings.GEMINI_API_KEY || '';
-  langSelect.value = settings.TRANSLATE_LANG || i18n.t("langZhTw");
+  langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
+  popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
   
-  // 修正初次載入時 UI 語言下拉選單的預設值
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
     const browserLang = browser.i18n.getUILanguage();
     const baseLang = browserLang.split('-')[0];
-    if (browserLang === 'zh-CN') {
-        initialUiLang = 'zh_CN';
-    } else if (baseLang === 'zh') {
-        initialUiLang = 'zh_TW';
-    } else {
-        const availableOptions = Array.from(uiLangSelect.options).map(o => o.value);
-        if (availableOptions.includes(baseLang)) {
-            initialUiLang = baseLang;
-        } else {
-            initialUiLang = 'en';
-        }
+    if (browserLang === 'zh-CN') initialUiLang = 'zh_CN';
+    else if (baseLang === 'zh') initialUiLang = 'zh_TW';
+    else {
+      const availableOptions = Array.from(uiLangSelect.options).map(o => o.value);
+      if (availableOptions.includes(baseLang)) initialUiLang = baseLang;
+      else initialUiLang = 'en';
     }
   }
   uiLangSelect.value = initialUiLang;
-
   themeSelect.value = settings.THEME || 'auto';
   maxHistoryInput.value = settings.maxHistorySize || 20;
 
-  // 應用主題與渲染歷史紀錄
   applyTheme(themeSelect.value);
   renderHistory(settings.translationHistory);
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
 
   // --- 事件監聽 ---
+  // 翻譯按鈕
+  translateBtn.addEventListener('click', async () => {
+    const text = translateInput.value.trim();
+    if (!text) return;
+    
+    const { GEMINI_API_KEY } = await browser.storage.local.get("GEMINI_API_KEY");
+    
+    // 【修改處】加入智慧判斷邏輯
+    let useGoogleTranslate = false;
+    if (containsCjk(text)) {
+        useGoogleTranslate = text.length <= 5;
+    } else {
+        const wordCount = text.split(/\s+/).length;
+        const characterCount = text.length;
+        useGoogleTranslate = wordCount <= 3 && characterCount < 30;
+    }
+    
+    const targetLang = popupTargetLang.value;
+
+    if (useGoogleTranslate) {
+        await handleGooglePopupTranslate(text, targetLang, translateResult);
+    } else {
+        if (!GEMINI_API_KEY) {
+            alert(i18n.t("apiKeyStatusUnset"));
+            switchTab('settings');
+            apiKeyInput.focus();
+            return;
+        }
+        await handleGeminiPopupTranslate(text, GEMINI_API_KEY, targetLang, translateResult);
+    }
+  });
+
+  // UI 語言切換
   uiLangSelect.addEventListener('change', async (e) => {
       const newLang = e.target.value;
       await i18n.loadMessages(newLang);
       renderUI();
-      // 重新渲染歷史紀錄和 API 狀態，因為裡面的文字也需要更新
       const currentHistory = (await browser.storage.local.get("translationHistory")).translationHistory;
       renderHistory(currentHistory);
       const currentApiKey = (await browser.storage.local.get(["GEMINI_API_KEY", "geminiKeyValid"]));
@@ -289,7 +443,6 @@ async function main() {
       maxHistorySize: isNaN(newMaxHistorySize) ? 20 : newMaxHistorySize,
       geminiKeyValid: !!apiKeyInput.value.trim()
     });
-    // 通知背景腳本語言已變更，以便更新右鍵選單
     browser.runtime.sendMessage({ type: 'languageChanged' });
     showStatus("statusSaved");
     displayApiKeyStatus(apiKeyInput.value.trim(), !!apiKeyInput.value.trim());
@@ -302,7 +455,6 @@ async function main() {
     }
   });
   
-  // 監聽 storage 變化以即時更新 UI
   browser.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
     if (changes.translationHistory) {

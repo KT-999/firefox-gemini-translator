@@ -10,14 +10,43 @@
   <div class="wrapper">
     <!-- 頁籤導覽列 -->
     <nav class="tab-nav">
-      <button id="tab-settings" class="tab-btn active" type="button" data-i18n="tabSettings"></button>
+      <button id="tab-translate" class="tab-btn active" type="button" data-i18n="tabTranslate"></button>
+      <button id="tab-settings" class="tab-btn" type="button" data-i18n="tabSettings"></button>
       <button id="tab-history" class="tab-btn" type="button" data-i18n="tabHistory"></button>
     </nav>
 
     <!-- 主要內容區 -->
     <main class="content">
+      <!-- 翻譯頁籤內容 -->
+      <div id="view-translate" class="tab-view active">
+        <div class="translate-container">
+          <!-- 【新增】獨立的目標語言選擇器 -->
+          <div class="popup-lang-selector">
+            <label for="popupTargetLang" data-i18n="targetLanguage"></label>
+            <select id="popupTargetLang">
+              <option value="繁體中文" data-i18n="langZhTw"></option>
+              <option value="簡體中文" data-i18n="langZhCn"></option>
+              <option value="英文" data-i18n="langEn"></option>
+              <option value="日文" data-i18n="langJa"></option>
+              <option value="韓文" data-i18n="langKo"></option>
+              <option value="法文" data-i18n="langFr"></option>
+              <option value="德文" data-i18n="langDe"></option>
+              <option value="西班牙文" data-i18n="langEs"></option>
+              <option value="俄文" data-i18n="langRu"></option>
+            </select>
+          </div>
+          
+          <textarea id="translateInput" rows="5" data-i18n-placeholder="translateInputPlaceholder"></textarea>
+          <button id="translateBtn" class="translate-btn" type="button" data-i18n="translateButton"></button>
+          <div class="result-card">
+            <h3 data-i18n="translationResult"></h3>
+            <div id="translateResult"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- 設定頁籤內容 -->
-      <div id="view-settings" class="tab-view active">
+      <div id="view-settings" class="tab-view">
         <div class="card">
           <form id="settingsForm">
             <h2 data-i18n="coreSettings"></h2>
