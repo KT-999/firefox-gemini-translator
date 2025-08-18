@@ -1,6 +1,10 @@
 # firefox-gemini-translator
 firefox-一種使用Gemini API進行翻譯的簡易方案
 
+
+https://addons.mozilla.org/zh-TW/firefox/addon/gemini-translate-helper/
+
+
 請釘選至工具列
 
 chrome版本請直接放入取代komica資料夾內的檔案
