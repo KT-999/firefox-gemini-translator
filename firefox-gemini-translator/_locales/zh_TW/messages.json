@@ -20,6 +20,8 @@
   "translating": { "message": "翻譯中..." },
   "coreSettings": { "message": "核心設定" },
   "geminiApiKey": { "message": "Gemini API Key:" },
+  "useGeminiLabel": { "message": "啟用 Gemini 翻譯" },
+  "useGeminiDescription": { "message": "啟用時，長句將使用 Gemini，短詞使用 Google。停用時，將一律使用 Google 翻譯。" },
   "apiKeyPlaceholder": { "message": "請輸入您的 API Key" },
   "apiKeyToggle": { "message": "顯示/隱藏金鑰" },
   "apiKeyStatusUnset": { "message": "(尚未輸入，點此獲取)" },

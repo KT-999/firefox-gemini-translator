@@ -20,6 +20,8 @@
   "translating": { "message": "Traduciendo..." },
   "coreSettings": { "message": "Configuración principal" },
   "geminiApiKey": { "message": "Clave de API de Gemini:" },
+  "useGeminiLabel": { "message": "Habilitar traducción de Gemini" },
+  "useGeminiDescription": { "message": "Cuando está habilitado, usa Gemini para oraciones largas y Google para palabras cortas. Cuando está deshabilitado, siempre usa el Traductor de Google." },
   "apiKeyPlaceholder": { "message": "Introduce tu clave de API" },
   "apiKeyToggle": { "message": "Mostrar/Ocultar clave" },
   "apiKeyStatusUnset": { "message": "(No establecida, haz clic aquí para obtener una)" },

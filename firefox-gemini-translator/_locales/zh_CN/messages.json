@@ -20,6 +20,8 @@
   "translating": { "message": "翻译中..." },
   "coreSettings": { "message": "核心设置" },
   "geminiApiKey": { "message": "Gemini API 密钥:" },
+  "useGeminiLabel": { "message": "启用 Gemini 翻译" },
+  "useGeminiDescription": { "message": "启用时，长句将使用 Gemini，短词使用 Google。停用时，将一律使用 Google 翻译。" },
   "apiKeyPlaceholder": { "message": "请输入您的 API 密钥" },
   "apiKeyToggle": { "message": "显示/隐藏密钥" },
   "apiKeyStatusUnset": { "message": "（未设置，点击此处获取）" },

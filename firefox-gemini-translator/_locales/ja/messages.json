@@ -20,6 +20,8 @@
   "translating": { "message": "翻訳中..." },
   "coreSettings": { "message": "コア設定" },
   "geminiApiKey": { "message": "Gemini APIキー:" },
+  "useGeminiLabel": { "message": "Gemini翻訳を有効にする" },
+  "useGeminiDescription": { "message": "有効にすると、長い文章にはGemini、短い単語にはGoogleが使用されます。無効にすると、常にGoogle翻訳が使用されます。" },
   "apiKeyPlaceholder": { "message": "APIキーを入力してください" },
   "apiKeyToggle": { "message": "キーの表示/非表示" },
   "apiKeyStatusUnset": { "message": "（未設定、ここをクリックして取得）" },

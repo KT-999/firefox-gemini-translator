@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extName__",
-  "version": "1.401",
+  "version": "1.5",
   "description": "__MSG_extDesc__",
   "default_locale": "en",
   "permissions": [
@@ -12,10 +12,7 @@
     "https://translate.googleapis.com/"
   ],
   "background": {
-    "scripts": [
-      "options/i18n.js",
-      "background.js"
-    ]
+    "page": "background.html"
   },
   "content_scripts": [
     {
@@ -37,7 +34,8 @@
     "browser_style": true
   },
   "icons": {
-    "48": "icons/icon-48.png"
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "web_accessible_resources": [
     "_locales/*"

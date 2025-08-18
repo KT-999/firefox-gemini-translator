@@ -48,7 +48,7 @@ body.dark #translateInput { background-color: #3c4043; color: #e8eaed; border-co
 .translate-btn:hover { background: var(--primary-color-hover); }
 .result-card { display: flex; flex-direction: column; flex-grow: 1; background-color: var(--card-bg-light); padding: 1em; border-radius: 8px; border: 1px solid var(--border-color-light); }
 body.dark .result-card { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); }
-.result-header { display: flex; justify-content: space-between; align-items: center; } /* 【新增】 */
+.result-header { display: flex; justify-content: space-between; align-items: center; }
 .result-card h3 { margin-top: 0; margin-bottom: 0.5em; font-size: 1.1em; padding-bottom: 0.5em; border-bottom: 1px solid var(--border-color-light); flex-grow: 1; }
 body.dark .result-card h3 { border-bottom-color: var(--border-color-dark); }
 #translateResult { flex-grow: 1; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; padding: 8px; background-color: var(--result-bg-light); border-radius: 4px; }
@@ -66,6 +66,20 @@ body.dark label { color: #bdc1c6; }
 input[type="password"], input[type="text"], input[type="number"], select { width: 100%; padding: .8em; margin-bottom: 1.5em; border-radius: 4px; border: 1px solid #ccc; font-size: 1em; background-color: #fff; color: #333; }
 body.dark input, body.dark select { background-color: #3c4043; color: #e8eaed; border-color: #5f6368; }
 button#saveBtn { width: 100%; margin-top: 1em; padding: .8em; background: var(--primary-color); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: 500; }
+.setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; } /* 【新增】 */
+.label-group { flex-grow: 1; margin-right: 16px; } /* 【新增】 */
+.label-group label { margin-bottom: 0.25em; } /* 【新增】 */
+.description { font-size: 0.85em; color: #666; margin: 0; } /* 【新增】 */
+body.dark .description { color: #aaa; } /* 【新增】 */
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; } /* 【新增】 */
+.switch input { opacity: 0; width: 0; height: 0; } /* 【新增】 */
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; } /* 【新增】 */
+.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; } /* 【新增】 */
+input:checked + .slider { background-color: var(--primary-color); } /* 【新增】 */
+input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); } /* 【新增】 */
+input:checked + .slider:before { transform: translateX(22px); } /* 【新增】 */
+.slider.round { border-radius: 34px; } /* 【新增】 */
+.slider.round:before { border-radius: 50%; } /* 【新增】 */
 
 /* --- 6. 歷史紀錄區樣式 --- */
 .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; }
@@ -91,9 +105,9 @@ body.dark .delete-history-btn:hover { background-color: var(--danger-color); col
 .engine-gemini { background-color: var(--primary-color); }
 
 /* --- 7. 其他元件樣式 --- */
-.listen-btn { background: none; border: none; padding: 4px; cursor: pointer; color: #666; opacity: 0.7; } /* 【新增】 */
-.listen-btn:hover { opacity: 1; color: var(--primary-color); } /* 【新增】 */
-body.dark .listen-btn { color: #ccc; } /* 【新增】 */
+.listen-btn { background: none; border: none; padding: 4px; cursor: pointer; color: #666; opacity: 0.7; }
+.listen-btn:hover { opacity: 1; color: var(--primary-color); }
+body.dark .listen-btn { color: #ccc; }
 .password-wrapper { position: relative; }
 #apiKey { padding-right: 45px; }
 .toggle-vis { position: absolute; right: 1px; top: 0; bottom: 0; margin-bottom: 1.5em; padding: 0 12px; background: transparent; border: none; cursor: pointer; color: #666; display: flex; align-items: center; }

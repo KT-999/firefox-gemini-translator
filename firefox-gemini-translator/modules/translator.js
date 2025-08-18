@@ -1,0 +1,127 @@
+// modules/translator.js
+// 這個模組封裝了呼叫外部翻譯 API 的核心邏輯。
+
+/**
+ * 檢查文字是否包含中日韓 (CJK) 字元。
+ * @param {string} text - 要檢查的文字。
+ * @returns {boolean}
+ */
+function containsCjk(text) {
+  const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
+  return cjkRegex.test(text);
+}
+
+/**
+ * 智慧判斷應該使用哪個翻譯引擎。
+ * @param {string} text - 要翻譯的文字。
+ * @param {boolean} useGeminiEnabled - 使用者是否在設定中啟用了 Gemini。
+ * @returns {string} 'google' 或 'gemini'。
+ */
+export function decideEngine(text, useGeminiEnabled) {
+    if (!useGeminiEnabled) {
+        return 'google';
+    }
+    
+    let useGoogleTranslate = false;
+    if (containsCjk(text)) {
+        useGoogleTranslate = text.length <= 5;
+    } else {
+        const wordCount = text.split(/\s+/).length;
+        const characterCount = text.length;
+        useGoogleTranslate = wordCount <= 3 && characterCount < 30;
+    }
+    
+    return useGoogleTranslate ? 'google' : 'gemini';
+}
+
+
+/**
+ * 使用 Google Translate API 進行翻譯。
+ * @param {string} text - 要翻譯的文字。
+ * @param {string} targetLang - 目標語言。
+ * @returns {Promise<string>} 翻譯後的文字。
+ */
+export async function translateWithGoogle(text, targetLang) {
+    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
+    const tl = langCodeMap[targetLang] || "zh-TW";
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Google API 錯誤: ${response.status}`);
+    
+    const data = await response.json();
+    let translatedText = '';
+    
+    const allDefinitions = {};
+    if (data[1] || data[5] || (data[12] && data[12].length > 0)) {
+        const synonymBlocks = [data[1], data[5]].filter(Boolean);
+        synonymBlocks.forEach(block => {
+            if (Array.isArray(block)) {
+                block.forEach(part => {
+                    if (!Array.isArray(part) || part.length < 2) return;
+                    const partOfSpeech = part[0];
+                    const words = part[1];
+                    if (typeof partOfSpeech === 'string' && Array.isArray(words)) {
+                        if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
+                        words.forEach(word => allDefinitions[partOfSpeech].add(word));
+                    }
+                });
+            }
+        });
+        if (data[12] && Array.isArray(data[12])) {
+             data[12].forEach(part => {
+                if (!Array.isArray(part) || part.length < 2) return;
+                const partOfSpeech = part[0];
+                const definitions = part[1];
+                 if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
+                    if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
+                    definitions.forEach(def => {
+                        if (def && typeof def[0] === 'string') allDefinitions[partOfSpeech].add(def[0]);
+                    });
+                }
+            });
+        }
+    }
+    translatedText = Object.entries(allDefinitions).map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`).join('\n');
+    if (!translatedText && data[0] && Array.isArray(data[0])) {
+      translatedText = data[0].map(item => item[0]).join('');
+    }
+
+    if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
+    return translatedText;
+}
+
+/**
+ * 使用 Gemini API 進行翻譯。
+ * @param {string} text - 要翻譯的文字。
+ * @param {string} targetLang - 目標語言。
+ * @param {string} apiKey - Gemini API Key。
+ * @param {function} i18n_t - i18n 的翻譯函式。
+ * @returns {Promise<string>} 翻譯後的文字。
+ */
+export async function translateWithGemini(text, targetLang, apiKey, i18n_t) {
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const prompt = i18n_t("promptSystem", [targetLang, text]);
+
+    const response = await fetch(GEMINI_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 1024, temperature: 0.1 }
+        })
+    });
+
+    if (!response.ok) {
+        if (response.status === 400) throw new Error('Invalid API Key');
+        throw new Error(`API 網路錯誤: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+    if (!translatedText) {
+        throw new Error("從 Gemini 未收到翻譯結果");
+    }
+    return translatedText;
+}

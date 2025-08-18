@@ -2,7 +2,7 @@
  * 專屬的 i18n 語言管理器
  * 解決 browser.i18n 無法由使用者設定動態切換語言的問題
  */
-const i18n = (() => {
+export const i18n = (() => {
   let messages = {};
 
   // 從 messages.json 檔案非同步載入翻譯
@@ -31,7 +31,7 @@ const i18n = (() => {
       const { UI_LANG } = await browser.storage.local.get('UI_LANG');
       let lang = UI_LANG;
 
-      // 【修改處】如果使用者從未設定過語言 (初次使用)，偵測瀏覽器語言
+      // 如果使用者從未設定過語言 (初次使用)，偵測瀏覽器語言
       if (!lang) {
         const browserLang = browser.i18n.getUILanguage(); // e.g., "zh-TW", "fr-CA"
         const supportedLangs = ['en', 'zh_TW', 'zh_CN', 'ja', 'ko', 'fr', 'de', 'es', 'ru'];
