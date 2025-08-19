@@ -15,6 +15,7 @@
     </nav>
 
     <main class="content">
+      <!-- 翻譯頁籤 (結構不變) -->
       <div id="view-translate" class="tab-view active">
         <div class="translate-container">
           <div class="popup-lang-selector">
@@ -45,6 +46,7 @@
         </div>
       </div>
 
+      <!-- 設定頁籤 -->
       <div id="view-settings" class="tab-view">
         <div class="card">
           <form id="settingsForm">
@@ -70,6 +72,15 @@
                 <input type="checkbox" id="useGeminiSwitch">
                 <span class="slider round"></span>
               </label>
+            </div>
+
+            <!-- 【修改處】Gemini 模型選擇 -->
+            <div id="geminiModelContainer">
+                <label for="geminiModelSelect" data-i18n="geminiModelLabel"></label>
+                <select id="geminiModelSelect">
+                  <option value="gemini-1.5-flash-latest" data-i18n="geminiModelFlash"></option>
+                  <option value="gemini-1.5-pro-latest" data-i18n="geminiModelPro"></option>
+               </select>
             </div>
 
             <label for="lang" data-i18n="targetLanguage"></label>
@@ -122,7 +133,6 @@
   </div>
 
   <div id="status"></div>
-  <!-- 【修改】載入 i18n.js 和 options.js (作為模組) -->
   <script src="i18n.js"></script>
   <script src="options.js" type="module"></script>
 </body>

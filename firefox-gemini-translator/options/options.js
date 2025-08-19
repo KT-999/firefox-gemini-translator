@@ -1,16 +1,10 @@
 // options/options.js
-// 這個檔案現在是彈出視窗的「總管」(Controller)。
-// 它負責初始化頁面、綁定事件監聽器，並呼叫其他模組來完成具體工作。
-
 import { i18n } from './i18n.js';
 import { getSettings, saveSettings, addHistoryItem, getHistory } from '../modules/storage.js';
 import { decideEngine, translateWithGoogle, translateWithGemini } from '../modules/translator.js';
 import { applyTheme, renderUI, displayApiKeyStatus, renderHistory, showStatus } from '../modules/ui.js';
 import { playTTS } from '../modules/tts.js';
 
-/**
- * 處理彈出視窗中的翻譯請求
- */
 async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
     listenBtn.classList.add('hidden');
     resultEl.innerHTML = '<div class="loading-spinner"></div>';
@@ -25,13 +19,13 @@ async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
         } else {
             if (!settings.GEMINI_API_KEY) {
                 alert(i18n.t("apiKeyStatusUnset"));
-                // 主動切換到設定頁面
                 document.getElementById('tab-settings').click();
                 document.getElementById('apiKey').focus();
                 resultEl.textContent = '';
                 return;
             }
-            translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, i18n.t);
+            // 【修改】傳入模型名稱
+            translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, settings.GEMINI_MODEL, i18n.t);
             await saveSettings({ geminiKeyValid: true });
         }
         
@@ -49,15 +43,10 @@ async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
     }
 }
 
-
-/**
- * 頁面載入完成後執行的主要函式。
- */
 async function main() {
   await i18n.init();
   renderUI();
 
-  // --- DOM 元素 ---
   const dom = {
     tabs: {
         translate: { btn: document.getElementById('tab-translate'), view: document.getElementById('view-translate') },
@@ -78,10 +67,11 @@ async function main() {
     translateResult: document.getElementById('translateResult'),
     popupTargetLang: document.getElementById('popupTargetLang'),
     useGeminiSwitch: document.getElementById('useGeminiSwitch'),
-    popupListenBtn: document.getElementById('popupListenBtn')
+    popupListenBtn: document.getElementById('popupListenBtn'),
+    geminiModelSelect: document.getElementById('geminiModelSelect'), // 【新增】
+    geminiModelContainer: document.getElementById('geminiModelContainer') // 【新增】
   };
 
-  // --- 頁籤切換邏輯 ---
   function switchTab(activeKey) {
     Object.keys(dom.tabs).forEach(key => {
         const isActive = key === activeKey;
@@ -93,13 +83,13 @@ async function main() {
     dom.tabs[key].btn.addEventListener('click', () => switchTab(key));
   });
 
-  // --- 載入設定並初始化 UI ---
   const settings = await getSettings();
   const defaultTargetLang = i18n.t("langZhTw");
   dom.apiKeyInput.value = settings.GEMINI_API_KEY;
   dom.langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.useGeminiSwitch.checked = settings.USE_GEMINI;
+  dom.geminiModelSelect.value = settings.GEMINI_MODEL; // 【新增】
   
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
@@ -121,7 +111,13 @@ async function main() {
   renderHistory(await getHistory());
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
 
-  // --- 事件監聽 ---
+  // 【新增】根據 Gemini 開關狀態，顯示或隱藏模型選擇器
+  function toggleModelSelectorVisibility() {
+      dom.geminiModelContainer.style.display = dom.useGeminiSwitch.checked ? '' : 'none';
+  }
+  toggleModelSelectorVisibility(); // 初始化
+  dom.useGeminiSwitch.addEventListener('change', toggleModelSelectorVisibility);
+
   dom.translateBtn.addEventListener('click', () => {
     const text = dom.translateInput.value.trim();
     if (!text) return;
@@ -156,7 +152,8 @@ async function main() {
       THEME: dom.themeSelect.value,
       maxHistorySize: parseInt(dom.maxHistoryInput.value, 10) || 20,
       geminiKeyValid: !!dom.apiKeyInput.value.trim(),
-      USE_GEMINI: dom.useGeminiSwitch.checked
+      USE_GEMINI: dom.useGeminiSwitch.checked,
+      GEMINI_MODEL: dom.geminiModelSelect.value // 【新增】
     };
     await saveSettings(settingsToSave);
     browser.runtime.sendMessage({ type: 'languageChanged' });

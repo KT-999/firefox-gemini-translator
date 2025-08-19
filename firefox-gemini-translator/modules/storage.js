@@ -3,10 +3,6 @@
 
 /**
  * 儲存一筆翻譯紀錄。
- * @param {string} original - 原始文字。
- * @param {string} translated - 翻譯後的文字。
- * @param {string} engine - 使用的翻譯引擎 ('google' 或 'gemini')。
- * @param {string} targetLang - 目標語言。
  */
 export async function addHistoryItem(original, translated, engine, targetLang) {
   try {
@@ -30,7 +26,6 @@ export async function addHistoryItem(original, translated, engine, targetLang) {
 
 /**
  * 獲取所有設定。
- * @returns {Promise<object>} 包含所有設定的物件。
  */
 export async function getSettings() {
     const defaults = {
@@ -40,14 +35,14 @@ export async function getSettings() {
         THEME: 'auto',
         maxHistorySize: 20,
         geminiKeyValid: false,
-        USE_GEMINI: true
+        USE_GEMINI: true,
+        GEMINI_MODEL: 'gemini-1.5-flash-latest' // 【新增】預設模型
     };
     return browser.storage.local.get(defaults);
 }
 
 /**
  * 儲存設定。
- * @param {object} settingsToSave - 要儲存的設定物件。
  */
 export async function saveSettings(settingsToSave) {
     return browser.storage.local.set(settingsToSave);
@@ -55,7 +50,6 @@ export async function saveSettings(settingsToSave) {
 
 /**
  * 獲取翻譯歷史紀錄。
- * @returns {Promise<Array>} 翻譯歷史紀錄陣列。
  */
 export async function getHistory() {
     const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
