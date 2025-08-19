@@ -2,15 +2,20 @@
 // 這個模組集中處理所有與 browser.storage.local 的互動。
 
 /**
- * 儲存一筆翻譯紀錄。
+ * 【修改】儲存一筆翻譯紀錄，新增 modelName 參數。
+ * @param {string} original - 原始文字。
+ * @param {string} translated - 翻譯後的文字。
+ * @param {string} engine - 使用的翻譯引擎 ('google' 或 'gemini')。
+ * @param {string} targetLang - 目標語言。
+ * @param {string|null} modelName - 如果使用 Gemini，則為模型名稱。
  */
-export async function addHistoryItem(original, translated, engine, targetLang) {
+export async function addHistoryItem(original, translated, engine, targetLang, modelName = null) {
   try {
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
     if (!original || !translated) return;
 
     const newEntry = {
-      original, translated, engine, targetLang,
+      original, translated, engine, targetLang, modelName, // 新增 modelName
       timestamp: new Date().toISOString()
     };
 
@@ -36,7 +41,7 @@ export async function getSettings() {
         maxHistorySize: 20,
         geminiKeyValid: false,
         USE_GEMINI: true,
-        GEMINI_MODEL: 'gemini-1.5-flash-latest' // 【新增】預設模型
+        GEMINI_MODEL: 'gemini-1.5-flash-latest'
     };
     return browser.storage.local.get(defaults);
 }

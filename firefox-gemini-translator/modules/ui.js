@@ -1,12 +1,7 @@
 // modules/ui.js
-// 這個模組專門負責所有與 options.html 頁面相關的 DOM 操作和 UI 渲染。
-
-import { playTTS } from './tts.js'; // 我們也將 TTS 拆分出來
+import { playTTS } from './tts.js';
 import { i18n } from '../options/i18n.js';
 
-/**
- * 根據主題設定調整頁面樣式。
- */
 export function applyTheme(theme) {
   let finalTheme = theme;
   if (theme === 'auto') {
@@ -16,44 +11,33 @@ export function applyTheme(theme) {
   document.body.className = finalTheme;
 }
 
-/**
- * 使用 i18n 管理器來渲染整個頁面的 UI 文字。
- */
 export function renderUI() {
   const nativeLangNames = {
     'langUiEn': 'English', 'langUiZhTw': '繁體中文', 'langUiZhCn': '简体中文',
     'langUiJa': '日本語', 'langUiKo': '한국어', 'langUiFr': 'Français',
     'langUiDe': 'Deutsch', 'langUiEs': 'Español', 'langUiRu': 'Русский'
   };
-
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
     elem.textContent = i18n.t(key);
   });
-  
   document.querySelectorAll('#uiLang option').forEach(option => {
     const key = option.getAttribute('data-i18n');
     if (nativeLangNames[key]) {
       option.textContent = nativeLangNames[key];
     }
   });
-
   document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
     const key = elem.getAttribute('data-i18n-placeholder');
     elem.placeholder = i18n.t(key);
   });
-
   document.querySelectorAll('[data-i18n-title]').forEach(elem => {
     const key = elem.getAttribute('data-i18n-title');
     elem.title = i18n.t(key);
   });
-
   document.title = i18n.t('optionsTitle');
 }
 
-/**
- * 顯示 API Key 的狀態。
- */
 export function displayApiKeyStatus(apiKey, isValid) {
   const statusEl = document.getElementById("apiKeyStatus");
   if (!statusEl) return;
@@ -80,7 +64,7 @@ export function displayApiKeyStatus(apiKey, isValid) {
 }
 
 /**
- * 渲染翻譯紀錄列表。
+ * 【修改】渲染翻譯紀錄列表，為不同模型標籤加上專屬 class。
  */
 export function renderHistory(history = []) {
   const container = document.getElementById("historyContainer");
@@ -93,12 +77,34 @@ export function renderHistory(history = []) {
   history.forEach(item => {
     const itemDiv = document.createElement("div");
     itemDiv.className = "history-item";
+    
+    const tagContainer = document.createElement("div");
+    tagContainer.className = "tag-container";
+    itemDiv.appendChild(tagContainer);
+
     if (item.engine) {
       const engineTag = document.createElement("span");
       engineTag.className = `engine-tag engine-${item.engine}`;
       engineTag.textContent = item.engine;
-      itemDiv.appendChild(engineTag);
+      tagContainer.appendChild(engineTag);
+
+      if (item.engine === 'gemini' && item.modelName) {
+        const modelTag = document.createElement("span");
+        modelTag.className = 'engine-tag model-tag';
+        
+        // 根據模型名稱添加特定的 class
+        if (item.modelName.includes('flash')) {
+            modelTag.classList.add('model-flash');
+        } else if (item.modelName.includes('pro')) {
+            modelTag.classList.add('model-pro');
+        }
+
+        const displayName = item.modelName.replace('-latest', '').replace('gemini-1.5-', '1.5 ');
+        modelTag.textContent = displayName;
+        tagContainer.appendChild(modelTag);
+      }
     }
+
     const originalP = document.createElement("p");
     originalP.className = "original-text";
     originalP.textContent = item.original;
@@ -160,9 +166,6 @@ export function renderHistory(history = []) {
   });
 }
 
-/**
- * 顯示狀態通知 Toast
- */
 export function showStatus(messageKey, statusEl) {
     statusEl.textContent = i18n.t(messageKey);
     statusEl.classList.add('show');

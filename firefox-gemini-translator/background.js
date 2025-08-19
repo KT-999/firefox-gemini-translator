@@ -18,24 +18,27 @@ async function handleContextMenuClick(info, tab) {
 
   try {
     const settings = await getSettings();
-    const engine = decideEngine(selectedText, settings.USE_GEMINI);
+    let engine = decideEngine(selectedText, settings.USE_GEMINI);
     const targetLang = settings.TRANSLATE_LANG || '繁體中文';
     let translatedText = '';
+    let modelName = null;
 
     if (engine === 'google') {
         translatedText = await translateWithGoogle(selectedText, targetLang);
-    } else {
+    } else { // engine is 'gemini'
         if (!settings.GEMINI_API_KEY) {
             console.log("未設定 Gemini API Key，右鍵選單自動使用 Google 翻譯。");
             translatedText = await translateWithGoogle(selectedText, targetLang);
+            engine = 'google'; // 將引擎更正為 google
         } else {
-            // 【修改】傳入模型名稱
             translatedText = await translateWithGemini(selectedText, targetLang, settings.GEMINI_API_KEY, settings.GEMINI_MODEL, i18n.t);
+            modelName = settings.GEMINI_MODEL; // 記錄使用的模型
             await saveSettings({ geminiKeyValid: true });
         }
     }
     
-    await addHistoryItem(selectedText, translatedText, engine, targetLang);
+    // 【修改】統一在此處儲存紀錄，並傳入 modelName
+    await addHistoryItem(selectedText, translatedText, engine, targetLang, modelName);
 
     const uiStrings = {
         copy: i18n.t("popupCopy"),

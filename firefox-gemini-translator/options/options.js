@@ -13,10 +13,11 @@ async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
         const settings = await getSettings();
         const engine = decideEngine(text, settings.USE_GEMINI);
         let translatedText = '';
+        let modelName = null;
 
         if (engine === 'google') {
             translatedText = await translateWithGoogle(text, targetLang);
-        } else {
+        } else { // engine is 'gemini'
             if (!settings.GEMINI_API_KEY) {
                 alert(i18n.t("apiKeyStatusUnset"));
                 document.getElementById('tab-settings').click();
@@ -24,15 +25,16 @@ async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
                 resultEl.textContent = '';
                 return;
             }
-            // 【修改】傳入模型名稱
             translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, settings.GEMINI_MODEL, i18n.t);
+            modelName = settings.GEMINI_MODEL; // 記錄使用的模型
             await saveSettings({ geminiKeyValid: true });
         }
         
         resultEl.textContent = translatedText;
         listenBtn.classList.remove('hidden');
         listenBtn.onclick = () => playTTS(translatedText, targetLang);
-        await addHistoryItem(text, translatedText, engine, targetLang);
+        // 【修改】儲存時傳入 modelName
+        await addHistoryItem(text, translatedText, engine, targetLang, modelName);
 
     } catch (error) {
         console.error(`Popup ${error.message.includes('API') ? 'Gemini' : 'Google'} 翻譯失敗:`, error);
@@ -68,8 +70,8 @@ async function main() {
     popupTargetLang: document.getElementById('popupTargetLang'),
     useGeminiSwitch: document.getElementById('useGeminiSwitch'),
     popupListenBtn: document.getElementById('popupListenBtn'),
-    geminiModelSelect: document.getElementById('geminiModelSelect'), // 【新增】
-    geminiModelContainer: document.getElementById('geminiModelContainer') // 【新增】
+    geminiModelSelect: document.getElementById('geminiModelSelect'),
+    geminiModelContainer: document.getElementById('geminiModelContainer')
   };
 
   function switchTab(activeKey) {
@@ -89,7 +91,7 @@ async function main() {
   dom.langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.useGeminiSwitch.checked = settings.USE_GEMINI;
-  dom.geminiModelSelect.value = settings.GEMINI_MODEL; // 【新增】
+  dom.geminiModelSelect.value = settings.GEMINI_MODEL;
   
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
@@ -111,11 +113,10 @@ async function main() {
   renderHistory(await getHistory());
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
 
-  // 【新增】根據 Gemini 開關狀態，顯示或隱藏模型選擇器
   function toggleModelSelectorVisibility() {
       dom.geminiModelContainer.style.display = dom.useGeminiSwitch.checked ? '' : 'none';
   }
-  toggleModelSelectorVisibility(); // 初始化
+  toggleModelSelectorVisibility();
   dom.useGeminiSwitch.addEventListener('change', toggleModelSelectorVisibility);
 
   dom.translateBtn.addEventListener('click', () => {
@@ -153,7 +154,7 @@ async function main() {
       maxHistorySize: parseInt(dom.maxHistoryInput.value, 10) || 20,
       geminiKeyValid: !!dom.apiKeyInput.value.trim(),
       USE_GEMINI: dom.useGeminiSwitch.checked,
-      GEMINI_MODEL: dom.geminiModelSelect.value // 【新增】
+      GEMINI_MODEL: dom.geminiModelSelect.value
     };
     await saveSettings(settingsToSave);
     browser.runtime.sendMessage({ type: 'languageChanged' });
