@@ -2,6 +2,22 @@
 import { playTTS } from './tts.js';
 import { i18n } from '../options/i18n.js';
 
+/**
+ * 將 ISO 日期字串格式化為 'YYYY/MM/DD HH:mm:ss' 的 24 小時制格式。
+ * @param {string} isoString - ISO 格式的日期時間字串。
+ * @returns {string} 格式化後的日期時間字串。
+ */
+function formatTimestamp(isoString) {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+}
+
 export function applyTheme(theme) {
   let finalTheme = theme;
   if (theme === 'auto') {
@@ -64,7 +80,7 @@ export function displayApiKeyStatus(apiKey, isValid) {
 }
 
 /**
- * 【修改】渲染翻譯紀錄列表，為不同模型標籤加上專屬 class。
+ * 渲染翻譯紀錄列表。
  */
 export function renderHistory(history = []) {
   const container = document.getElementById("historyContainer");
@@ -92,7 +108,6 @@ export function renderHistory(history = []) {
         const modelTag = document.createElement("span");
         modelTag.className = 'engine-tag model-tag';
         
-        // 根據模型名稱添加特定的 class
         if (item.modelName.includes('flash')) {
             modelTag.classList.add('model-flash');
         } else if (item.modelName.includes('pro')) {
@@ -114,7 +129,8 @@ export function renderHistory(history = []) {
     const footerDiv = document.createElement("div");
     footerDiv.className = "history-item-footer";
     const timeSpan = document.createElement("span");
-    timeSpan.textContent = new Date(item.timestamp).toLocaleString();
+    // 【修改處】使用新的格式化函式
+    timeSpan.textContent = formatTimestamp(item.timestamp);
     const buttonGroup = document.createElement("div");
     buttonGroup.className = "history-item-buttons";
     
