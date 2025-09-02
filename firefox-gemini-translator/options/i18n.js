@@ -34,7 +34,7 @@ export const i18n = (() => {
       // 如果使用者從未設定過語言 (初次使用)，偵測瀏覽器語言
       if (!lang) {
         const browserLang = browser.i18n.getUILanguage(); // e.g., "zh-TW", "fr-CA"
-        const supportedLangs = ['en', 'zh_TW', 'zh_CN', 'ja', 'ko', 'fr', 'de', 'es', 'ru'];
+        const supportedLangs = ['en', 'zh_TW', 'zh_CN', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'hi', 'ar', 'bn', 'pt', 'id'];
         const baseLang = browserLang.split('-')[0]; // e.g., "zh", "fr"
 
         if (browserLang === 'zh-CN') {
@@ -87,3 +87,4 @@ export const i18n = (() => {
     t,
   };
 })();
+

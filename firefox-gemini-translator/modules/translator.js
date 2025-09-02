@@ -1,7 +1,7 @@
 // modules/translator.js
 // 這個模組封裝了呼叫外部翻譯 API 的核心邏輯。
 
-function containsCjk(text) {
+export function containsCjk(text) {
   const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
   return cjkRegex.test(text);
 }
@@ -22,7 +22,7 @@ export function decideEngine(text, useGeminiEnabled) {
 }
 
 export async function translateWithGoogle(text, targetLang) {
-    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru" };
+    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
     const tl = langCodeMap[targetLang] || "zh-TW";
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
 
@@ -100,3 +100,4 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     }
     return translatedText;
 }
+

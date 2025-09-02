@@ -42,17 +42,20 @@ body.dark .tab-btn:hover { background-color: rgba(255,255,255,0.05); }
 .popup-lang-selector { display: flex; align-items: center; gap: 8px; }
 .popup-lang-selector label { margin-bottom: 0; flex-shrink: 0; }
 .popup-lang-selector select { margin-bottom: 0; flex-grow: 1; }
+.input-title { font-size: 1.1em; margin: 8px 0 -4px 0; }
 #translateInput { width: 100%; padding: 10px; font-size: 1em; border-radius: 4px; border: 1px solid #ccc; resize: vertical; flex-shrink: 0; }
 body.dark #translateInput { background-color: #3c4043; color: #e8eaed; border-color: #5f6368; }
 .translate-btn { width: 100%; padding: 10px; background: var(--primary-color); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: 500; }
 .translate-btn:hover { background: var(--primary-color-hover); }
 .result-card { display: flex; flex-direction: column; flex-grow: 1; background-color: var(--card-bg-light); padding: 1em; border-radius: 8px; border: 1px solid var(--border-color-light); }
 body.dark .result-card { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); }
-.result-header { display: flex; justify-content: space-between; align-items: center; }
-.result-card h3 { margin-top: 0; margin-bottom: 0.5em; font-size: 1.1em; padding-bottom: 0.5em; border-bottom: 1px solid var(--border-color-light); flex-grow: 1; }
-body.dark .result-card h3 { border-bottom-color: var(--border-color-dark); }
-#translateResult { flex-grow: 1; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; padding: 8px; background-color: var(--result-bg-light); border-radius: 4px; }
-body.dark #translateResult { background-color: var(--result-bg-dark); }
+.result-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.result-card h3 { margin-top: 0; margin-bottom: 0; font-size: 1.1em; flex-grow: 1; }
+.source-lang-display { font-size: 0.9em; color: #666; white-space: nowrap; margin-left: auto; }
+body.dark .source-lang-display { color: #aaa; }
+.header-buttons { display: flex; gap: 4px; }
+#translateResult { flex-grow: 1; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; padding: 8px; background-color: var(--result-bg-light); border-radius: 4px; margin-top: 0.5em; border-top: 1px solid var(--border-color-light); }
+body.dark #translateResult { background-color: var(--result-bg-dark); border-top-color: var(--border-color-dark); }
 .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -93,6 +96,9 @@ body.dark .history-item { border-color: var(--border-color-dark); }
 .history-item .translated-text { white-space: pre-wrap; }
 .history-item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5em; font-size: 0.8em; color: #888; }
 body.dark .history-item-footer { color: #aaa; }
+.history-item-info { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.history-source-lang { background-color: rgba(0,0,0,0.05); padding: 2px 5px; border-radius: 3px; }
+body.dark .history-source-lang { background-color: rgba(255,255,255,0.1); }
 .history-item-buttons { display: flex; gap: 0.5em; align-items: center; }
 .copy-history-btn, .delete-history-btn { background: none; border: 1px solid #ccc; color: #555; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.9em; margin: 0; }
 .delete-history-btn { border-color: var(--danger-color); color: var(--danger-color); }
@@ -109,6 +115,7 @@ body.dark .delete-history-btn:hover { background-color: var(--danger-color); col
 
 /* --- 7. 其他元件樣式 --- */
 .listen-btn { background: none; border: none; padding: 4px; cursor: pointer; color: #666; opacity: 0.7; }
+.listen-btn svg { display: block; } /* 確保 SVG 是塊級元素 */
 .listen-btn:hover { opacity: 1; color: var(--primary-color); }
 body.dark .listen-btn { color: #ccc; }
 .password-wrapper { position: relative; }
@@ -123,3 +130,4 @@ body.dark .toggle-vis { color: #ccc; }
 .key-status.invalid { color: var(--danger-color); }
 #status { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--success-color); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: bottom 0.4s ease-in-out; z-index: 1000; font-weight: 500; }
 #status.show { bottom: 20px; }
+

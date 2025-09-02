@@ -31,7 +31,9 @@ export function renderUI() {
   const nativeLangNames = {
     'langUiEn': 'English', 'langUiZhTw': '繁體中文', 'langUiZhCn': '简体中文',
     'langUiJa': '日本語', 'langUiKo': '한국어', 'langUiFr': 'Français',
-    'langUiDe': 'Deutsch', 'langUiEs': 'Español', 'langUiRu': 'Русский'
+    'langUiDe': 'Deutsch', 'langUiEs': 'Español', 'langUiRu': 'Русский',
+    'langUiHi': 'हिन्दी', 'langUiAr': 'العربية', 'langUiBn': 'বাংলা',
+    'langUiPt': 'Português', 'langUiId': 'Bahasa Indonesia'
   };
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
@@ -82,7 +84,7 @@ export function displayApiKeyStatus(apiKey, isValid) {
 /**
  * 渲染翻譯紀錄列表。
  */
-export function renderHistory(history = []) {
+export async function renderHistory(history = []) {
   const container = document.getElementById("historyContainer");
   if (!container) return;
   container.innerHTML = "";
@@ -90,6 +92,12 @@ export function renderHistory(history = []) {
     container.textContent = i18n.t("noHistory");
     return;
   }
+  
+  const { UI_LANG } = await browser.storage.local.get('UI_LANG');
+  const uiLang = (UI_LANG || 'zh_TW').replace('_', '-');
+  const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
+  const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
+
   history.forEach(item => {
     const itemDiv = document.createElement("div");
     itemDiv.className = "history-item";
@@ -128,17 +136,45 @@ export function renderHistory(history = []) {
     translatedP.textContent = item.translated;
     const footerDiv = document.createElement("div");
     footerDiv.className = "history-item-footer";
+
+    const infoContainer = document.createElement("div");
+    infoContainer.className = "history-item-info";
+
     const timeSpan = document.createElement("span");
-    // 【修改處】使用新的格式化函式
     timeSpan.textContent = formatTimestamp(item.timestamp);
+    infoContainer.appendChild(timeSpan);
+
+    if (item.sourceLang && item.sourceLang !== 'und') {
+        const sourceLangSpan = document.createElement("span");
+        sourceLangSpan.className = "history-source-lang";
+        try {
+            const sourceLangName = displayLang.of(item.sourceLang);
+            sourceLangSpan.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
+        } catch (e) {
+            sourceLangSpan.textContent = `${i18n.t('sourceLanguageLabel')}${item.sourceLang}`;
+        }
+        infoContainer.appendChild(sourceLangSpan);
+    }
+    
     const buttonGroup = document.createElement("div");
     buttonGroup.className = "history-item-buttons";
     
+    const listenOriginalBtn = document.createElement("button");
+    listenOriginalBtn.className = "listen-btn";
+    listenOriginalBtn.title = i18n.t("listenOriginalButtonTooltip");
+    listenOriginalBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    listenOriginalBtn.onclick = () => playTTS(item.original, item.sourceLang);
+    if (!item.sourceLang || item.sourceLang === 'und') {
+        listenOriginalBtn.classList.add('hidden');
+    }
+    buttonGroup.appendChild(listenOriginalBtn);
+
     const listenBtn = document.createElement("button");
     listenBtn.className = "listen-btn";
     listenBtn.title = i18n.t("listenButtonTooltip");
     listenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
-    listenBtn.onclick = () => playTTS(item.translated, item.targetLang);
+    const targetLangCode = langNameToCodeMap[item.targetLang];
+    listenBtn.onclick = () => playTTS(item.translated, targetLangCode);
     buttonGroup.appendChild(listenBtn);
 
     const copyOriginalBtn = document.createElement("button");
@@ -173,8 +209,10 @@ export function renderHistory(history = []) {
     buttonGroup.appendChild(copyOriginalBtn);
     buttonGroup.appendChild(copyTranslatedBtn);
     buttonGroup.appendChild(deleteBtn);
-    footerDiv.appendChild(timeSpan);
+    
+    footerDiv.appendChild(infoContainer);
     footerDiv.appendChild(buttonGroup);
+    
     itemDiv.appendChild(originalP);
     itemDiv.appendChild(translatedP);
     itemDiv.appendChild(footerDiv);
@@ -187,3 +225,4 @@ export function showStatus(messageKey, statusEl) {
     statusEl.classList.add('show');
     setTimeout(() => { statusEl.classList.remove('show'); }, 2500);
 }
+

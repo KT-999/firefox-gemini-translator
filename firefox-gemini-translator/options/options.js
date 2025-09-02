@@ -1,13 +1,18 @@
 // options/options.js
 import { i18n } from './i18n.js';
 import { getSettings, saveSettings, addHistoryItem, getHistory } from '../modules/storage.js';
-import { decideEngine, translateWithGoogle, translateWithGemini } from '../modules/translator.js';
+import { decideEngine, translateWithGoogle, translateWithGemini, containsCjk } from '../modules/translator.js';
 import { applyTheme, renderUI, displayApiKeyStatus, renderHistory, showStatus } from '../modules/ui.js';
 import { playTTS } from '../modules/tts.js';
 
-async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
+async function handlePopupTranslate(text, targetLang, resultEl, listenBtn, listenOriginalBtn) {
     listenBtn.classList.add('hidden');
+    listenOriginalBtn.classList.add('hidden');
     resultEl.innerHTML = '<div class="loading-spinner"></div>';
+    const sourceLangEl = document.getElementById('sourceLangDisplay');
+    sourceLangEl.textContent = '';
+
+    let sourceLang = 'und';
 
     try {
         const settings = await getSettings();
@@ -15,9 +20,54 @@ async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
         let translatedText = '';
         let modelName = null;
 
+        // 【修正】擴充後備語言偵測，新增印地文、阿拉伯文、孟加拉文、葡萄牙文等
+        const detectedLangInfo = await browser.i18n.detectLanguage(text);
+        sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
+        if (sourceLang === 'und') {
+            if (/[\u0900-\u097F]/.test(text)) {
+                sourceLang = 'hi'; // 印地文
+            } else if (/[\u0600-\u06FF]/.test(text)) {
+                sourceLang = 'ar'; // 阿拉伯文
+            } else if (/[\u0980-\u09FF]/.test(text)) {
+                sourceLang = 'bn'; // 孟加拉文
+            } else if (/[\uAC00-\uD7A3]/.test(text)) {
+                sourceLang = 'ko'; // 韓文
+            } else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) {
+                sourceLang = 'ja'; // 日文
+            } else if (containsCjk(text)) {
+                sourceLang = 'zh'; // 中文
+            } else if (/[\u0400-\u04FF]/.test(text)) {
+                sourceLang = 'ru'; // 俄文
+            } else if (/[àâçéèêëîïôûùüÿæœ]/i.test(text)) {
+                sourceLang = 'fr'; // 法文
+            } else if (/[äöüß]/i.test(text)) {
+                sourceLang = 'de'; // 德文
+            } else if (/[áéíóúüñ]/i.test(text)) {
+                sourceLang = 'es'; // 西班牙文
+            } else if (/[ãõàáâéêíóôõúç]/i.test(text)) {
+                sourceLang = 'pt'; // 葡萄牙文
+            } else if (/^[a-z\u00C0-\u017F\s.,'’!-]+$/i.test(text)) {
+                sourceLang = 'en'; // 擴展拉丁字母 (預設為英文/印尼文等)
+            }
+        }
+        
+        const uiLang = (settings.UI_LANG || 'zh_TW').replace('_', '-');
+        const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
+        
+        if (sourceLang !== 'und') {
+            try {
+                const sourceLangName = displayLang.of(sourceLang);
+                sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
+            } catch (e) {
+                sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLang}`;
+            }
+        } else {
+             sourceLangEl.textContent = '';
+        }
+
         if (engine === 'google') {
             translatedText = await translateWithGoogle(text, targetLang);
-        } else { // engine is 'gemini'
+        } else {
             if (!settings.GEMINI_API_KEY) {
                 alert(i18n.t("apiKeyStatusUnset"));
                 document.getElementById('tab-settings').click();
@@ -26,15 +76,24 @@ async function handlePopupTranslate(text, targetLang, resultEl, listenBtn) {
                 return;
             }
             translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, settings.GEMINI_MODEL, i18n.t);
-            modelName = settings.GEMINI_MODEL; // 記錄使用的模型
+            modelName = settings.GEMINI_MODEL;
             await saveSettings({ geminiKeyValid: true });
         }
         
         resultEl.textContent = translatedText;
+
+        const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
+        const targetLangCode = langNameToCodeMap[targetLang];
+        
         listenBtn.classList.remove('hidden');
-        listenBtn.onclick = () => playTTS(translatedText, targetLang);
-        // 【修改】儲存時傳入 modelName
-        await addHistoryItem(text, translatedText, engine, targetLang, modelName);
+        listenBtn.onclick = () => playTTS(translatedText, targetLangCode);
+
+        if (sourceLang !== 'und') {
+            listenOriginalBtn.classList.remove('hidden');
+            listenOriginalBtn.onclick = () => playTTS(text, sourceLang);
+        }
+        
+        await addHistoryItem(text, translatedText, engine, targetLang, sourceLang, modelName);
 
     } catch (error) {
         console.error(`Popup ${error.message.includes('API') ? 'Gemini' : 'Google'} 翻譯失敗:`, error);
@@ -70,6 +129,7 @@ async function main() {
     popupTargetLang: document.getElementById('popupTargetLang'),
     useGeminiSwitch: document.getElementById('useGeminiSwitch'),
     popupListenBtn: document.getElementById('popupListenBtn'),
+    popupListenOriginalBtn: document.getElementById('popupListenOriginalBtn'),
     geminiModelSelect: document.getElementById('geminiModelSelect'),
     geminiModelContainer: document.getElementById('geminiModelContainer')
   };
@@ -122,7 +182,7 @@ async function main() {
   dom.translateBtn.addEventListener('click', () => {
     const text = dom.translateInput.value.trim();
     if (!text) return;
-    handlePopupTranslate(text, dom.popupTargetLang.value, dom.translateResult, dom.popupListenBtn);
+    handlePopupTranslate(text, dom.popupTargetLang.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn);
   });
 
   dom.uiLangSelect.addEventListener('change', async (e) => {
@@ -177,3 +237,4 @@ async function main() {
 }
 
 document.addEventListener("DOMContentLoaded", main);
+

@@ -1,7 +1,7 @@
 // background.js (模組)
 import { i18n } from './options/i18n.js';
 import { getSettings, saveSettings, addHistoryItem } from './modules/storage.js';
-import { decideEngine, translateWithGoogle, translateWithGemini } from './modules/translator.js';
+import { decideEngine, translateWithGoogle, translateWithGemini, containsCjk } from './modules/translator.js';
 
 async function sendMessageToTab(tabId, message) {
   try {
@@ -23,6 +23,37 @@ async function handleContextMenuClick(info, tab) {
     let translatedText = '';
     let modelName = null;
 
+    // 【修正】擴充後備語言偵測，新增印地文、阿拉伯文、孟加拉文、葡萄牙文等
+    const detectedLangInfo = await browser.i18n.detectLanguage(selectedText);
+    let sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
+    if (sourceLang === 'und') {
+        if (/[\u0900-\u097F]/.test(selectedText)) {
+            sourceLang = 'hi'; // 印地文
+        } else if (/[\u0600-\u06FF]/.test(selectedText)) {
+            sourceLang = 'ar'; // 阿拉伯文
+        } else if (/[\u0980-\u09FF]/.test(selectedText)) {
+            sourceLang = 'bn'; // 孟加拉文
+        } else if (/[\uAC00-\uD7A3]/.test(selectedText)) {
+            sourceLang = 'ko'; // 韓文
+        } else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(selectedText)) {
+            sourceLang = 'ja'; // 日文
+        } else if (containsCjk(selectedText)) {
+            sourceLang = 'zh'; // 中文
+        } else if (/[\u0400-\u04FF]/.test(selectedText)) {
+            sourceLang = 'ru'; // 俄文
+        } else if (/[àâçéèêëîïôûùüÿæœ]/i.test(selectedText)) {
+            sourceLang = 'fr'; // 法文
+        } else if (/[äöüß]/i.test(selectedText)) {
+            sourceLang = 'de'; // 德文
+        } else if (/[áéíóúüñ]/i.test(selectedText)) {
+            sourceLang = 'es'; // 西班牙文
+        } else if (/[ãõàáâéêíóôõúç]/i.test(selectedText)) {
+            sourceLang = 'pt'; // 葡萄牙文
+        } else if (/^[a-z\u00C0-\u017F\s.,'’!-]+$/i.test(selectedText)) {
+            sourceLang = 'en'; // 擴展拉丁字母 (預設為英文/印尼文等)
+        }
+    }
+
     if (engine === 'google') {
         translatedText = await translateWithGoogle(selectedText, targetLang);
     } else { // engine is 'gemini'
@@ -32,13 +63,12 @@ async function handleContextMenuClick(info, tab) {
             engine = 'google'; // 將引擎更正為 google
         } else {
             translatedText = await translateWithGemini(selectedText, targetLang, settings.GEMINI_API_KEY, settings.GEMINI_MODEL, i18n.t);
-            modelName = settings.GEMINI_MODEL; // 記錄使用的模型
+            modelName = settings.GEMINI_MODEL;
             await saveSettings({ geminiKeyValid: true });
         }
     }
     
-    // 【修改】統一在此處儲存紀錄，並傳入 modelName
-    await addHistoryItem(selectedText, translatedText, engine, targetLang, modelName);
+    await addHistoryItem(selectedText, translatedText, engine, targetLang, sourceLang, modelName);
 
     const uiStrings = {
         copy: i18n.t("popupCopy"),
@@ -77,3 +107,4 @@ async function initialize() {
 }
 
 initialize();
+

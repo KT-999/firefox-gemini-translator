@@ -15,7 +15,7 @@
     </nav>
 
     <main class="content">
-      <!-- 翻譯頁籤 (結構不變) -->
+      <!-- 翻譯頁籤 -->
       <div id="view-translate" class="tab-view active">
         <div class="translate-container">
           <div class="popup-lang-selector">
@@ -30,16 +30,28 @@
               <option value="德文" data-i18n="langDe"></option>
               <option value="西班牙文" data-i18n="langEs"></option>
               <option value="俄文" data-i18n="langRu"></option>
+              <option value="印地文" data-i18n="langHi"></option>
+              <option value="阿拉伯文" data-i18n="langAr"></option>
+              <option value="孟加拉文" data-i18n="langBn"></option>
+              <option value="葡萄牙文" data-i18n="langPt"></option>
+              <option value="印尼文" data-i18n="langId"></option>
             </select>
           </div>
+          <h3 class="input-title" data-i18n="originalTextTitle"></h3>
           <textarea id="translateInput" rows="5" data-i18n-placeholder="translateInputPlaceholder"></textarea>
           <button id="translateBtn" class="translate-btn" type="button" data-i18n="translateButton"></button>
           <div class="result-card">
             <div class="result-header">
               <h3 data-i18n="translationResult"></h3>
-              <button id="popupListenBtn" class="listen-btn hidden" type="button" data-i18n-title="listenButtonTooltip">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-              </button>
+              <span id="sourceLangDisplay" class="source-lang-display"></span>
+              <div class="header-buttons">
+                <button id="popupListenOriginalBtn" class="listen-btn hidden" type="button" data-i18n-title="listenOriginalButtonTooltip">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button id="popupListenBtn" class="listen-btn hidden" type="button" data-i18n-title="listenButtonTooltip">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </button>
+              </div>
             </div>
             <div id="translateResult"></div>
           </div>
@@ -74,7 +86,6 @@
               </label>
             </div>
 
-            <!-- 【修改處】Gemini 模型選擇 -->
             <div id="geminiModelContainer">
                 <label for="geminiModelSelect" data-i18n="geminiModelLabel"></label>
                 <select id="geminiModelSelect">
@@ -94,6 +105,11 @@
               <option value="德文" data-i18n="langDe"></option>
               <option value="西班牙文" data-i18n="langEs"></option>
               <option value="俄文" data-i18n="langRu"></option>
+              <option value="印地文" data-i18n="langHi"></option>
+              <option value="阿拉伯文" data-i18n="langAr"></option>
+              <option value="孟加拉文" data-i18n="langBn"></option>
+              <option value="葡萄牙文" data-i18n="langPt"></option>
+              <option value="印尼文" data-i18n="langId"></option>
             </select>
             
             <h2 data-i18n="personalization"></h2>
@@ -108,6 +124,11 @@
               <option value="de" data-i18n="langUiDe"></option>
               <option value="es" data-i18n="langUiEs"></option>
               <option value="ru" data-i18n="langUiRu"></option>
+              <option value="hi" data-i18n="langUiHi"></option>
+              <option value="ar" data-i18n="langUiAr"></option>
+              <option value="bn" data-i18n="langUiBn"></option>
+              <option value="pt" data-i18n="langUiPt"></option>
+              <option value="id" data-i18n="langUiId"></option>
             </select>
             <label for="theme" data-i18n="theme"></label>
             <select id="theme">
@@ -133,7 +154,7 @@
   </div>
 
   <div id="status"></div>
-  <script src="i18n.js"></script>
   <script src="options.js" type="module"></script>
 </body>
 </html>
+
