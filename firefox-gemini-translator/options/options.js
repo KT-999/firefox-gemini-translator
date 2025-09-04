@@ -126,6 +126,12 @@ async function main() {
   await i18n.init();
   renderUI();
 
+  const manifest = browser.runtime.getManifest();
+  const versionDisplay = document.getElementById('version-display');
+  if (versionDisplay) {
+    versionDisplay.textContent = `v${manifest.version}`;
+  }
+
   const dom = {
     tabs: {
       translate: { btn: document.getElementById('tab-translate'), view: document.getElementById('view-translate') },
@@ -201,7 +207,7 @@ async function main() {
   });
 
   dom.uiLangSelect.addEventListener('change', async (e) => {
-    await i18n.loadMessages(e.target.value);
+    await i18n.init({ langOverride: e.target.value });
     renderUI();
     renderHistory(await getHistory());
     const currentSettings = await getSettings();

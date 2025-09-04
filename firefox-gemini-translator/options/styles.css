@@ -39,12 +39,35 @@ body.dark .tab-btn:hover { background-color: rgba(255,255,255,0.05); }
 
 /* --- 4. 翻譯頁籤樣式 --- */
 .translate-container { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-.selectors-container { display: flex; gap: 16px; width: 100%; }
-.popup-lang-selector { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.popup-lang-selector label { margin-bottom: 0; flex-shrink: 0; }
-.popup-lang-selector select { margin-bottom: 0; flex-grow: 1; }
-.lang-selector-wrapper { flex: 2; }
-.engine-selector-wrapper { flex: 3; }
+
+.selectors-container {
+    display: flex;
+    flex-direction: column; 
+    gap: 16px;
+    width: 100%;
+}
+
+.popup-selector-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.popup-selector-item label {
+    margin-bottom: 0;
+    font-weight: 500;
+    font-size: 0.9em;
+    color: #5f6368;
+}
+
+body.dark .popup-selector-item label {
+    color: #bdc1c6;
+}
+
+.popup-selector-item select {
+    width: 100%;
+    margin-bottom: 0;
+}
 
 .input-title { font-size: 1.1em; margin: 8px 0 -4px 0; }
 #translateInput { width: 100%; padding: 10px; font-size: 1em; border-radius: 4px; border: 1px solid #ccc; resize: vertical; flex-shrink: 0; }
@@ -69,27 +92,39 @@ body.dark #translateResult { background-color: var(--result-bg-dark); border-top
 /* --- 5. 設定頁籤樣式 --- */
 .card { background-color: var(--card-bg-light); padding: 1.5em; border-radius: 8px; border: 1px solid var(--border-color-light); }
 body.dark .card { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); }
-h2 { margin-top: 0; margin-bottom: 1.5em; font-size: 1.2em; padding-bottom: 0.5em; border-bottom: 1px solid var(--border-color-light); }
-body.dark h2 { border-bottom-color: var(--border-color-dark); }
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid var(--border-color-light);
+}
+body.dark .settings-header {
+  border-bottom-color: var(--border-color-dark);
+}
+#version-display {
+  font-size: 0.85em;
+  color: #888;
+  font-weight: normal;
+}
+body.dark #version-display {
+  color: #aaa;
+}
+
+h2 { margin-top: 0; margin-bottom: 0; font-size: 1.2em; padding-bottom: 0; border-bottom: none; }
+body.dark h2 { border-bottom-color: var(--border-color-dark); } /* This is now inside .settings-header */
 label { display: block; margin-bottom: .5em; font-weight: 500; color: #5f6368; overflow-wrap: break-word; word-wrap: break-word; }
 body.dark label { color: #bdc1c6; }
 input[type="password"], input[type="text"], input[type="number"], select { width: 100%; padding: .8em; margin-bottom: 1.5em; border-radius: 4px; border: 1px solid #ccc; font-size: 1em; background-color: #fff; color: #333; }
 body.dark input, body.dark select { background-color: #3c4043; color: #e8eaed; border-color: #5f6368; }
 button#saveBtn { width: 100%; margin-top: 1em; padding: .8em; background: var(--primary-color); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: 500; }
-.setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
-.label-group { flex-grow: 1; margin-right: 16px; }
-.label-group label { margin-bottom: 0.25em; }
-.description { font-size: 0.85em; color: #666; margin: 0; }
+.setting-item-column {
+  margin-bottom: 1.5em;
+}
+.description { font-size: 0.85em; color: #666; margin-top: -1em; margin-bottom: 1.5em; }
 body.dark .description { color: #aaa; }
-.switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
-.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
-input:checked + .slider { background-color: var(--primary-color); }
-input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); }
-input:checked + .slider:before { transform: translateX(22px); }
-.slider.round { border-radius: 34px; }
-.slider.round:before { border-radius: 50%; }
 
 /* --- 6. 歷史紀錄區樣式 --- */
 .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; }
@@ -116,14 +151,13 @@ body.dark .delete-history-btn:hover { background-color: var(--danger-color); col
 .tag-container { position: absolute; top: 0; right: 0; display: flex; border-radius: 0 6px 0 6px; overflow: hidden; }
 .engine-tag { padding: 2px 6px; font-size: 0.75em; font-weight: bold; color: #fff; text-transform: capitalize; }
 .engine-google, .translation-source-display.engine-google { background-color: #888; color: #fff; }
-.engine-gemini { background-color: var(--primary-color); }
+.engine-gemini, .translation-source-display.engine-gemini { background-color: var(--primary-color); }
 .model-tag.model-flash, .translation-source-display.model-flash { background-color: #00897b; color: #fff; }
 .model-tag.model-pro, .translation-source-display.model-pro { background-color: #3949ab; color: #fff; }
 
-
 /* --- 7. 其他元件樣式 --- */
 .listen-btn { background: none; border: none; padding: 4px; cursor: pointer; color: #666; opacity: 0.7; }
-.listen-btn svg { display: block; } /* 確保 SVG 是塊級元素 */
+.listen-btn svg { display: block; }
 .listen-btn:hover { opacity: 1; color: var(--primary-color); }
 body.dark .listen-btn { color: #ccc; }
 .password-wrapper { position: relative; }

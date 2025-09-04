@@ -21,7 +21,7 @@
       <div id="view-translate" class="tab-view active">
         <div class="translate-container">
           <div class="selectors-container">
-            <div class="popup-lang-selector lang-selector-wrapper">
+            <div class="popup-selector-item">
               <label for="popupTargetLang" data-i18n="targetLanguage"></label>
               <select id="popupTargetLang">
                 <option value="繁體中文" data-i18n="langZhTw"></option>
@@ -40,7 +40,7 @@
                 <option value="印尼文" data-i18n="langId"></option>
               </select>
             </div>
-            <div class="popup-lang-selector engine-selector-wrapper">
+            <div class="popup-selector-item">
               <label for="popupEngineSelect" data-i18n="translationEngineLabel"></label>
               <select id="popupEngineSelect">
                 <option value="google" data-i18n="engineOptionGoogle"></option>
@@ -87,7 +87,10 @@
       <div id="view-settings" class="tab-view">
         <div class="card">
           <form id="settingsForm">
-            <h2 data-i18n="coreSettings"></h2>
+            <div class="settings-header">
+              <h2 data-i18n="coreSettings"></h2>
+              <span id="version-display"></span>
+            </div>
             <label for="apiKey">
               <span data-i18n="geminiApiKey"></span>
               <span id="apiKeyStatus" class="key-status"></span>
@@ -179,6 +182,7 @@
         </div>
       </div>
 
+      <!-- 歷史紀錄頁籤 -->
       <div id="view-history" class="tab-view">
         <div class="history-header">
           <h2 data-i18n="historyList"></h2>
