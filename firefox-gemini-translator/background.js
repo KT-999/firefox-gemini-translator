@@ -2,6 +2,7 @@
 import { i18n } from './options/i18n.js';
 import { getSettings, saveSettings, addHistoryItem } from './modules/storage.js';
 import { decideEngine, translateWithGoogle, translateWithGemini, containsCjk } from './modules/translator.js';
+import { playTTS } from './modules/tts.js';
 
 async function sendMessageToTab(tabId, message) {
     try {
@@ -11,11 +12,7 @@ async function sendMessageToTab(tabId, message) {
     }
 }
 
-async function handleContextMenuClick(info, tab) {
-    if (info.menuItemId !== "smart-translate") return;
-    const selectedText = info.selectionText.trim();
-    if (!selectedText || !tab?.id) return;
-
+async function handleTranslation(selectedText, tabId) {
     const settings = await getSettings();
     const targetLang = settings.TRANSLATE_LANG || '繁體中文';
 
@@ -33,7 +30,7 @@ async function handleContextMenuClick(info, tab) {
             }
         } else if (contextEngineSetting === 'google') {
             engine = 'google';
-        } else { // A specific gemini model is forced
+        } else {
             engine = 'gemini';
             modelName = contextEngineSetting;
         }
@@ -43,9 +40,9 @@ async function handleContextMenuClick(info, tab) {
         } else { // engine is 'gemini'
             if (!settings.GEMINI_API_KEY) {
                 console.log("右鍵選單設定為 Gemini 但未提供 API Key，自動降級使用 Google 翻譯。");
-                translatedText = await translateWithGoogle(selectedText, targetLang);
                 engine = 'google';
                 modelName = null;
+                translatedText = await translateWithGoogle(selectedText, targetLang);
             } else {
                 translatedText = await translateWithGemini(selectedText, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
                 await saveSettings({ geminiKeyValid: true });
@@ -71,44 +68,62 @@ async function handleContextMenuClick(info, tab) {
 
         await addHistoryItem(selectedText, translatedText, engine, targetLang, sourceLang, modelName);
 
-        const uiStrings = {
-            copy: i18n.t("popupCopy"),
-            copied: i18n.t("popupCopied"),
-            close: i18n.t("popupClose")
+        const uiLang = (settings.UI_LANG || 'zh_TW').replace('_', '-');
+        const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
+        let sourceLangName = '';
+        if (sourceLang !== 'und') {
+            try {
+                sourceLangName = displayLang.of(sourceLang);
+            } catch (e) {
+                sourceLangName = sourceLang;
+            }
+        }
+
+        const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
+
+        const messageData = {
+            originalText: selectedText,
+            translatedText: translatedText.replace(/\n/g, '__NEWLINE__'),
+            engine,
+            modelName,
+            sourceLangCode: sourceLang,
+            sourceLangName,
+            targetLangCode: langNameToCodeMap[targetLang] || 'zh-TW',
+            uiStrings: {
+                copyOriginal: i18n.t("copyOriginal"),
+                copyTranslated: i18n.t("copyTranslated"),
+                copied: i18n.t("copied"),
+                listenOriginalButtonTooltip: i18n.t("listenOriginalButtonTooltip"),
+                listenButtonTooltip: i18n.t("listenButtonTooltip"),
+                sourceLanguageLabel: i18n.t("sourceLanguageLabel"),
+                engineOptionGoogle: i18n.t("engineOptionGoogle"),
+                engineTagGemini: i18n.t("engineTagGemini"),
+                modelTagFlash: i18n.t("modelTagFlash"),
+                modelTagPro: i18n.t("modelTagPro")
+            }
         };
-        await sendMessageToTab(tab.id, { type: "showTranslation", text: translatedText.replace(/\n/g, '__NEWLINE__'), engine, ui: uiStrings });
+
+        await sendMessageToTab(tabId, { type: "showTranslationCard", data: messageData });
 
     } catch (error) {
         console.error("右鍵選單翻譯失敗:", error);
         if (error.message === 'Invalid API Key') {
             await saveSettings({ geminiKeyValid: false });
             console.log("Gemini API Key 無效，自動降級使用 Google 翻譯。");
-            try {
-                const translatedText = await translateWithGoogle(selectedText, targetLang);
-                const engine = 'google';
-                const modelName = null;
-
-                const detectedLangInfo = await browser.i18n.detectLanguage(selectedText);
-                let sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
-                if (sourceLang === 'und' && containsCjk(selectedText)) {
-                    sourceLang = 'zh';
-                }
-
-                await addHistoryItem(selectedText, translatedText, engine, targetLang, sourceLang, modelName);
-                const uiStrings = {
-                    copy: i18n.t("popupCopy"),
-                    copied: i18n.t("popupCopied"),
-                    close: i18n.t("popupClose")
-                };
-                await sendMessageToTab(tab.id, { type: "showTranslation", text: translatedText.replace(/\n/g, '__NEWLINE__'), engine: 'google', ui: uiStrings });
-            } catch (fallbackError) {
-                console.error("後備 Google 翻譯也失敗:", fallbackError);
-                await sendMessageToTab(tab.id, { type: "showTranslation", text: i18n.t("errorGoogle") });
-            }
+            // Retry with google by calling the function again but forcing google
+            await handleTranslation(selectedText, tabId);
         } else {
-            await sendMessageToTab(tab.id, { type: "showTranslation", text: i18n.t("errorGoogle") });
+            await sendMessageToTab(tabId, { type: "showError", text: i18n.t("errorGoogle") });
         }
     }
+}
+
+
+async function handleContextMenuClick(info, tab) {
+    if (info.menuItemId !== "smart-translate") return;
+    const selectedText = info.selectionText.trim();
+    if (!selectedText || !tab?.id) return;
+    await handleTranslation(selectedText, tab.id);
 }
 
 async function initialize() {
@@ -118,13 +133,17 @@ async function initialize() {
         title: i18n.t("contextMenuTitle"),
         contexts: ["selection"]
     });
+
     browser.contextMenus.onClicked.addListener(handleContextMenuClick);
+
     browser.runtime.onMessage.addListener(async (message) => {
         if (message.type === 'languageChanged') {
             await i18n.init();
             browser.contextMenus.update("smart-translate", {
                 title: i18n.t("contextMenuTitle")
             });
+        } else if (message.type === 'playTTS') {
+            playTTS(message.text, message.langCode);
         }
     });
 }
