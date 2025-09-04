@@ -5,20 +5,41 @@ import { translateWithGoogle, translateWithGemini, containsCjk } from '../module
 import { applyTheme, renderUI, displayApiKeyStatus, renderHistory, showStatus } from '../modules/ui.js';
 import { playTTS } from '../modules/tts.js';
 
-async function handlePopupTranslate(text, targetLang, engine, resultEl, sourceDisplayEl, sourceContainerEl, listenBtn, listenOriginalBtn) {
-  sourceDisplayEl.textContent = '';
-  sourceContainerEl.innerHTML = '';
+async function handlePopupTranslate(text, targetLang, engineSelection, resultEl, listenBtn, listenOriginalBtn) {
   listenBtn.classList.add('hidden');
   listenOriginalBtn.classList.add('hidden');
   resultEl.innerHTML = '<div class="loading-spinner"></div>';
+  const sourceLangEl = document.getElementById('sourceLangDisplay');
+  const sourceDisplayEl = document.getElementById('translationSourceDisplay');
+  sourceLangEl.textContent = '';
+  sourceDisplayEl.textContent = '';
+  sourceDisplayEl.className = 'translation-source-display'; // Reset classes
 
   let sourceLang = 'und';
 
   try {
     const settings = await getSettings();
     let translatedText = '';
+    let engine = 'google';
     let modelName = null;
-    let finalEngine = engine.startsWith('gemini') ? 'gemini' : 'google';
+
+    if (engineSelection === 'google') {
+      engine = 'google';
+      translatedText = await translateWithGoogle(text, targetLang);
+    } else { // A Gemini model is selected
+      engine = 'gemini';
+      modelName = engineSelection;
+      if (!settings.GEMINI_API_KEY) {
+        alert(i18n.t("apiKeyStatusUnset"));
+        document.getElementById('tab-settings').click();
+        document.getElementById('apiKey').focus();
+        resultEl.textContent = '';
+        sourceDisplayEl.textContent = '';
+        return;
+      }
+      translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
+      await saveSettings({ geminiKeyValid: true });
+    }
 
     const detectedLangInfo = await browser.i18n.detectLanguage(text);
     sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
@@ -34,6 +55,7 @@ async function handlePopupTranslate(text, targetLang, engine, resultEl, sourceDi
       else if (/[äöüß]/i.test(text)) sourceLang = 'de';
       else if (/[áéíóúüñ]/i.test(text)) sourceLang = 'es';
       else if (/[ãõàáâéêíóôõúç]/i.test(text)) sourceLang = 'pt';
+      else if (/^[a-z\u00C0-\u017F\s.,'’!-]+$/i.test(text)) sourceLang = 'en';
     }
 
     const uiLang = (settings.UI_LANG || 'zh_TW').replace('_', '-');
@@ -42,54 +64,30 @@ async function handlePopupTranslate(text, targetLang, engine, resultEl, sourceDi
     if (sourceLang !== 'und') {
       try {
         const sourceLangName = displayLang.of(sourceLang);
-        sourceDisplayEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
+        sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
       } catch (e) {
-        sourceDisplayEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLang}`;
+        sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLang}`;
       }
-    }
-
-    if (finalEngine === 'google') {
-      translatedText = await translateWithGoogle(text, targetLang);
-      modelName = null;
     } else {
-      if (!settings.GEMINI_API_KEY) {
-        alert(i18n.t("apiKeyStatusUnset"));
-        document.getElementById('tab-settings').click();
-        document.getElementById('apiKey').focus();
-        resultEl.textContent = '';
-        return;
-      }
-      modelName = engine;
-      translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
-      await saveSettings({ geminiKeyValid: true });
-    }
-
-    // --- 顯示翻譯來源標籤 ---
-    sourceContainerEl.innerHTML = ''; // 清空舊標籤
-    if (finalEngine === 'gemini' && modelName) {
-      const geminiTag = document.createElement('span');
-      geminiTag.className = 'engine-tag engine-gemini';
-      geminiTag.textContent = i18n.t('engineTagGemini');
-
-      const modelTag = document.createElement('span');
-      modelTag.className = 'engine-tag model-tag';
-      if (modelName.includes('flash')) {
-        modelTag.classList.add('model-flash');
-        modelTag.textContent = i18n.t('modelTagFlash');
-      } else {
-        modelTag.classList.add('model-pro');
-        modelTag.textContent = i18n.t('modelTagPro');
-      }
-      sourceContainerEl.appendChild(geminiTag);
-      sourceContainerEl.appendChild(modelTag);
-    } else {
-      const googleTag = document.createElement('span');
-      googleTag.className = 'engine-tag engine-google';
-      googleTag.textContent = i18n.t('engineOptionGoogle');
-      sourceContainerEl.appendChild(googleTag);
+      sourceLangEl.textContent = '';
     }
 
     resultEl.textContent = translatedText;
+
+    let sourceText = '';
+    if (engine === 'google') {
+      sourceText = i18n.t("engineOptionGoogle");
+      sourceDisplayEl.classList.add('engine-google');
+    } else {
+      if (modelName.includes('flash')) {
+        sourceText = i18n.t("engineOptionGeminiFlash");
+        sourceDisplayEl.classList.add('model-flash');
+      } else if (modelName.includes('pro')) {
+        sourceText = i18n.t("engineOptionGeminiPro");
+        sourceDisplayEl.classList.add('model-pro');
+      }
+    }
+    sourceDisplayEl.textContent = sourceText;
 
     const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
     const targetLangCode = langNameToCodeMap[targetLang];
@@ -102,38 +100,31 @@ async function handlePopupTranslate(text, targetLang, engine, resultEl, sourceDi
       listenOriginalBtn.onclick = () => playTTS(text, sourceLang);
     }
 
-    await addHistoryItem(text, translatedText, finalEngine, targetLang, sourceLang, modelName);
+    await addHistoryItem(text, translatedText, engine, targetLang, sourceLang, modelName);
 
   } catch (error) {
     console.error(`Popup ${error.message.includes('API') ? 'Gemini' : 'Google'} 翻譯失敗:`, error);
     if (error.message === 'Invalid API Key') {
       await saveSettings({ geminiKeyValid: false });
-      // 自動降級改用 Google 翻譯
-      const fallbackText = await translateWithGoogle(text, targetLang);
-      resultEl.textContent = fallbackText;
-
-      const googleTag = document.createElement('span');
-      googleTag.className = 'engine-tag engine-google';
-      googleTag.textContent = i18n.t('engineOptionGoogle');
-      sourceContainerEl.appendChild(googleTag);
-
-      await addHistoryItem(text, fallbackText, 'google', targetLang, sourceLang, null);
+      console.log("Popup Gemini API Key 無效，自動降級使用 Google 翻譯。");
+      // Re-run the translation forcing Google as the engine.
+      await handlePopupTranslate(text, targetLang, 'google', resultEl, listenBtn, listenOriginalBtn);
     } else {
       resultEl.textContent = error.message.includes('API') ? i18n.t("errorGemini") : i18n.t("errorGoogle");
+      sourceDisplayEl.textContent = 'Error';
     }
   }
+}
+
+function toggleGeminiModelSelector() {
+  const contextMenuEngine = document.getElementById('contextMenuEngineSelect').value;
+  const geminiModelContainer = document.getElementById('geminiModelContainer');
+  geminiModelContainer.style.display = contextMenuEngine === 'smart' ? '' : 'none';
 }
 
 async function main() {
   await i18n.init();
   renderUI();
-
-  // 顯示版本號
-  const manifest = browser.runtime.getManifest();
-  const versionDisplay = document.getElementById('version-display');
-  if (versionDisplay) {
-    versionDisplay.textContent = `v${manifest.version}`;
-  }
 
   const dom = {
     tabs: {
@@ -154,14 +145,11 @@ async function main() {
     translateBtn: document.getElementById('translateBtn'),
     translateResult: document.getElementById('translateResult'),
     popupTargetLang: document.getElementById('popupTargetLang'),
-    popupEngineSelect: document.getElementById('popupEngine'),
-    sourceLangDisplay: document.getElementById('sourceLangDisplay'),
-    translationSourceContainer: document.getElementById('translation-source-container'),
+    popupEngineSelect: document.getElementById('popupEngineSelect'),
     popupListenBtn: document.getElementById('popupListenBtn'),
     popupListenOriginalBtn: document.getElementById('popupListenOriginalBtn'),
     geminiModelSelect: document.getElementById('geminiModelSelect'),
-    geminiModelContainer: document.getElementById('geminiModelContainer'),
-    contextMenuEngineSelect: document.getElementById('contextMenuEngine')
+    contextMenuEngineSelect: document.getElementById('contextMenuEngineSelect')
   };
 
   function switchTab(activeKey) {
@@ -176,10 +164,11 @@ async function main() {
   });
 
   const settings = await getSettings();
+  const defaultTargetLang = i18n.t("langZhTw");
   dom.apiKeyInput.value = settings.GEMINI_API_KEY;
-  dom.langSelect.value = settings.TRANSLATE_LANG;
-  dom.popupTargetLang.value = settings.TRANSLATE_LANG;
-  dom.geminiModelSelect.value = settings.GEMINI_SMART_MODEL;
+  dom.langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
+  dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
+  dom.geminiModelSelect.value = settings.GEMINI_MODEL;
   dom.contextMenuEngineSelect.value = settings.CONTEXT_MENU_ENGINE;
 
   let initialUiLang = settings.UI_LANG;
@@ -190,7 +179,8 @@ async function main() {
     else if (baseLang === 'zh') initialUiLang = 'zh_TW';
     else {
       const availableOptions = Array.from(dom.uiLangSelect.options).map(o => o.value);
-      initialUiLang = availableOptions.includes(baseLang) ? baseLang : 'en';
+      if (availableOptions.includes(baseLang)) initialUiLang = baseLang;
+      else initialUiLang = 'en';
     }
   }
   dom.uiLangSelect.value = initialUiLang;
@@ -200,35 +190,19 @@ async function main() {
   applyTheme(dom.themeSelect.value);
   renderHistory(await getHistory());
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
+  toggleGeminiModelSelector(); // Initial check
 
-  function toggleGeminiModelSelector() {
-    const isSmartMode = dom.contextMenuEngineSelect.value === 'smart';
-    dom.geminiModelContainer.style.display = isSmartMode ? '' : 'none';
-  }
-  toggleGeminiModelSelector();
   dom.contextMenuEngineSelect.addEventListener('change', toggleGeminiModelSelector);
 
   dom.translateBtn.addEventListener('click', () => {
     const text = dom.translateInput.value.trim();
     if (!text) return;
-    handlePopupTranslate(
-      text,
-      dom.popupTargetLang.value,
-      dom.popupEngineSelect.value,
-      dom.translateResult,
-      dom.sourceLangDisplay,
-      dom.translationSourceContainer,
-      dom.popupListenBtn,
-      dom.popupListenOriginalBtn
-    );
+    handlePopupTranslate(text, dom.popupTargetLang.value, dom.popupEngineSelect.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn);
   });
 
   dom.uiLangSelect.addEventListener('change', async (e) => {
     await i18n.loadMessages(e.target.value);
     renderUI();
-    // Re-render version after UI re-render
-    const manifest = browser.runtime.getManifest();
-    versionDisplay.textContent = `v${manifest.version}`;
     renderHistory(await getHistory());
     const currentSettings = await getSettings();
     displayApiKeyStatus(currentSettings.GEMINI_API_KEY, currentSettings.geminiKeyValid);
@@ -254,8 +228,8 @@ async function main() {
       THEME: dom.themeSelect.value,
       maxHistorySize: parseInt(dom.maxHistoryInput.value, 10) || 20,
       geminiKeyValid: !!dom.apiKeyInput.value.trim(),
-      CONTEXT_MENU_ENGINE: dom.contextMenuEngineSelect.value,
-      GEMINI_SMART_MODEL: dom.geminiModelSelect.value
+      GEMINI_MODEL: dom.geminiModelSelect.value,
+      CONTEXT_MENU_ENGINE: dom.contextMenuEngineSelect.value
     };
     await saveSettings(settingsToSave);
     browser.runtime.sendMessage({ type: 'languageChanged' });

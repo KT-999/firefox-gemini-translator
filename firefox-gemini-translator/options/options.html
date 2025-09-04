@@ -20,8 +20,8 @@
       <!-- 翻譯頁籤 -->
       <div id="view-translate" class="tab-view active">
         <div class="translate-container">
-          <div class="translate-controls">
-            <div class="control-group target-lang-group">
+          <div class="selectors-container">
+            <div class="popup-lang-selector lang-selector-wrapper">
               <label for="popupTargetLang" data-i18n="targetLanguage"></label>
               <select id="popupTargetLang">
                 <option value="繁體中文" data-i18n="langZhTw"></option>
@@ -40,25 +40,25 @@
                 <option value="印尼文" data-i18n="langId"></option>
               </select>
             </div>
-            <div class="control-group engine-group">
-              <label for="popupEngine" data-i18n="translationEngineLabel"></label>
-              <select id="popupEngine">
+            <div class="popup-lang-selector engine-selector-wrapper">
+              <label for="popupEngineSelect" data-i18n="translationEngineLabel"></label>
+              <select id="popupEngineSelect">
                 <option value="google" data-i18n="engineOptionGoogle"></option>
                 <option value="gemini-1.5-flash-latest" data-i18n="engineOptionGeminiFlash"></option>
                 <option value="gemini-1.5-pro-latest" data-i18n="engineOptionGeminiPro"></option>
               </select>
             </div>
           </div>
+
           <h3 class="input-title" data-i18n="originalTextTitle"></h3>
           <textarea id="translateInput" rows="5" data-i18n-placeholder="translateInputPlaceholder"></textarea>
           <button id="translateBtn" class="translate-btn" type="button" data-i18n="translateButton"></button>
+
           <div class="result-card">
             <div class="result-header">
-              <h3>
-                <span data-i18n="translationResult"></span>
-                <span id="sourceLangDisplay" class="source-lang-display"></span>
-              </h3>
-              <div id="translation-source-container" class="header-buttons"></div>
+              <h3><span data-i18n="translationResult"></span></h3>
+              <span id="sourceLangDisplay"></span>
+              <span id="translationSourceDisplay" class="translation-source-display"></span>
               <div class="header-buttons">
                 <button id="popupListenOriginalBtn" class="listen-btn hidden" type="button"
                   data-i18n-title="listenOriginalButtonTooltip">
@@ -87,11 +87,7 @@
       <div id="view-settings" class="tab-view">
         <div class="card">
           <form id="settingsForm">
-            <div class="card-header">
-              <h2 data-i18n="coreSettings"></h2>
-              <span id="version-display" class="version-display"></span>
-            </div>
-
+            <h2 data-i18n="coreSettings"></h2>
             <label for="apiKey">
               <span data-i18n="geminiApiKey"></span>
               <span id="apiKeyStatus" class="key-status"></span>
@@ -115,6 +111,25 @@
               </button>
             </div>
 
+            <div class="setting-item-column">
+              <label for="contextMenuEngineSelect" data-i18n="contextMenuEngineLabel"></label>
+              <select id="contextMenuEngineSelect">
+                <option value="smart" data-i18n="contextMenuEngineSmart"></option>
+                <option value="google" data-i18n="contextMenuEngineGoogle"></option>
+                <option value="gemini-1.5-flash-latest" data-i18n="contextMenuEngineGeminiFlash"></option>
+                <option value="gemini-1.5-pro-latest" data-i18n="contextMenuEngineGeminiPro"></option>
+              </select>
+            </div>
+
+            <div id="geminiModelContainer" class="setting-item-column">
+              <label for="geminiModelSelect" data-i18n="geminiModelLabel"></label>
+              <select id="geminiModelSelect">
+                <option value="gemini-1.5-flash-latest" data-i18n="geminiModelFlash"></option>
+                <option value="gemini-1.5-pro-latest" data-i18n="geminiModelPro"></option>
+              </select>
+              <p class="description" data-i18n="geminiModelDescription"></p>
+            </div>
+
             <label for="lang" data-i18n="targetLanguageSettings"></label>
             <select id="lang">
               <option value="繁體中文" data-i18n="langZhTw"></option>
@@ -133,26 +148,7 @@
               <option value="印尼文" data-i18n="langId"></option>
             </select>
 
-            <label for="contextMenuEngine" data-i18n="contextMenuEngineLabel"></label>
-            <select id="contextMenuEngine">
-              <option value="smart" data-i18n="contextMenuEngineSmart"></option>
-              <option value="google" data-i18n="contextMenuEngineGoogle"></option>
-              <option value="gemini-1.5-flash-latest" data-i18n="contextMenuEngineGeminiFlash"></option>
-              <option value="gemini-1.5-pro-latest" data-i18n="contextMenuEngineGeminiPro"></option>
-            </select>
-
-            <div id="geminiModelContainer">
-              <label for="geminiModelSelect" data-i18n="geminiModelLabel"></label>
-              <select id="geminiModelSelect">
-                <option value="gemini-1.5-flash-latest" data-i18n="geminiModelFlash"></option>
-                <option value="gemini-1.5-pro-latest" data-i18n="geminiModelPro"></option>
-              </select>
-              <p class="description" data-i18n="geminiModelDescription"></p>
-            </div>
-
-            <div class="card-header">
-              <h2 data-i18n="personalization"></h2>
-            </div>
+            <h2 data-i18n="personalization"></h2>
             <label for="uiLang" data-i18n="uiLanguage"></label>
             <select id="uiLang">
               <option value="en" data-i18n="langUiEn"></option>
