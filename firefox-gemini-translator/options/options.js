@@ -1,107 +1,115 @@
 // options/options.js
 import { i18n } from './i18n.js';
 import { getSettings, saveSettings, addHistoryItem, getHistory } from '../modules/storage.js';
-import { decideEngine, translateWithGoogle, translateWithGemini, containsCjk } from '../modules/translator.js';
+import { translateWithGoogle, translateWithGemini, containsCjk } from '../modules/translator.js';
 import { applyTheme, renderUI, displayApiKeyStatus, renderHistory, showStatus } from '../modules/ui.js';
 import { playTTS } from '../modules/tts.js';
 
-async function handlePopupTranslate(text, targetLang, resultEl, listenBtn, listenOriginalBtn) {
-    listenBtn.classList.add('hidden');
-    listenOriginalBtn.classList.add('hidden');
-    resultEl.innerHTML = '<div class="loading-spinner"></div>';
-    const sourceLangEl = document.getElementById('sourceLangDisplay');
-    sourceLangEl.textContent = '';
+async function handlePopupTranslate(text, targetLang, engineSelection, resultEl, listenBtn, listenOriginalBtn) {
+  listenBtn.classList.add('hidden');
+  listenOriginalBtn.classList.add('hidden');
+  resultEl.innerHTML = '<div class="loading-spinner"></div>';
+  const sourceLangEl = document.getElementById('sourceLangDisplay');
+  const sourceDisplayEl = document.getElementById('translationSourceDisplay');
+  sourceLangEl.textContent = '';
+  sourceDisplayEl.textContent = '';
+  sourceDisplayEl.className = 'translation-source-display'; // Reset classes
 
-    let sourceLang = 'und';
+  let sourceLang = 'und';
 
-    try {
-        const settings = await getSettings();
-        const engine = decideEngine(text, settings.USE_GEMINI);
-        let translatedText = '';
-        let modelName = null;
+  try {
+    const settings = await getSettings();
+    let translatedText = '';
+    let engine = 'google';
+    let modelName = null;
 
-        // 【修正】擴充後備語言偵測，新增印地文、阿拉伯文、孟加拉文、葡萄牙文等
-        const detectedLangInfo = await browser.i18n.detectLanguage(text);
-        sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
-        if (sourceLang === 'und') {
-            if (/[\u0900-\u097F]/.test(text)) {
-                sourceLang = 'hi'; // 印地文
-            } else if (/[\u0600-\u06FF]/.test(text)) {
-                sourceLang = 'ar'; // 阿拉伯文
-            } else if (/[\u0980-\u09FF]/.test(text)) {
-                sourceLang = 'bn'; // 孟加拉文
-            } else if (/[\uAC00-\uD7A3]/.test(text)) {
-                sourceLang = 'ko'; // 韓文
-            } else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) {
-                sourceLang = 'ja'; // 日文
-            } else if (containsCjk(text)) {
-                sourceLang = 'zh'; // 中文
-            } else if (/[\u0400-\u04FF]/.test(text)) {
-                sourceLang = 'ru'; // 俄文
-            } else if (/[àâçéèêëîïôûùüÿæœ]/i.test(text)) {
-                sourceLang = 'fr'; // 法文
-            } else if (/[äöüß]/i.test(text)) {
-                sourceLang = 'de'; // 德文
-            } else if (/[áéíóúüñ]/i.test(text)) {
-                sourceLang = 'es'; // 西班牙文
-            } else if (/[ãõàáâéêíóôõúç]/i.test(text)) {
-                sourceLang = 'pt'; // 葡萄牙文
-            } else if (/^[a-z\u00C0-\u017F\s.,'’!-]+$/i.test(text)) {
-                sourceLang = 'en'; // 擴展拉丁字母 (預設為英文/印尼文等)
-            }
-        }
-        
-        const uiLang = (settings.UI_LANG || 'zh_TW').replace('_', '-');
-        const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
-        
-        if (sourceLang !== 'und') {
-            try {
-                const sourceLangName = displayLang.of(sourceLang);
-                sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
-            } catch (e) {
-                sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLang}`;
-            }
-        } else {
-             sourceLangEl.textContent = '';
-        }
-
-        if (engine === 'google') {
-            translatedText = await translateWithGoogle(text, targetLang);
-        } else {
-            if (!settings.GEMINI_API_KEY) {
-                alert(i18n.t("apiKeyStatusUnset"));
-                document.getElementById('tab-settings').click();
-                document.getElementById('apiKey').focus();
-                resultEl.textContent = '';
-                return;
-            }
-            translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, settings.GEMINI_MODEL, i18n.t);
-            modelName = settings.GEMINI_MODEL;
-            await saveSettings({ geminiKeyValid: true });
-        }
-        
-        resultEl.textContent = translatedText;
-
-        const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
-        const targetLangCode = langNameToCodeMap[targetLang];
-        
-        listenBtn.classList.remove('hidden');
-        listenBtn.onclick = () => playTTS(translatedText, targetLangCode);
-
-        if (sourceLang !== 'und') {
-            listenOriginalBtn.classList.remove('hidden');
-            listenOriginalBtn.onclick = () => playTTS(text, sourceLang);
-        }
-        
-        await addHistoryItem(text, translatedText, engine, targetLang, sourceLang, modelName);
-
-    } catch (error) {
-        console.error(`Popup ${error.message.includes('API') ? 'Gemini' : 'Google'} 翻譯失敗:`, error);
-        if (error.message === 'Invalid API Key') {
-            await saveSettings({ geminiKeyValid: false });
-        }
-        resultEl.textContent = error.message.includes('API') ? i18n.t("errorGemini") : i18n.t("errorGoogle");
+    if (engineSelection === 'google') {
+      engine = 'google';
+      translatedText = await translateWithGoogle(text, targetLang);
+    } else { // A Gemini model is selected
+      engine = 'gemini';
+      modelName = engineSelection;
+      if (!settings.GEMINI_API_KEY) {
+        alert(i18n.t("apiKeyStatusUnset"));
+        document.getElementById('tab-settings').click();
+        document.getElementById('apiKey').focus();
+        resultEl.textContent = '';
+        sourceDisplayEl.textContent = '';
+        return;
+      }
+      translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
+      await saveSettings({ geminiKeyValid: true });
     }
+
+    const detectedLangInfo = await browser.i18n.detectLanguage(text);
+    sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
+    if (sourceLang === 'und') {
+      if (/[\u0900-\u097F]/.test(text)) sourceLang = 'hi';
+      else if (/[\u0600-\u06FF]/.test(text)) sourceLang = 'ar';
+      else if (/[\u0980-\u09FF]/.test(text)) sourceLang = 'bn';
+      else if (/[\uAC00-\uD7A3]/.test(text)) sourceLang = 'ko';
+      else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) sourceLang = 'ja';
+      else if (containsCjk(text)) sourceLang = 'zh';
+      else if (/[\u0400-\u04FF]/.test(text)) sourceLang = 'ru';
+      else if (/[àâçéèêëîïôûùüÿæœ]/i.test(text)) sourceLang = 'fr';
+      else if (/[äöüß]/i.test(text)) sourceLang = 'de';
+      else if (/[áéíóúüñ]/i.test(text)) sourceLang = 'es';
+      else if (/[ãõàáâéêíóôõúç]/i.test(text)) sourceLang = 'pt';
+      else if (/^[a-z\u00C0-\u017F\s.,'’!-]+$/i.test(text)) sourceLang = 'en';
+    }
+
+    const uiLang = (settings.UI_LANG || 'zh_TW').replace('_', '-');
+    const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
+
+    if (sourceLang !== 'und') {
+      try {
+        const sourceLangName = displayLang.of(sourceLang);
+        sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
+      } catch (e) {
+        sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLang}`;
+      }
+    } else {
+      sourceLangEl.textContent = '';
+    }
+
+    resultEl.textContent = translatedText;
+
+    let sourceText = '';
+    if (engine === 'google') {
+      sourceText = i18n.t("engineOptionGoogle");
+      sourceDisplayEl.classList.add('engine-google');
+    } else {
+      if (modelName.includes('flash')) {
+        sourceText = i18n.t("engineOptionGeminiFlash");
+        sourceDisplayEl.classList.add('model-flash');
+      } else if (modelName.includes('pro')) {
+        sourceText = i18n.t("engineOptionGeminiPro");
+        sourceDisplayEl.classList.add('model-pro');
+      }
+    }
+    sourceDisplayEl.textContent = sourceText;
+
+    const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
+    const targetLangCode = langNameToCodeMap[targetLang];
+
+    listenBtn.classList.remove('hidden');
+    listenBtn.onclick = () => playTTS(translatedText, targetLangCode);
+
+    if (sourceLang !== 'und') {
+      listenOriginalBtn.classList.remove('hidden');
+      listenOriginalBtn.onclick = () => playTTS(text, sourceLang);
+    }
+
+    await addHistoryItem(text, translatedText, engine, targetLang, sourceLang, modelName);
+
+  } catch (error) {
+    console.error(`Popup ${error.message.includes('API') ? 'Gemini' : 'Google'} 翻譯失敗:`, error);
+    if (error.message === 'Invalid API Key') {
+      await saveSettings({ geminiKeyValid: false });
+    }
+    resultEl.textContent = error.message.includes('API') ? i18n.t("errorGemini") : i18n.t("errorGoogle");
+    sourceDisplayEl.textContent = 'Error';
+  }
 }
 
 async function main() {
@@ -110,9 +118,9 @@ async function main() {
 
   const dom = {
     tabs: {
-        translate: { btn: document.getElementById('tab-translate'), view: document.getElementById('view-translate') },
-        settings: { btn: document.getElementById('tab-settings'), view: document.getElementById('view-settings') },
-        history: { btn: document.getElementById('tab-history'), view: document.getElementById('view-history') },
+      translate: { btn: document.getElementById('tab-translate'), view: document.getElementById('view-translate') },
+      settings: { btn: document.getElementById('tab-settings'), view: document.getElementById('view-settings') },
+      history: { btn: document.getElementById('tab-history'), view: document.getElementById('view-history') },
     },
     apiKeyInput: document.getElementById("apiKey"),
     toggleApiKeyBtn: document.getElementById("toggleApiKey"),
@@ -127,6 +135,7 @@ async function main() {
     translateBtn: document.getElementById('translateBtn'),
     translateResult: document.getElementById('translateResult'),
     popupTargetLang: document.getElementById('popupTargetLang'),
+    popupEngineSelect: document.getElementById('popupEngineSelect'),
     useGeminiSwitch: document.getElementById('useGeminiSwitch'),
     popupListenBtn: document.getElementById('popupListenBtn'),
     popupListenOriginalBtn: document.getElementById('popupListenOriginalBtn'),
@@ -136,9 +145,9 @@ async function main() {
 
   function switchTab(activeKey) {
     Object.keys(dom.tabs).forEach(key => {
-        const isActive = key === activeKey;
-        dom.tabs[key].btn.classList.toggle('active', isActive);
-        dom.tabs[key].view.classList.toggle('active', isActive);
+      const isActive = key === activeKey;
+      dom.tabs[key].btn.classList.toggle('active', isActive);
+      dom.tabs[key].view.classList.toggle('active', isActive);
     });
   }
   Object.keys(dom.tabs).forEach(key => {
@@ -152,7 +161,7 @@ async function main() {
   dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.useGeminiSwitch.checked = settings.USE_GEMINI;
   dom.geminiModelSelect.value = settings.GEMINI_MODEL;
-  
+
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
     const browserLang = browser.i18n.getUILanguage();
@@ -174,7 +183,7 @@ async function main() {
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
 
   function toggleModelSelectorVisibility() {
-      dom.geminiModelContainer.style.display = dom.useGeminiSwitch.checked ? '' : 'none';
+    dom.geminiModelContainer.style.display = dom.useGeminiSwitch.checked ? '' : 'none';
   }
   toggleModelSelectorVisibility();
   dom.useGeminiSwitch.addEventListener('change', toggleModelSelectorVisibility);
@@ -182,15 +191,15 @@ async function main() {
   dom.translateBtn.addEventListener('click', () => {
     const text = dom.translateInput.value.trim();
     if (!text) return;
-    handlePopupTranslate(text, dom.popupTargetLang.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn);
+    handlePopupTranslate(text, dom.popupTargetLang.value, dom.popupEngineSelect.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn);
   });
 
   dom.uiLangSelect.addEventListener('change', async (e) => {
-      await i18n.loadMessages(e.target.value);
-      renderUI();
-      renderHistory(await getHistory());
-      const currentSettings = await getSettings();
-      displayApiKeyStatus(currentSettings.GEMINI_API_KEY, currentSettings.geminiKeyValid);
+    await i18n.loadMessages(e.target.value);
+    renderUI();
+    renderHistory(await getHistory());
+    const currentSettings = await getSettings();
+    displayApiKeyStatus(currentSettings.GEMINI_API_KEY, currentSettings.geminiKeyValid);
   });
 
   dom.themeSelect.addEventListener('change', () => applyTheme(dom.themeSelect.value));
@@ -228,7 +237,7 @@ async function main() {
       showStatus("statusCleared", dom.status);
     }
   });
-  
+
   browser.storage.onChanged.addListener(async (changes, area) => {
     if (area === 'local' && changes.translationHistory) {
       renderHistory(changes.translationHistory.newValue);

@@ -39,9 +39,13 @@ body.dark .tab-btn:hover { background-color: rgba(255,255,255,0.05); }
 
 /* --- 4. 翻譯頁籤樣式 --- */
 .translate-container { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-.popup-lang-selector { display: flex; align-items: center; gap: 8px; }
+.selectors-container { display: flex; gap: 16px; width: 100%; }
+.popup-lang-selector { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .popup-lang-selector label { margin-bottom: 0; flex-shrink: 0; }
 .popup-lang-selector select { margin-bottom: 0; flex-grow: 1; }
+.lang-selector-wrapper { flex: 2; }
+.engine-selector-wrapper { flex: 3; }
+
 .input-title { font-size: 1.1em; margin: 8px 0 -4px 0; }
 #translateInput { width: 100%; padding: 10px; font-size: 1em; border-radius: 4px; border: 1px solid #ccc; resize: vertical; flex-shrink: 0; }
 body.dark #translateInput { background-color: #3c4043; color: #e8eaed; border-color: #5f6368; }
@@ -49,11 +53,14 @@ body.dark #translateInput { background-color: #3c4043; color: #e8eaed; border-co
 .translate-btn:hover { background: var(--primary-color-hover); }
 .result-card { display: flex; flex-direction: column; flex-grow: 1; background-color: var(--card-bg-light); padding: 1em; border-radius: 8px; border: 1px solid var(--border-color-light); }
 body.dark .result-card { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); }
-.result-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.result-card h3 { margin-top: 0; margin-bottom: 0; font-size: 1.1em; flex-grow: 1; }
-.source-lang-display { font-size: 0.9em; color: #666; white-space: nowrap; margin-left: auto; }
-body.dark .source-lang-display { color: #aaa; }
-.header-buttons { display: flex; gap: 4px; }
+.result-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.result-card h3 { margin: 0; font-size: 1.1em; }
+
+.source-lang-display { font-size: 0.9em; color: #666; background-color: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+body.dark .source-lang-display { color: #ccc; background-color: rgba(255,255,255,0.1); }
+.translation-source-display { font-size: 0.9em; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+
+.header-buttons { display: flex; gap: 4px; margin-left: auto; }
 #translateResult { flex-grow: 1; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; padding: 8px; background-color: var(--result-bg-light); border-radius: 4px; margin-top: 0.5em; border-top: 1px solid var(--border-color-light); }
 body.dark #translateResult { background-color: var(--result-bg-dark); border-top-color: var(--border-color-dark); }
 .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
@@ -108,10 +115,11 @@ body.dark .delete-history-btn { border-color: var(--danger-color); color: var(--
 body.dark .delete-history-btn:hover { background-color: var(--danger-color); color: #fff; }
 .tag-container { position: absolute; top: 0; right: 0; display: flex; border-radius: 0 6px 0 6px; overflow: hidden; }
 .engine-tag { padding: 2px 6px; font-size: 0.75em; font-weight: bold; color: #fff; text-transform: capitalize; }
-.engine-google { background-color: #888; }
+.engine-google, .translation-source-display.engine-google { background-color: #888; color: #fff; }
 .engine-gemini { background-color: var(--primary-color); }
-.model-tag.model-flash { background-color: #00897b; /* Teal for Flash */ }
-.model-tag.model-pro { background-color: #3949ab; /* Indigo for Pro */ }
+.model-tag.model-flash, .translation-source-display.model-flash { background-color: #00897b; color: #fff; }
+.model-tag.model-pro, .translation-source-display.model-pro { background-color: #3949ab; color: #fff; }
+
 
 /* --- 7. 其他元件樣式 --- */
 .listen-btn { background: none; border: none; padding: 4px; cursor: pointer; color: #666; opacity: 0.7; }
