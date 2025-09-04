@@ -20,7 +20,7 @@ function handleClickOutside(event) {
 }
 
 async function createTranslationCard(data) {
-  closeCard(); // 確保先關閉舊的卡片
+  closeCard();
 
   const {
     originalText, translatedText, engine, modelName,
@@ -36,59 +36,114 @@ async function createTranslationCard(data) {
   card.id = 'gemini-translate-card';
   card.className = `gt-card-theme-${theme}`;
 
-  // --- 建立卡片內部結構 ---
-  let tags = '';
+  // --- Safely Create Card Structure ---
+
+  // Header Tags
+  const tagContainer = document.createElement('div');
+  tagContainer.className = 'gt-tag-container';
+
   if (engine === 'gemini' && modelName) {
-    let modelTagClass = 'model-tag ';
-    let modelTagText = '';
+    const geminiTag = document.createElement('span');
+    geminiTag.className = 'gt-engine-tag engine-gemini';
+    geminiTag.textContent = uiStrings.engineTagGemini;
+    tagContainer.appendChild(geminiTag);
+
+    const modelTag = document.createElement('span');
+    modelTag.className = 'gt-engine-tag model-tag';
     if (modelName.includes('flash')) {
-      modelTagClass += 'model-flash';
-      modelTagText = uiStrings.modelTagFlash;
+      modelTag.classList.add('model-flash');
+      modelTag.textContent = uiStrings.modelTagFlash;
     } else if (modelName.includes('pro')) {
-      modelTagClass += 'model-pro';
-      modelTagText = uiStrings.modelTagPro;
+      modelTag.classList.add('model-pro');
+      modelTag.textContent = uiStrings.modelTagPro;
     }
-    tags = `
-            <span class="gt-engine-tag engine-gemini">${uiStrings.engineTagGemini}</span>
-            <span class="gt-engine-tag ${modelTagClass}">${modelTagText}</span>
-        `;
-  } else { // Google
-    tags = `<span class="gt-engine-tag engine-google">${uiStrings.engineOptionGoogle}</span>`;
+    tagContainer.appendChild(modelTag);
+  } else {
+    const googleTag = document.createElement('span');
+    googleTag.className = 'gt-engine-tag engine-google';
+    googleTag.textContent = uiStrings.engineOptionGoogle;
+    tagContainer.appendChild(googleTag);
   }
-  const tagHTML = `<div class="gt-tag-container">${tags}</div>`;
+  card.appendChild(tagContainer);
 
-  const sourceLangHTML = sourceLangName ? `<span class="gt-source-lang">${uiStrings.sourceLanguageLabel}${sourceLangName}</span>` : '';
+  // Close Button
+  const closeBtn = document.createElement('button');
+  closeBtn.id = 'gt-close-btn';
+  closeBtn.className = 'gt-close-btn';
+  closeBtn.innerHTML = '&times;'; // Safe as it's a static character entity
+  card.appendChild(closeBtn);
 
-  card.innerHTML = `
-        ${tagHTML}
-        <button id="gt-close-btn" class="gt-close-btn">&times;</button>
-        <div class="gt-content">
-            <p class="gt-original-text">${originalText}</p>
-            <p class="gt-translated-text">${translatedText.replace(/__NEWLINE__/g, '<br>')}</p>
-        </div>
-        <div class="gt-footer">
-            <div class="gt-footer-info">${sourceLangHTML}</div>
-            <div class="gt-footer-buttons">
-                <button class="gt-icon-btn" id="gt-listen-original-btn" title="${uiStrings.listenOriginalButtonTooltip}">
-                    <svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
-                <button class="gt-icon-btn" id="gt-listen-translated-btn" title="${uiStrings.listenButtonTooltip}">
-                    <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                </button>
-                <button class="gt-text-btn" id="gt-copy-original-btn">${uiStrings.copyOriginal}</button>
-                <button class="gt-text-btn" id="gt-copy-translated-btn">${uiStrings.copyTranslated}</button>
-            </div>
-        </div>
-    `;
+  // Content Area
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'gt-content';
+  const originalP = document.createElement('p');
+  originalP.className = 'gt-original-text';
+  originalP.textContent = originalText;
+  const translatedP = document.createElement('p');
+  translatedP.className = 'gt-translated-text';
+  // Safely handle newlines
+  translatedText.split('__NEWLINE__').forEach((part, index, arr) => {
+    translatedP.appendChild(document.createTextNode(part));
+    if (index < arr.length - 1) {
+      translatedP.appendChild(document.createElement('br'));
+    }
+  });
+  contentDiv.appendChild(originalP);
+  contentDiv.appendChild(translatedP);
+  card.appendChild(contentDiv);
 
-  // --- 設定卡片位置 ---
+  // Footer Area
+  const footerDiv = document.createElement('div');
+  footerDiv.className = 'gt-footer';
+  const footerInfo = document.createElement('div');
+  footerInfo.className = 'gt-footer-info';
+  if (sourceLangName) {
+    const sourceLangSpan = document.createElement('span');
+    sourceLangSpan.className = 'gt-source-lang';
+    sourceLangSpan.textContent = `${uiStrings.sourceLanguageLabel}${sourceLangName}`;
+    footerInfo.appendChild(sourceLangSpan);
+  }
+  const footerButtons = document.createElement('div');
+  footerButtons.className = 'gt-footer-buttons';
+
+  // Footer Buttons
+  const listenOriginalBtn = document.createElement('button');
+  listenOriginalBtn.className = 'gt-icon-btn';
+  listenOriginalBtn.id = 'gt-listen-original-btn';
+  listenOriginalBtn.title = uiStrings.listenOriginalButtonTooltip;
+  listenOriginalBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+
+  const listenTranslatedBtn = document.createElement('button');
+  listenTranslatedBtn.className = 'gt-icon-btn';
+  listenTranslatedBtn.id = 'gt-listen-translated-btn';
+  listenTranslatedBtn.title = uiStrings.listenButtonTooltip;
+  listenTranslatedBtn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+
+  const copyOriginalBtn = document.createElement('button');
+  copyOriginalBtn.className = 'gt-text-btn';
+  copyOriginalBtn.id = 'gt-copy-original-btn';
+  copyOriginalBtn.textContent = uiStrings.copyOriginal;
+
+  const copyTranslatedBtn = document.createElement('button');
+  copyTranslatedBtn.className = 'gt-text-btn';
+  copyTranslatedBtn.id = 'gt-copy-translated-btn';
+  copyTranslatedBtn.textContent = uiStrings.copyTranslated;
+
+  footerButtons.appendChild(listenOriginalBtn);
+  footerButtons.appendChild(listenTranslatedBtn);
+  footerButtons.appendChild(copyOriginalBtn);
+  footerButtons.appendChild(copyTranslatedBtn);
+  footerDiv.appendChild(footerInfo);
+  footerDiv.appendChild(footerButtons);
+  card.appendChild(footerDiv);
+
+  // --- Position and Display Card ---
   card.style.left = `${window.lastMouseX || 100}px`;
   card.style.top = `${window.lastMouseY || 100}px`;
 
   document.body.appendChild(card);
   currentCard = card;
 
-  // --- 調整位置避免超出視窗 ---
   const rect = card.getBoundingClientRect();
   if (rect.right > window.innerWidth) {
     card.style.left = `${window.innerWidth - rect.width - 20}px`;
@@ -97,10 +152,9 @@ async function createTranslationCard(data) {
     card.style.top = `${window.innerHeight - rect.height - 20}px`;
   }
 
-  // --- 綁定事件 ---
-  card.querySelector('#gt-close-btn').addEventListener('click', closeCard);
+  // --- Bind Events ---
+  closeBtn.addEventListener('click', closeCard);
 
-  const listenOriginalBtn = card.querySelector('#gt-listen-original-btn');
   if (!sourceLangCode || sourceLangCode === 'und') {
     listenOriginalBtn.style.display = 'none';
   } else {
@@ -109,11 +163,10 @@ async function createTranslationCard(data) {
     });
   }
 
-  card.querySelector('#gt-listen-translated-btn').addEventListener('click', () => {
+  listenTranslatedBtn.addEventListener('click', () => {
     browser.runtime.sendMessage({ type: 'playTTS', text: translatedText.replace(/__NEWLINE__/g, ' '), langCode: targetLangCode });
   });
 
-  const copyOriginalBtn = card.querySelector('#gt-copy-original-btn');
   copyOriginalBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(originalText).then(() => {
       copyOriginalBtn.textContent = uiStrings.copied;
@@ -121,7 +174,6 @@ async function createTranslationCard(data) {
     });
   });
 
-  const copyTranslatedBtn = card.querySelector('#gt-copy-translated-btn');
   copyTranslatedBtn.addEventListener('click', () => {
     const textToCopy = translatedText.replace(/__NEWLINE__/g, '\n');
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -132,6 +184,7 @@ async function createTranslationCard(data) {
 
   setTimeout(() => document.addEventListener('mousedown', handleClickOutside), 0);
 }
+
 
 function injectStyles() {
   const styleId = 'gemini-translate-card-styles';
