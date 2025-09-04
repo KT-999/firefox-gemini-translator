@@ -111,26 +111,26 @@
               </button>
             </div>
 
-            <div class="setting-item">
-              <div class="label-group">
-                <label for="useGeminiSwitch" data-i18n="useGeminiLabel"></label>
-                <p class="description" data-i18n="useGeminiDescription"></p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="useGeminiSwitch">
-                <span class="slider round"></span>
-              </label>
+            <div class="setting-item-column">
+              <label for="contextMenuEngineSelect" data-i18n="contextMenuEngineLabel"></label>
+              <select id="contextMenuEngineSelect">
+                <option value="smart" data-i18n="contextMenuEngineSmart"></option>
+                <option value="google" data-i18n="contextMenuEngineGoogle"></option>
+                <option value="gemini-1.5-flash-latest" data-i18n="contextMenuEngineGeminiFlash"></option>
+                <option value="gemini-1.5-pro-latest" data-i18n="contextMenuEngineGeminiPro"></option>
+              </select>
             </div>
 
-            <div id="geminiModelContainer">
+            <div id="geminiModelContainer" class="setting-item-column">
               <label for="geminiModelSelect" data-i18n="geminiModelLabel"></label>
               <select id="geminiModelSelect">
                 <option value="gemini-1.5-flash-latest" data-i18n="geminiModelFlash"></option>
                 <option value="gemini-1.5-pro-latest" data-i18n="geminiModelPro"></option>
               </select>
+              <p class="description" data-i18n="geminiModelDescription"></p>
             </div>
 
-            <label for="lang" data-i18n="targetLanguage"></label>
+            <label for="lang" data-i18n="targetLanguageSettings"></label>
             <select id="lang">
               <option value="繁體中文" data-i18n="langZhTw"></option>
               <option value="簡體中文" data-i18n="langZhCn"></option>

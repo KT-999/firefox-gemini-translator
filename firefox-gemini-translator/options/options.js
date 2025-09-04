@@ -106,10 +106,20 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
     console.error(`Popup ${error.message.includes('API') ? 'Gemini' : 'Google'} 翻譯失敗:`, error);
     if (error.message === 'Invalid API Key') {
       await saveSettings({ geminiKeyValid: false });
+      console.log("Popup Gemini API Key 無效，自動降級使用 Google 翻譯。");
+      // Re-run the translation forcing Google as the engine.
+      await handlePopupTranslate(text, targetLang, 'google', resultEl, listenBtn, listenOriginalBtn);
+    } else {
+      resultEl.textContent = error.message.includes('API') ? i18n.t("errorGemini") : i18n.t("errorGoogle");
+      sourceDisplayEl.textContent = 'Error';
     }
-    resultEl.textContent = error.message.includes('API') ? i18n.t("errorGemini") : i18n.t("errorGoogle");
-    sourceDisplayEl.textContent = 'Error';
   }
+}
+
+function toggleGeminiModelSelector() {
+  const contextMenuEngine = document.getElementById('contextMenuEngineSelect').value;
+  const geminiModelContainer = document.getElementById('geminiModelContainer');
+  geminiModelContainer.style.display = contextMenuEngine === 'smart' ? '' : 'none';
 }
 
 async function main() {
@@ -136,11 +146,10 @@ async function main() {
     translateResult: document.getElementById('translateResult'),
     popupTargetLang: document.getElementById('popupTargetLang'),
     popupEngineSelect: document.getElementById('popupEngineSelect'),
-    useGeminiSwitch: document.getElementById('useGeminiSwitch'),
     popupListenBtn: document.getElementById('popupListenBtn'),
     popupListenOriginalBtn: document.getElementById('popupListenOriginalBtn'),
     geminiModelSelect: document.getElementById('geminiModelSelect'),
-    geminiModelContainer: document.getElementById('geminiModelContainer')
+    contextMenuEngineSelect: document.getElementById('contextMenuEngineSelect')
   };
 
   function switchTab(activeKey) {
@@ -159,8 +168,8 @@ async function main() {
   dom.apiKeyInput.value = settings.GEMINI_API_KEY;
   dom.langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
-  dom.useGeminiSwitch.checked = settings.USE_GEMINI;
   dom.geminiModelSelect.value = settings.GEMINI_MODEL;
+  dom.contextMenuEngineSelect.value = settings.CONTEXT_MENU_ENGINE;
 
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
@@ -181,12 +190,9 @@ async function main() {
   applyTheme(dom.themeSelect.value);
   renderHistory(await getHistory());
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
+  toggleGeminiModelSelector(); // Initial check
 
-  function toggleModelSelectorVisibility() {
-    dom.geminiModelContainer.style.display = dom.useGeminiSwitch.checked ? '' : 'none';
-  }
-  toggleModelSelectorVisibility();
-  dom.useGeminiSwitch.addEventListener('change', toggleModelSelectorVisibility);
+  dom.contextMenuEngineSelect.addEventListener('change', toggleGeminiModelSelector);
 
   dom.translateBtn.addEventListener('click', () => {
     const text = dom.translateInput.value.trim();
@@ -222,8 +228,8 @@ async function main() {
       THEME: dom.themeSelect.value,
       maxHistorySize: parseInt(dom.maxHistoryInput.value, 10) || 20,
       geminiKeyValid: !!dom.apiKeyInput.value.trim(),
-      USE_GEMINI: dom.useGeminiSwitch.checked,
-      GEMINI_MODEL: dom.geminiModelSelect.value
+      GEMINI_MODEL: dom.geminiModelSelect.value,
+      CONTEXT_MENU_ENGINE: dom.contextMenuEngineSelect.value
     };
     await saveSettings(settingsToSave);
     browser.runtime.sendMessage({ type: 'languageChanged' });

@@ -2,14 +2,11 @@
 // 這個模組封裝了呼叫外部翻譯 API 的核心邏輯。
 
 export function containsCjk(text) {
-  const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
-  return cjkRegex.test(text);
+    const cjkRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uffef\u4e00-\u9faf\uac00-\ud7af]/;
+    return cjkRegex.test(text);
 }
 
-export function decideEngine(text, useGeminiEnabled) {
-    if (!useGeminiEnabled) {
-        return 'google';
-    }
+export function decideEngine(text) {
     let useGoogleTranslate = false;
     if (containsCjk(text)) {
         useGoogleTranslate = text.length <= 5;
@@ -28,10 +25,10 @@ export async function translateWithGoogle(text, targetLang) {
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Google API 錯誤: ${response.status}`);
-    
+
     const data = await response.json();
     let translatedText = '';
-    
+
     const allDefinitions = {};
     if (data[1] || data[5] || (data[12] && data[12].length > 0)) {
         const synonymBlocks = [data[1], data[5]].filter(Boolean);
@@ -49,11 +46,11 @@ export async function translateWithGoogle(text, targetLang) {
             }
         });
         if (data[12] && Array.isArray(data[12])) {
-             data[12].forEach(part => {
+            data[12].forEach(part => {
                 if (!Array.isArray(part) || part.length < 2) return;
                 const partOfSpeech = part[0];
                 const definitions = part[1];
-                 if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
+                if (typeof partOfSpeech === 'string' && Array.isArray(definitions)) {
                     if (!allDefinitions[partOfSpeech]) allDefinitions[partOfSpeech] = new Set();
                     definitions.forEach(def => {
                         if (def && typeof def[0] === 'string') allDefinitions[partOfSpeech].add(def[0]);
@@ -64,7 +61,7 @@ export async function translateWithGoogle(text, targetLang) {
     }
     translatedText = Object.entries(allDefinitions).map(([pos, defSet]) => `${pos}: ${[...defSet].join(', ')}`).join('\n');
     if (!translatedText && data[0] && Array.isArray(data[0])) {
-      translatedText = data[0].map(item => item[0]).join('');
+        translatedText = data[0].map(item => item[0]).join('');
     }
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
@@ -100,4 +97,3 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     }
     return translatedText;
 }
-

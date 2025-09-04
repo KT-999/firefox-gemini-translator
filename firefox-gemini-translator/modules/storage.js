@@ -34,31 +34,31 @@ export async function addHistoryItem(original, translated, engine, targetLang, s
  * 獲取所有設定。
  */
 export async function getSettings() {
-    const defaults = {
-        GEMINI_API_KEY: '',
-        TRANSLATE_LANG: '繁體中文',
-        UI_LANG: null,
-        THEME: 'auto',
-        maxHistorySize: 20,
-        geminiKeyValid: false,
-        USE_GEMINI: true,
-        GEMINI_MODEL: 'gemini-1.5-flash-latest'
-    };
-    return browser.storage.local.get(defaults);
+  const defaults = {
+    GEMINI_API_KEY: '',
+    TRANSLATE_LANG: '繁體中文',
+    UI_LANG: null,
+    THEME: 'auto',
+    maxHistorySize: 20,
+    geminiKeyValid: false,
+    GEMINI_MODEL: 'gemini-1.5-flash-latest',
+    CONTEXT_MENU_ENGINE: 'smart'
+  };
+  return browser.storage.local.get(defaults);
 }
 
 /**
  * 儲存設定。
  */
 export async function saveSettings(settingsToSave) {
-    return browser.storage.local.set(settingsToSave);
+  return browser.storage.local.set(settingsToSave);
 }
 
 /**
  * 獲取翻譯歷史紀錄。
  */
 export async function getHistory() {
-    const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
-    return translationHistory;
+  const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
+  return translationHistory;
 }
 
