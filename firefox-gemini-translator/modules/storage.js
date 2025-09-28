@@ -41,7 +41,8 @@ export async function getSettings() {
     THEME: 'auto',
     maxHistorySize: 20,
     geminiKeyValid: false,
-    GEMINI_MODEL: 'gemini-1.5-flash-latest',
+    // 【更新】將預設模型更新為最新的 2.0 Flash
+    GEMINI_MODEL: 'gemini-2.0-flash',
     CONTEXT_MENU_ENGINE: 'smart'
   };
   return browser.storage.local.get(defaults);

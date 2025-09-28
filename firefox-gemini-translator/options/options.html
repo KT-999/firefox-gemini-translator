@@ -44,14 +44,13 @@
               <label for="popupEngineSelect" data-i18n="translationEngineLabel"></label>
               <select id="popupEngineSelect">
                 <option value="google" data-i18n="engineOptionGoogle"></option>
-                <option value="gemini-1.5-flash-latest" data-i18n="engineOptionGeminiFlash"></option>
-                <option value="gemini-1.5-pro-latest" data-i18n="engineOptionGeminiPro"></option>
+                <option value="gemini-2.0-flash" data-i18n="engineOptionGeminiFlash"></option>
               </select>
             </div>
           </div>
 
           <h3 class="input-title" data-i18n="originalTextTitle"></h3>
-          <textarea id="translateInput" rows="5" data-i18n-placeholder="translateInputPlaceholder"></textarea>
+          <textarea id="translateInput" rows="4" data-i18n-placeholder="translateInputPlaceholder"></textarea>
           <button id="translateBtn" class="translate-btn" type="button" data-i18n="translateButton"></button>
 
           <div class="result-card">
@@ -119,16 +118,14 @@
               <select id="contextMenuEngineSelect">
                 <option value="smart" data-i18n="contextMenuEngineSmart"></option>
                 <option value="google" data-i18n="contextMenuEngineGoogle"></option>
-                <option value="gemini-1.5-flash-latest" data-i18n="contextMenuEngineGeminiFlash"></option>
-                <option value="gemini-1.5-pro-latest" data-i18n="contextMenuEngineGeminiPro"></option>
+                <option value="gemini-2.0-flash" data-i18n="contextMenuEngineGeminiFlash"></option>
               </select>
             </div>
 
             <div id="geminiModelContainer" class="setting-item-column">
               <label for="geminiModelSelect" data-i18n="geminiModelLabel"></label>
               <select id="geminiModelSelect">
-                <option value="gemini-1.5-flash-latest" data-i18n="geminiModelFlash"></option>
-                <option value="gemini-1.5-pro-latest" data-i18n="geminiModelPro"></option>
+                <option value="gemini-2.0-flash" data-i18n="geminiModelFlash"></option>
               </select>
               <p class="description" data-i18n="geminiModelDescription"></p>
             </div>
@@ -182,7 +179,6 @@
         </div>
       </div>
 
-      <!-- 歷史紀錄頁籤 -->
       <div id="view-history" class="tab-view">
         <div class="history-header">
           <h2 data-i18n="historyList"></h2>

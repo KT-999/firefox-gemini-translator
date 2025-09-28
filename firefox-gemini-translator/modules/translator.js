@@ -69,15 +69,23 @@ export async function translateWithGoogle(text, targetLang) {
 }
 
 /**
- * 【修改】使用 Gemini API 進行翻譯，新增 modelName 參數。
+ * 【最終修正】使用 Gemini API 進行翻譯，將 API 金鑰放入 Header 中。
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    // 只有穩定的 'gemini-pro' 使用 v1，其餘（包含 1.5 和 2.0 系列）都使用 v1beta
+    const apiVersion = (modelName === 'gemini-pro') ? 'v1' : 'v1beta';
+    // 【修正】移除 URL 中的 API Key
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent`;
+    
     const prompt = i18n_t("promptSystem", [targetLang, text]);
 
     const response = await fetch(GEMINI_API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        // 【修正】將 API Key 加入到 Header 中
+        headers: {
+            "Content-Type": "application/json",
+            "X-goog-api-key": apiKey
+        },
         body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { maxOutputTokens: 1024, temperature: 0.1 }
@@ -86,6 +94,8 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
 
     if (!response.ok) {
         if (response.status === 400) throw new Error('Invalid API Key');
+        const errorBody = await response.json();
+        console.error("Gemini API Error Response:", errorBody);
         throw new Error(`API 網路錯誤: ${response.status}`);
     }
 
