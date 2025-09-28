@@ -42,7 +42,10 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "gemini-translator@kenny.dev.com"
+      "id": "gemini-translator@kenny.dev.com",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }
