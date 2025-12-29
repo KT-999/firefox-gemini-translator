@@ -84,21 +84,38 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     
     const prompt = i18n_t("promptSystem", [targetLang, text]);
 
-    const response = await fetch(GEMINI_API_URL, {
-        method: "POST",
-        // 【修正】將 API Key 加入到 Header 中
-        headers: {
-            "Content-Type": "application/json",
-            "X-goog-api-key": apiKey
-        },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 1024, temperature: 0.1 }
-        })
-    });
+    const shouldRetry = (status) => [429, 500, 503].includes(status);
+    const maxAttempts = 3;
+    let data;
 
-    if (!response.ok) {
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const response = await fetch(GEMINI_API_URL, {
+            method: "POST",
+            // 【修正】將 API Key 加入到 Header 中
+            headers: {
+                "Content-Type": "application/json",
+                "X-goog-api-key": apiKey
+            },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 1024, temperature: 0.1 }
+            })
+        });
+
+        if (response.ok) {
+            data = await response.json();
+            break;
+        }
+
         if (response.status === 400) throw new Error('Invalid API Key');
+
+        if (shouldRetry(response.status) && attempt < maxAttempts - 1) {
+            const delayMs = 500 * (2 ** attempt);
+            console.warn(`Gemini API ${response.status}，${delayMs}ms 後重試...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+            continue;
+        }
+
         const errorBody = await response.json();
         console.error("Gemini API Error Response:", {
             status: response.status,
@@ -109,7 +126,10 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
         throw new Error(`API 網路錯誤: ${response.status}`);
     }
 
-    const data = await response.json();
+    if (!data) {
+        throw new Error("從 Gemini 未收到翻譯結果");
+    }
+
     const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!translatedText) {
