@@ -98,7 +98,13 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     if (!response.ok) {
         if (response.status === 400) throw new Error('Invalid API Key');
         const errorBody = await response.json();
-        console.error("Gemini API Error Response:", errorBody);
+        console.error("Gemini API Error Response:", {
+            status: response.status,
+            apiVersion,
+            modelName,
+            normalizedModelName,
+            errorBody
+        });
         throw new Error(`API 網路錯誤: ${response.status}`);
     }
 
