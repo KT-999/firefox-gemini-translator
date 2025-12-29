@@ -170,11 +170,24 @@ async function main() {
 
   const settings = await getSettings();
   const defaultTargetLang = i18n.t("langZhTw");
+
+  const normalizeSelectValue = (select, value, fallback) => {
+    const hasValue = Array.from(select.options).some(option => option.value === value);
+    return hasValue ? value : fallback;
+  };
   dom.apiKeyInput.value = settings.GEMINI_API_KEY;
   dom.langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
   dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
-  dom.geminiModelSelect.value = settings.GEMINI_MODEL;
-  dom.contextMenuEngineSelect.value = settings.CONTEXT_MENU_ENGINE;
+  const normalizedGeminiModel = normalizeSelectValue(dom.geminiModelSelect, settings.GEMINI_MODEL, 'gemini-2.0-flash');
+  const normalizedContextMenuEngine = normalizeSelectValue(dom.contextMenuEngineSelect, settings.CONTEXT_MENU_ENGINE, 'gemini-2.0-flash');
+  dom.geminiModelSelect.value = normalizedGeminiModel;
+  dom.contextMenuEngineSelect.value = normalizedContextMenuEngine;
+  if (normalizedGeminiModel !== settings.GEMINI_MODEL || normalizedContextMenuEngine !== settings.CONTEXT_MENU_ENGINE) {
+    await saveSettings({
+      GEMINI_MODEL: normalizedGeminiModel,
+      CONTEXT_MENU_ENGINE: normalizedContextMenuEngine
+    });
+  }
 
   let initialUiLang = settings.UI_LANG;
   if (!initialUiLang) {
