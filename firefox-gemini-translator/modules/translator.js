@@ -72,10 +72,13 @@ export async function translateWithGoogle(text, targetLang) {
  * 【最終修正】使用 Gemini API 進行翻譯，將 API 金鑰放入 Header 中。
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
+    const normalizedModelName = (modelName === 'gemini-1.5-flash' || modelName === 'gemini-1.5-pro')
+        ? `${modelName}-latest`
+        : modelName;
     // 只有穩定的 'gemini-pro' 使用 v1，其餘（包含 1.5 和 2.0 系列）都使用 v1beta
-    const apiVersion = (modelName === 'gemini-pro') ? 'v1' : 'v1beta';
+    const apiVersion = (normalizedModelName === 'gemini-pro') ? 'v1' : 'v1beta';
     // 【修正】移除 URL 中的 API Key
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent`;
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${normalizedModelName}:generateContent`;
     
     const prompt = i18n_t("promptSystem", [targetLang, text]);
 
