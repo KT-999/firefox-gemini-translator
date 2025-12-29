@@ -22,11 +22,15 @@
   "translationEngineLabel": { "message": "엔진:" },
   "engineOptionGoogle": { "message": "Google 번역" },
   "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
+  "engineOptionGeminiFlash15": { "message": "Gemini 1.5 Flash" },
+  "engineOptionGeminiPro15": { "message": "Gemini 1.5 Pro" },
   "coreSettings": { "message": "핵심 설정" },
   "geminiApiKey": { "message": "Gemini API 키:" },
   "geminiModelLabel": { "message": "스마트 모드 모델:" },
   "geminiModelDescription": { "message": "'컨텍스트 메뉴 기본 엔진'이 '스마트'로 설정된 경우 긴 텍스트는 여기에 지정된 Gemini 모델을 사용합니다." },
   "geminiModelFlash": { "message": "Gemini 2.0 Flash (더 빠름, 일반용)" },
+  "geminiModelFlash15": { "message": "Gemini 1.5 Flash (빠르고 가벼움)" },
+  "geminiModelPro15": { "message": "Gemini 1.5 Pro (고품질, 긴 텍스트)" },
   "apiKeyPlaceholder": { "message": "API 키를 입력하십시오" },
   "apiKeyToggle": { "message": "키 표시/숨기기" },
   "apiKeyStatusUnset": { "message": "(설정되지 않음, 여기를 클릭하여 받기)" },
@@ -38,6 +42,8 @@
   "contextMenuEngineSmart": { "message": "스마트 모드 (기본값)" },
   "contextMenuEngineGoogle": { "message": "항상 Google 번역 사용" },
   "contextMenuEngineGeminiFlash": { "message": "항상 Gemini 2.0 Flash 사용" },
+  "contextMenuEngineGeminiFlash15": { "message": "항상 Gemini 1.5 Flash 사용" },
+  "contextMenuEngineGeminiPro15": { "message": "항상 Gemini 1.5 Pro 사용" },
   "langZhTw": { "message": "중국어 번체" },
   "langZhCn": { "message": "중국어 간체" },
   "langEn": { "message": "영어" },
@@ -87,5 +93,6 @@
   "statusCleared": { "message": "기록이 지워졌습니다" },
   "sourceLanguageLabel": { "message": "원본 언어: " },
   "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "2.0 Flash" }
+  "modelTagFlash": { "message": "Flash" },
+  "modelTagPro": { "message": "Pro" }
 }

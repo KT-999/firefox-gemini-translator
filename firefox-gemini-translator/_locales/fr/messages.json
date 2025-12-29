@@ -22,11 +22,15 @@
   "translationEngineLabel": { "message": "Moteur :" },
   "engineOptionGoogle": { "message": "Google Traduction" },
   "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
+  "engineOptionGeminiFlash15": { "message": "Gemini 1.5 Flash" },
+  "engineOptionGeminiPro15": { "message": "Gemini 1.5 Pro" },
   "coreSettings": { "message": "Paramètres principaux" },
   "geminiApiKey": { "message": "Clé API Gemini :" },
   "geminiModelLabel": { "message": "Modèle Mode Intelligent :" },
   "geminiModelDescription": { "message": "Lorsque le 'Moteur par défaut du menu contextuel' est réglé sur 'Intelligent', le texte long utilisera le modèle Gemini spécifié ici." },
   "geminiModelFlash": { "message": "Gemini 2.0 Flash (Plus rapide, pour un usage général)" },
+  "geminiModelFlash15": { "message": "Gemini 1.5 Flash (Rapide, léger)" },
+  "geminiModelPro15": { "message": "Gemini 1.5 Pro (Meilleure qualité, long contexte)" },
   "apiKeyPlaceholder": { "message": "Veuillez saisir votre clé API" },
   "apiKeyToggle": { "message": "Afficher/Masquer la clé" },
   "apiKeyStatusUnset": { "message": "(Non définie, cliquez ici pour en obtenir une)" },
@@ -38,6 +42,8 @@
   "contextMenuEngineSmart": { "message": "Mode Intelligent (Défaut)" },
   "contextMenuEngineGoogle": { "message": "Toujours utiliser Google Traduction" },
   "contextMenuEngineGeminiFlash": { "message": "Toujours utiliser Gemini 2.0 Flash" },
+  "contextMenuEngineGeminiFlash15": { "message": "Toujours utiliser Gemini 1.5 Flash" },
+  "contextMenuEngineGeminiPro15": { "message": "Toujours utiliser Gemini 1.5 Pro" },
   "langZhTw": { "message": "Chinois traditionnel" },
   "langZhCn": { "message": "Chinois simplifié" },
   "langEn": { "message": "Anglais" },
@@ -87,5 +93,6 @@
   "statusCleared": { "message": "Historique effacé" },
   "sourceLanguageLabel": { "message": "Source : " },
   "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "2.0 Flash" }
+  "modelTagFlash": { "message": "Flash" },
+  "modelTagPro": { "message": "Pro" }
 }

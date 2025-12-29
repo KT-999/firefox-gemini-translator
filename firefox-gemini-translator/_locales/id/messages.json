@@ -22,11 +22,15 @@
   "translationEngineLabel": { "message": "Mesin:" },
   "engineOptionGoogle": { "message": "Google Terjemahan" },
   "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
+  "engineOptionGeminiFlash15": { "message": "Gemini 1.5 Flash" },
+  "engineOptionGeminiPro15": { "message": "Gemini 1.5 Pro" },
   "coreSettings": { "message": "Pengaturan Inti" },
   "geminiApiKey": { "message": "Kunci API Gemini:" },
   "geminiModelLabel": { "message": "Model Mode Cerdas:" },
   "geminiModelDescription": { "message": "Ketika 'Mesin Default Menu Konteks' diatur ke 'Cerdas', teks panjang akan menggunakan model Gemini yang ditentukan di sini." },
   "geminiModelFlash": { "message": "Gemini 2.0 Flash (Lebih cepat, untuk penggunaan umum)" },
+  "geminiModelFlash15": { "message": "Gemini 1.5 Flash (Cepat, ringan)" },
+  "geminiModelPro15": { "message": "Gemini 1.5 Pro (Kualitas lebih tinggi, konteks panjang)" },
   "apiKeyPlaceholder": { "message": "Harap masukkan Kunci API Anda" },
   "apiKeyToggle": { "message": "Tampilkan/Sembunyikan Kunci" },
   "apiKeyStatusUnset": { "message": "(Belum diatur, klik di sini untuk mendapatkannya)" },
@@ -38,6 +42,8 @@
   "contextMenuEngineSmart": { "message": "Mode Cerdas (Default)" },
   "contextMenuEngineGoogle": { "message": "Selalu gunakan Google Terjemahan" },
   "contextMenuEngineGeminiFlash": { "message": "Selalu gunakan Gemini 2.0 Flash" },
+  "contextMenuEngineGeminiFlash15": { "message": "Selalu gunakan Gemini 1.5 Flash" },
+  "contextMenuEngineGeminiPro15": { "message": "Selalu gunakan Gemini 1.5 Pro" },
   "langZhTw": { "message": "Tionghoa Tradisional" },
   "langZhCn": { "message": "Tionghoa Sederhana" },
   "langEn": { "message": "Inggris" },
@@ -87,5 +93,6 @@
   "statusCleared": { "message": "Riwayat dihapus" },
   "sourceLanguageLabel": { "message": "Sumber: " },
   "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "2.0 Flash" }
+  "modelTagFlash": { "message": "Flash" },
+  "modelTagPro": { "message": "Pro" }
 }

@@ -2,7 +2,7 @@
 import { i18n } from './i18n.js';
 import { getSettings, saveSettings, addHistoryItem, getHistory } from '../modules/storage.js';
 import { translateWithGoogle, translateWithGemini, containsCjk } from '../modules/translator.js';
-import { applyTheme, renderUI, displayApiKeyStatus, renderHistory, showStatus } from '../modules/ui.js';
+import { applyTheme, renderUI, displayApiKeyStatus, renderHistory, showStatus, formatGeminiModelLabel } from '../modules/ui.js';
 import { playTTS } from '../modules/tts.js';
 
 async function handlePopupTranslate(text, targetLang, engineSelection, resultEl, listenBtn, listenOriginalBtn) {
@@ -79,11 +79,10 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       sourceText = i18n.t("engineOptionGoogle");
       sourceDisplayEl.classList.add('engine-google');
     } else {
+      sourceText = `${i18n.t("engineTagGemini")} ${formatGeminiModelLabel(modelName)}`.trim();
       if (modelName.includes('flash')) {
-        sourceText = i18n.t("engineOptionGeminiFlash");
         sourceDisplayEl.classList.add('model-flash');
       } else if (modelName.includes('pro')) {
-        sourceText = i18n.t("engineOptionGeminiPro");
         sourceDisplayEl.classList.add('model-pro');
       }
     }

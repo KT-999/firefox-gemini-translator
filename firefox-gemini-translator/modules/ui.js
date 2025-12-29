@@ -18,6 +18,19 @@ function formatTimestamp(isoString) {
     return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
+export function formatGeminiModelLabel(modelName) {
+  if (!modelName) return '';
+  const cleaned = modelName.replace(/^gemini-/, '').replace(/-latest$/, '');
+  return cleaned
+    .split('-')
+    .map(part => {
+      if (!part) return part;
+      if (/^\d/.test(part)) return part;
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join(' ');
+}
+
 export function applyTheme(theme) {
   let finalTheme = theme;
   if (theme === 'auto') {
@@ -122,8 +135,7 @@ export async function renderHistory(history = []) {
             modelTag.classList.add('model-pro');
         }
 
-        const displayName = item.modelName.replace('-latest', '').replace('gemini-1.5-', '1.5 ');
-        modelTag.textContent = displayName;
+        modelTag.textContent = formatGeminiModelLabel(item.modelName);
         tagContainer.appendChild(modelTag);
       }
     }
@@ -225,4 +237,3 @@ export function showStatus(messageKey, statusEl) {
     statusEl.classList.add('show');
     setTimeout(() => { statusEl.classList.remove('show'); }, 2500);
 }
-

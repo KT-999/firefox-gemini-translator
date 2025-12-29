@@ -22,11 +22,15 @@
   "translationEngineLabel": { "message": "Engine:" },
   "engineOptionGoogle": { "message": "Google Translate" },
   "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
+  "engineOptionGeminiFlash15": { "message": "Gemini 1.5 Flash" },
+  "engineOptionGeminiPro15": { "message": "Gemini 1.5 Pro" },
   "coreSettings": { "message": "Core Settings" },
   "geminiApiKey": { "message": "Gemini API Key:" },
   "geminiModelLabel": { "message": "Smart Mode Model:" },
   "geminiModelDescription": { "message": "When 'Context Menu Default Engine' is set to 'Smart', long text will use the Gemini model specified here." },
   "geminiModelFlash": { "message": "Gemini 2.0 Flash (Faster, for general use)" },
+  "geminiModelFlash15": { "message": "Gemini 1.5 Flash (Fast, lightweight)" },
+  "geminiModelPro15": { "message": "Gemini 1.5 Pro (Higher quality, long context)" },
   "apiKeyPlaceholder": { "message": "Please enter your API Key" },
   "apiKeyToggle": { "message": "Show/Hide Key" },
   "apiKeyStatusUnset": { "message": "(Not set, click here to get one)" },
@@ -38,6 +42,8 @@
   "contextMenuEngineSmart": { "message": "Smart Mode (Default)" },
   "contextMenuEngineGoogle": { "message": "Always use Google Translate" },
   "contextMenuEngineGeminiFlash": { "message": "Always use Gemini 2.0 Flash" },
+  "contextMenuEngineGeminiFlash15": { "message": "Always use Gemini 1.5 Flash" },
+  "contextMenuEngineGeminiPro15": { "message": "Always use Gemini 1.5 Pro" },
   "langZhTw": { "message": "Traditional Chinese" },
   "langZhCn": { "message": "Simplified Chinese" },
   "langEn": { "message": "English" },
@@ -87,6 +93,6 @@
   "statusCleared": { "message": "History cleared" },
   "sourceLanguageLabel": { "message": "Source: " },
   "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "2.0 Flash" }
+  "modelTagFlash": { "message": "Flash" },
+  "modelTagPro": { "message": "Pro" }
 }
-
