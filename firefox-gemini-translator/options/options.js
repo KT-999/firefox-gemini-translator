@@ -169,7 +169,8 @@ async function main() {
   });
 
   const settings = await getSettings();
-  const defaultTargetLang = i18n.t("langZhTw");
+  const defaultTargetLang = settings.TRANSLATE_LANG || '繁體中文';
+  const defaultPopupEngine = 'google';
 
   const normalizeSelectValue = (select, value, fallback) => {
     const hasValue = Array.from(select.options).some(option => option.value === value);
@@ -177,7 +178,16 @@ async function main() {
   };
   dom.apiKeyInput.value = settings.GEMINI_API_KEY;
   dom.langSelect.value = settings.TRANSLATE_LANG || defaultTargetLang;
-  dom.popupTargetLang.value = settings.TRANSLATE_LANG || defaultTargetLang;
+  dom.popupTargetLang.value = normalizeSelectValue(
+    dom.popupTargetLang,
+    settings.POPUP_TRANSLATE_LANG || settings.TRANSLATE_LANG,
+    defaultTargetLang
+  );
+  dom.popupEngineSelect.value = normalizeSelectValue(
+    dom.popupEngineSelect,
+    settings.POPUP_TRANSLATE_ENGINE,
+    defaultPopupEngine
+  );
   const normalizedGeminiModel = normalizeSelectValue(dom.geminiModelSelect, settings.GEMINI_MODEL, 'gemini-2.0-flash');
   const normalizedContextMenuEngine = normalizeSelectValue(dom.contextMenuEngineSelect, settings.CONTEXT_MENU_ENGINE, 'gemini-2.0-flash');
   dom.geminiModelSelect.value = normalizedGeminiModel;
@@ -212,11 +222,22 @@ async function main() {
 
   dom.contextMenuEngineSelect.addEventListener('change', toggleGeminiModelSelector);
 
-  dom.translateBtn.addEventListener('click', () => {
+  const savePopupSelection = async () => {
+    await saveSettings({
+      POPUP_TRANSLATE_LANG: dom.popupTargetLang.value,
+      POPUP_TRANSLATE_ENGINE: dom.popupEngineSelect.value
+    });
+  };
+
+  dom.translateBtn.addEventListener('click', async () => {
     const text = dom.translateInput.value.trim();
     if (!text) return;
+    await savePopupSelection();
     handlePopupTranslate(text, dom.popupTargetLang.value, dom.popupEngineSelect.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn);
   });
+
+  dom.popupTargetLang.addEventListener('change', savePopupSelection);
+  dom.popupEngineSelect.addEventListener('change', savePopupSelection);
 
   dom.uiLangSelect.addEventListener('change', async (e) => {
     await i18n.init({ langOverride: e.target.value });

@@ -37,6 +37,8 @@ export async function getSettings() {
   const defaults = {
     GEMINI_API_KEY: '',
     TRANSLATE_LANG: '繁體中文',
+    POPUP_TRANSLATE_LANG: null,
+    POPUP_TRANSLATE_ENGINE: null,
     UI_LANG: null,
     THEME: 'auto',
     maxHistorySize: 20,
