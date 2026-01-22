@@ -151,6 +151,7 @@ body.dark .delete-history-btn:hover { background-color: var(--danger-color); col
 .tag-container { position: absolute; top: 0; right: 0; display: flex; border-radius: 0 6px 0 6px; overflow: hidden; }
 .engine-tag { padding: 2px 6px; font-size: 0.75em; font-weight: bold; color: #fff; text-transform: capitalize; }
 .engine-google, .translation-source-display.engine-google { background-color: #888; color: #fff; }
+.engine-google-cloud, .translation-source-display.engine-google-cloud { background-color: #5e35b1; color: #fff; }
 .engine-gemini, .translation-source-display.engine-gemini { background-color: var(--primary-color); }
 .model-tag.model-flash, .translation-source-display.model-flash { background-color: #00897b; color: #fff; }
 .model-tag.model-pro, .translation-source-display.model-pro { background-color: #3949ab; color: #fff; }
@@ -162,6 +163,7 @@ body.dark .delete-history-btn:hover { background-color: var(--danger-color); col
 body.dark .listen-btn { color: #ccc; }
 .password-wrapper { position: relative; }
 #apiKey { padding-right: 45px; }
+#googleCloudApiKey { padding-right: 45px; }
 .toggle-vis { position: absolute; right: 1px; top: 0; bottom: 0; margin-bottom: 1.5em; padding: 0 12px; background: transparent; border: none; cursor: pointer; color: #666; display: flex; align-items: center; }
 body.dark .toggle-vis { color: #ccc; }
 .toggle-vis svg { width: 16px; height: 16px; }
@@ -170,6 +172,9 @@ body.dark .toggle-vis { color: #ccc; }
 .key-status a { color: inherit; }
 .key-status.valid { color: var(--success-color); }
 .key-status.invalid { color: var(--danger-color); }
+.key-action-row { display: flex; justify-content: flex-end; margin-top: -1em; margin-bottom: 1.5em; }
+.remove-key-btn { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 0.35em 0.8em; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+.remove-key-btn:hover { background: var(--danger-color); color: #fff; }
 #status { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--success-color); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: bottom 0.4s ease-in-out; z-index: 1000; font-weight: 500; }
 #status.show { bottom: 20px; }
 

@@ -68,14 +68,42 @@ export async function translateWithGoogle(text, targetLang) {
     return translatedText;
 }
 
+export async function translateWithGoogleCloud(text, targetLang, apiKey) {
+    const langCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
+    const target = langCodeMap[targetLang] || "zh-TW";
+    const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            q: text,
+            target,
+            format: "text"
+        })
+    });
+
+    if (!response.ok) {
+        if (response.status === 400 || response.status === 403) {
+            throw new Error("Invalid Google Cloud API Key");
+        }
+        throw new Error(`Google Cloud API 錯誤: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const translatedText = data?.data?.translations?.[0]?.translatedText?.trim();
+    if (!translatedText) {
+        throw new Error("從 Google Cloud 未收到翻譯結果");
+    }
+    return translatedText;
+}
+
 /**
  * 【最終修正】使用 Gemini API 進行翻譯，將 API 金鑰放入 Header 中。
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
     let resolvedModelName = modelName;
     if (modelName && modelName.includes('1.5')) {
-        console.warn(`Gemini 1.5 模型已停用，改用 gemini-2.0-flash: ${modelName}`);
-        resolvedModelName = 'gemini-2.0-flash';
+        console.warn(`Gemini 1.5 模型已停用，改用 gemini-2.5-flash: ${modelName}`);
+        resolvedModelName = 'gemini-2.5-flash';
     }
     // 只有穩定的 'gemini-pro' 使用 v1，其餘（包含 1.5 和 2.0 系列）都使用 v1beta
     const apiVersion = (resolvedModelName === 'gemini-pro') ? 'v1' : 'v1beta';

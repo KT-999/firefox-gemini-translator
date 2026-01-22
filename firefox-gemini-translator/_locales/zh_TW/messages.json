@@ -1,110 +1,336 @@
 {
-  "extName": { "message": "Gemini 翻譯小幫手" },
-  "extDesc": { "message": "選取網頁文字並使用 Gemini 或 Google 翻譯成自訂語言，並在頁面上顯示結果。" },
-  "contextMenuTitle": { "message": "智慧翻譯" },
-  "promptSystem": { "message": "你是一個專業的翻譯引擎。請嚴格按照以下規則，將「」中的文字翻譯成${targetLang}。\n\n規則：\n1. **絕對不要**有任何解釋、前言、或額外補充說明。\n2. 如果原文是單一詞彙且有多種常見意思，請用「、」分隔後直接列出，例如：「令牌、象徵、代幣」。\n3. 如果原文是句子或片語，請直接提供最通順、最自然的單一翻譯結果。\n4. **絕對不要**使用任何 Markdown 格式，例如 * 或 -。\n\n原文：「${text}」", "placeholders": { "targetLang": { "content": "$1" }, "text": { "content": "$2" } } },
-  "errorGoogle": { "message": "❌ Google 翻譯失敗" },
-  "errorGemini": { "message": "❌ Gemini 翻譯失敗" },
-  "errorInvalidKey": { "message": "偵測到無效的 Gemini API Key，自動降級為 Google 翻譯。" },
-  "popupCopy": { "message": "複製" },
-  "popupCopied": { "message": "已複製!" },
-  "popupClose": { "message": "關閉" },
-  "listenButtonTooltip": { "message": "聆聽譯文" },
-  "listenOriginalButtonTooltip": { "message": "聆聽原文" },
-  "optionsTitle": { "message": "Gemini 翻譯設定" },
-  "tabTranslate": { "message": "翻譯" },
-  "tabSettings": { "message": "設定" },
-  "tabHistory": { "message": "翻譯紀錄" },
-  "originalTextTitle": { "message": "原文" },
-  "translateInputPlaceholder": { "message": "在此輸入要翻譯的文字..." },
-  "translateButton": { "message": "翻譯" },
-  "translationResult": { "message": "翻譯結果" },
-  "translationEngineLabel": { "message": "引擎:" },
-  "engineOptionGoogle": { "message": "Google 翻譯" },
-  "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
-  "engineOptionGemini3ProPreview": { "message": "Gemini 3 Pro Preview" },
-  "engineOptionGemini3FlashPreview": { "message": "Gemini 3 Flash Preview" },
-  "engineOptionGemini25Flash": { "message": "Gemini 2.5 Flash" },
-  "engineOptionGemini25FlashLite": { "message": "Gemini 2.5 Flash-Lite" },
-  "engineOptionGemini25Pro": { "message": "Gemini 2.5 Pro" },
-  "engineOptionGemini20FlashLite": { "message": "Gemini 2.0 Flash-Lite" },
-  "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "Flash" },
-  "modelTagPro": { "message": "Pro" },
-  "coreSettings": { "message": "核心設定" },
-  "geminiApiKey": { "message": "Gemini API Key:" },
-  "geminiModelLabel": { "message": "智慧判斷模型：" },
-  "geminiModelDescription": { "message": "當「右鍵選單預設引擎」設為「智慧判斷」時，長文將使用此處指定的 Gemini 模型。" },
-  "geminiModelFlash": { "message": "Gemini 2.0 Flash (速度快，適合一般用途)" },
-  "geminiModel3ProPreview": { "message": "Gemini 3 Pro Preview (預覽)" },
-  "geminiModel3FlashPreview": { "message": "Gemini 3 Flash Preview (預覽)" },
-  "geminiModel25Flash": { "message": "Gemini 2.5 Flash (兼具效能與速度)" },
-  "geminiModel25FlashLite": { "message": "Gemini 2.5 Flash-Lite (更省資源)" },
-  "geminiModel25Pro": { "message": "Gemini 2.5 Pro (更高品質、長內容)" },
-  "geminiModel20FlashLite": { "message": "Gemini 2.0 Flash-Lite (更省資源)" },
-  "contextMenuEngineLabel": { "message": "右鍵選單預設引擎：" },
-  "contextMenuEngineSmart": { "message": "智慧判斷 (預設)" },
-  "contextMenuEngineGoogle": { "message": "一律使用 Google 翻譯" },
-  "contextMenuEngineGeminiFlash": { "message": "一律使用 Gemini 2.0 Flash" },
-  "contextMenuEngineGemini3ProPreview": { "message": "一律使用 Gemini 3 Pro Preview" },
-  "contextMenuEngineGemini3FlashPreview": { "message": "一律使用 Gemini 3 Flash Preview" },
-  "contextMenuEngineGemini25Flash": { "message": "一律使用 Gemini 2.5 Flash" },
-  "contextMenuEngineGemini25FlashLite": { "message": "一律使用 Gemini 2.5 Flash-Lite" },
-  "contextMenuEngineGemini25Pro": { "message": "一律使用 Gemini 2.5 Pro" },
-  "contextMenuEngineGemini20FlashLite": { "message": "一律使用 Gemini 2.0 Flash-Lite" },
-  "apiKeyPlaceholder": { "message": "請輸入您的 API Key" },
-  "apiKeyToggle": { "message": "顯示/隱藏金鑰" },
-  "apiKeyStatusUnset": { "message": "(尚未輸入，點此獲取)" },
-  "apiKeyStatusInvalid": { "message": "(金鑰無效，點此獲取)" },
-  "apiKeyStatusValid": { "message": "(已儲存)" },
-  "targetLanguage": { "message": "目標:" },
-  "targetLanguageSettings": { "message": "預設翻譯目標語言：" },
-  "langZhTw": { "message": "繁體中文" },
-  "langZhCn": { "message": "簡體中文" },
-  "langEn": { "message": "英文" },
-  "langJa": { "message": "日文" },
-  "langKo": { "message": "韓文" },
-  "langFr": { "message": "法文" },
-  "langDe": { "message": "德文" },
-  "langEs": { "message": "西班牙文" },
-  "langRu": { "message": "俄文" },
-  "langHi": { "message": "印地文" },
-  "langAr": { "message": "阿拉伯文" },
-  "langBn": { "message": "孟加拉文" },
-  "langPt": { "message": "葡萄牙文" },
-  "langId": { "message": "印尼文" },
-  "personalization": { "message": "個人化" },
-  "uiLanguage": { "message": "介面語言:" },
-  "langUiEn": { "message": "English" },
-  "langUiZhTw": { "message": "繁體中文" },
-  "langUiZhCn": { "message": "简体中文" },
-  "langUiJa": { "message": "日本語" },
-  "langUiKo": { "message": "한국어" },
-  "langUiFr": { "message": "Français" },
-  "langUiDe": { "message": "Deutsch" },
-  "langUiEs": { "message": "Español" },
-  "langUiRu": { "message": "Русский" },
-  "langUiHi": { "message": "हिन्दी" },
-  "langUiAr": { "message": "العربية" },
-  "langUiBn": { "message": "বাংলা" },
-  "langUiPt": { "message": "Português" },
-  "langUiId": { "message": "Bahasa Indonesia" },
-  "theme": { "message": "主題:" },
-  "themeAuto": { "message": "跟隨系統" },
-  "themeLight": { "message": "明亮" },
-  "themeDark": { "message": "黑暗" },
-  "maxHistory": { "message": "最大紀錄數量:" },
-  "saveButton": { "message": "儲存設定" },
-  "historyList": { "message": "紀錄列表" },
-  "clearHistoryButton": { "message": "清除所有紀錄" },
-  "noHistory": { "message": "尚無翻譯紀錄。" },
-  "copyOriginal": { "message": "複製原文" },
-  "copyTranslated": { "message": "複製譯文" },
-  "copied": { "message": "已複製!" },
-  "delete": { "message": "刪除" },
-  "confirmDeleteHistoryItem": { "message": "確定要刪除這筆紀錄嗎？\n\n原文：${original}", "placeholders": { "original": { "content": "$1" } } },
-  "confirmClearAllHistory": { "message": "確定要清除所有翻譯紀錄嗎？此操作無法復原。" },
-  "statusSaved": { "message": "設定已儲存" },
-  "statusCleared": { "message": "紀錄已清除" },
-  "sourceLanguageLabel": { "message": "原文語言：" }
+  "extName": {
+    "message": "Gemini 翻譯小幫手"
+  },
+  "extDesc": {
+    "message": "選取網頁文字並使用 Gemini 或 Google 翻譯成自訂語言，並在頁面上顯示結果。"
+  },
+  "contextMenuTitle": {
+    "message": "智慧翻譯"
+  },
+  "promptSystem": {
+    "message": "你是一個專業的翻譯引擎。請嚴格按照以下規則，將「」中的文字翻譯成${targetLang}。\n\n規則：\n1. **絕對不要**有任何解釋、前言、或額外補充說明。\n2. 如果原文是單一詞彙且有多種常見意思，請用「、」分隔後直接列出，例如：「令牌、象徵、代幣」。\n3. 如果原文是句子或片語，請直接提供最通順、最自然的單一翻譯結果。\n4. **絕對不要**使用任何 Markdown 格式，例如 * 或 -。\n\n原文：「${text}」",
+    "placeholders": {
+      "targetLang": {
+        "content": "$1"
+      },
+      "text": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorGoogle": {
+    "message": "❌ Google 翻譯失敗"
+  },
+  "errorGemini": {
+    "message": "❌ Gemini 翻譯失敗"
+  },
+  "errorInvalidKey": {
+    "message": "偵測到無效的 Gemini API Key，自動降級為 Google 翻譯。"
+  },
+  "popupCopy": {
+    "message": "複製"
+  },
+  "popupCopied": {
+    "message": "已複製!"
+  },
+  "popupClose": {
+    "message": "關閉"
+  },
+  "listenButtonTooltip": {
+    "message": "聆聽譯文"
+  },
+  "listenOriginalButtonTooltip": {
+    "message": "聆聽原文"
+  },
+  "optionsTitle": {
+    "message": "Gemini 翻譯設定"
+  },
+  "tabTranslate": {
+    "message": "翻譯"
+  },
+  "tabSettings": {
+    "message": "設定"
+  },
+  "tabHistory": {
+    "message": "翻譯紀錄"
+  },
+  "originalTextTitle": {
+    "message": "原文"
+  },
+  "translateInputPlaceholder": {
+    "message": "在此輸入要翻譯的文字..."
+  },
+  "translateButton": {
+    "message": "翻譯"
+  },
+  "translationResult": {
+    "message": "翻譯結果"
+  },
+  "translationEngineLabel": {
+    "message": "引擎:"
+  },
+  "engineOptionGoogle": {
+    "message": "Google 翻譯"
+  },
+  "engineOptionGoogleCloud": {
+    "message": "Google Cloud 翻譯 API"
+  },
+  "engineOptionGemini3ProPreview": {
+    "message": "Gemini 3 Pro Preview"
+  },
+  "engineOptionGemini3FlashPreview": {
+    "message": "Gemini 3 Flash Preview"
+  },
+  "engineOptionGemini25Flash": {
+    "message": "Gemini 2.5 Flash"
+  },
+  "engineOptionGemini25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite"
+  },
+  "engineOptionGemini25Pro": {
+    "message": "Gemini 2.5 Pro"
+  },
+  "engineTagGemini": {
+    "message": "Gemini"
+  },
+  "modelTagFlash": {
+    "message": "Flash"
+  },
+  "modelTagPro": {
+    "message": "Pro"
+  },
+  "coreSettings": {
+    "message": "核心設定"
+  },
+  "geminiApiKey": {
+    "message": "Gemini API Key:"
+  },
+  "googleCloudApiKey": {
+    "message": "Google Cloud 翻譯 API Key:"
+  },
+  "geminiModelLabel": {
+    "message": "智慧判斷模型："
+  },
+  "geminiModelDescription": {
+    "message": "當「右鍵選單預設引擎」設為「智慧判斷」時，長文將使用此處指定的 Gemini 模型。"
+  },
+  "geminiModel3ProPreview": {
+    "message": "Gemini 3 Pro Preview (預覽)"
+  },
+  "geminiModel3FlashPreview": {
+    "message": "Gemini 3 Flash Preview (預覽)"
+  },
+  "geminiModel25Flash": {
+    "message": "Gemini 2.5 Flash (兼具效能與速度)"
+  },
+  "geminiModel25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite (更省資源)"
+  },
+  "geminiModel25Pro": {
+    "message": "Gemini 2.5 Pro (更高品質、長內容)"
+  },
+  "contextMenuEngineLabel": {
+    "message": "右鍵選單預設引擎："
+  },
+  "contextMenuEngineSmart": {
+    "message": "智慧判斷 (預設)"
+  },
+  "contextMenuEngineGoogle": {
+    "message": "一律使用 Google 翻譯"
+  },
+  "contextMenuEngineGoogleCloud": {
+    "message": "一律使用 Google Cloud 翻譯"
+  },
+  "contextMenuEngineGemini3ProPreview": {
+    "message": "一律使用 Gemini 3 Pro Preview"
+  },
+  "contextMenuEngineGemini3FlashPreview": {
+    "message": "一律使用 Gemini 3 Flash Preview"
+  },
+  "contextMenuEngineGemini25Flash": {
+    "message": "一律使用 Gemini 2.5 Flash"
+  },
+  "contextMenuEngineGemini25FlashLite": {
+    "message": "一律使用 Gemini 2.5 Flash-Lite"
+  },
+  "contextMenuEngineGemini25Pro": {
+    "message": "一律使用 Gemini 2.5 Pro"
+  },
+  "apiKeyPlaceholder": {
+    "message": "請輸入您的 API Key"
+  },
+  "googleCloudApiKeyPlaceholder": {
+    "message": "請輸入您的 Google Cloud API Key"
+  },
+  "apiKeyToggle": {
+    "message": "顯示/隱藏金鑰"
+  },
+  "googleCloudRemoveKey": {
+    "message": "移除 Google Cloud Key"
+  },
+  "apiKeyStatusUnset": {
+    "message": "(尚未輸入，點此獲取)"
+  },
+  "apiKeyStatusInvalid": {
+    "message": "(金鑰無效，點此獲取)"
+  },
+  "apiKeyStatusValid": {
+    "message": "(已儲存)"
+  },
+  "targetLanguage": {
+    "message": "目標:"
+  },
+  "targetLanguageSettings": {
+    "message": "預設翻譯目標語言："
+  },
+  "langZhTw": {
+    "message": "繁體中文"
+  },
+  "langZhCn": {
+    "message": "簡體中文"
+  },
+  "langEn": {
+    "message": "英文"
+  },
+  "langJa": {
+    "message": "日文"
+  },
+  "langKo": {
+    "message": "韓文"
+  },
+  "langFr": {
+    "message": "法文"
+  },
+  "langDe": {
+    "message": "德文"
+  },
+  "langEs": {
+    "message": "西班牙文"
+  },
+  "langRu": {
+    "message": "俄文"
+  },
+  "langHi": {
+    "message": "印地文"
+  },
+  "langAr": {
+    "message": "阿拉伯文"
+  },
+  "langBn": {
+    "message": "孟加拉文"
+  },
+  "langPt": {
+    "message": "葡萄牙文"
+  },
+  "langId": {
+    "message": "印尼文"
+  },
+  "personalization": {
+    "message": "個人化"
+  },
+  "uiLanguage": {
+    "message": "介面語言:"
+  },
+  "langUiEn": {
+    "message": "English"
+  },
+  "langUiZhTw": {
+    "message": "繁體中文"
+  },
+  "langUiZhCn": {
+    "message": "简体中文"
+  },
+  "langUiJa": {
+    "message": "日本語"
+  },
+  "langUiKo": {
+    "message": "한국어"
+  },
+  "langUiFr": {
+    "message": "Français"
+  },
+  "langUiDe": {
+    "message": "Deutsch"
+  },
+  "langUiEs": {
+    "message": "Español"
+  },
+  "langUiRu": {
+    "message": "Русский"
+  },
+  "langUiHi": {
+    "message": "हिन्दी"
+  },
+  "langUiAr": {
+    "message": "العربية"
+  },
+  "langUiBn": {
+    "message": "বাংলা"
+  },
+  "langUiPt": {
+    "message": "Português"
+  },
+  "langUiId": {
+    "message": "Bahasa Indonesia"
+  },
+  "theme": {
+    "message": "主題:"
+  },
+  "themeAuto": {
+    "message": "跟隨系統"
+  },
+  "themeLight": {
+    "message": "明亮"
+  },
+  "themeDark": {
+    "message": "黑暗"
+  },
+  "maxHistory": {
+    "message": "最大紀錄數量:"
+  },
+  "saveButton": {
+    "message": "儲存設定"
+  },
+  "historyList": {
+    "message": "紀錄列表"
+  },
+  "clearHistoryButton": {
+    "message": "清除所有紀錄"
+  },
+  "noHistory": {
+    "message": "尚無翻譯紀錄。"
+  },
+  "copyOriginal": {
+    "message": "複製原文"
+  },
+  "copyTranslated": {
+    "message": "複製譯文"
+  },
+  "copied": {
+    "message": "已複製!"
+  },
+  "delete": {
+    "message": "刪除"
+  },
+  "confirmDeleteHistoryItem": {
+    "message": "確定要刪除這筆紀錄嗎？\n\n原文：${original}",
+    "placeholders": {
+      "original": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmClearAllHistory": {
+    "message": "確定要清除所有翻譯紀錄嗎？此操作無法復原。"
+  },
+  "statusSaved": {
+    "message": "設定已儲存"
+  },
+  "statusCleared": {
+    "message": "紀錄已清除"
+  },
+  "sourceLanguageLabel": {
+    "message": "原文語言："
+  }
 }
