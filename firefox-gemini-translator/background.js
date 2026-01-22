@@ -1,7 +1,7 @@
 // background.js (模組)
 import { i18n } from './options/i18n.js';
 import { getSettings, saveSettings, addHistoryItem } from './modules/storage.js';
-import { decideEngine, translateWithGoogle, translateWithGemini, containsCjk } from './modules/translator.js';
+import { decideEngine, translateWithGoogle, translateWithGoogleCloud, translateWithGemini, containsCjk } from './modules/translator.js';
 import { playTTS } from './modules/tts.js';
 
 async function sendMessageToTab(tabId, message) {
@@ -12,7 +12,7 @@ async function sendMessageToTab(tabId, message) {
     }
 }
 
-async function handleTranslation(selectedText, tabId) {
+async function handleTranslation(selectedText, tabId, engineOverride = null) {
     const settings = await getSettings();
     const targetLang = settings.TRANSLATE_LANG || '繁體中文';
 
@@ -23,13 +23,17 @@ async function handleTranslation(selectedText, tabId) {
 
         const contextEngineSetting = settings.CONTEXT_MENU_ENGINE;
 
-        if (contextEngineSetting === 'smart') {
+        if (engineOverride) {
+            engine = engineOverride;
+        } else if (contextEngineSetting === 'smart') {
             engine = decideEngine(selectedText);
             if (engine === 'gemini') {
                 modelName = settings.GEMINI_MODEL;
             }
         } else if (contextEngineSetting === 'google') {
             engine = 'google';
+        } else if (contextEngineSetting === 'google-cloud') {
+            engine = 'google-cloud';
         } else {
             engine = 'gemini';
             modelName = contextEngineSetting;
@@ -37,7 +41,19 @@ async function handleTranslation(selectedText, tabId) {
 
         if (engine === 'google') {
             translatedText = await translateWithGoogle(selectedText, targetLang);
+        } else if (engine === 'google-cloud') {
+            if (!settings.GOOGLE_CLOUD_API_KEY) {
+                console.log("右鍵選單設定為 Google Cloud 但未提供 API Key，自動降級使用 Google 翻譯。");
+                engine = 'google';
+                translatedText = await translateWithGoogle(selectedText, targetLang);
+            } else {
+                translatedText = await translateWithGoogleCloud(selectedText, targetLang, settings.GOOGLE_CLOUD_API_KEY);
+                await saveSettings({ googleCloudKeyValid: true });
+            }
         } else { // engine is 'gemini'
+            if (!modelName) {
+                modelName = settings.GEMINI_MODEL;
+            }
             if (!settings.GEMINI_API_KEY) {
                 console.log("右鍵選單設定為 Gemini 但未提供 API Key，自動降級使用 Google 翻譯。");
                 engine = 'google';
@@ -97,6 +113,7 @@ async function handleTranslation(selectedText, tabId) {
                 listenButtonTooltip: i18n.t("listenButtonTooltip"),
                 sourceLanguageLabel: i18n.t("sourceLanguageLabel"),
                 engineOptionGoogle: i18n.t("engineOptionGoogle"),
+                engineOptionGoogleCloud: i18n.t("engineOptionGoogleCloud"),
                 engineTagGemini: i18n.t("engineTagGemini"),
                 modelTagFlash: i18n.t("modelTagFlash"),
                 modelTagPro: i18n.t("modelTagPro")
@@ -111,7 +128,11 @@ async function handleTranslation(selectedText, tabId) {
             await saveSettings({ geminiKeyValid: false });
             console.log("Gemini API Key 無效，自動降級使用 Google 翻譯。");
             // Retry with google by calling the function again but forcing google
-            await handleTranslation(selectedText, tabId);
+            await handleTranslation(selectedText, tabId, 'google');
+        } else if (error.message === 'Invalid Google Cloud API Key') {
+            await saveSettings({ googleCloudKeyValid: false });
+            console.log("Google Cloud API Key 無效，自動降級使用 Google 翻譯。");
+            await handleTranslation(selectedText, tabId, 'google');
         } else {
             await sendMessageToTab(tabId, { type: "showError", text: i18n.t("errorGoogle") });
         }

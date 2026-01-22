@@ -1,110 +1,336 @@
 {
-  "extName": { "message": "Помощник по переводу Gemini" },
-  "extDesc": { "message": "Выберите текст на веб-странице, переведите его на пользовательский язык с помощью Gemini или Google и отобразите результат на странице." },
-  "contextMenuTitle": { "message": "Умный перевод" },
-  "promptSystem": { "message": "Вы — профессиональный движок перевода. Пожалуйста, строго следуйте приведенным ниже правилам, чтобы перевести текст в кавычках на ${targetLang}.\n\nПравила:\n1. **Категорически не предоставляйте** никаких объяснений, преамбул или дополнительной информации.\n2. Если исходный текст — это одно слово с несколькими распространенными значениями, перечислите их напрямую, разделив '、', например: 'жетон, символ, значок'.\n3. Если исходный текст — это предложение или фраза, предоставьте напрямую самый гладкий и естественный единичный результат перевода.\n4. **Категорически не используйте** никакого форматирования Markdown, такого как * или -.\n\nИсходный текст: \"${text}\"", "placeholders": { "targetLang": { "content": "$1" }, "text": { "content": "$2" } } },
-  "errorGoogle": { "message": "❌ Ошибка перевода Google" },
-  "errorGemini": { "message": "❌ Ошибка перевода Gemini" },
-  "errorInvalidKey": { "message": "Обнаружен недействительный ключ API Gemini, автоматическое переключение на Google Translate." },
-  "popupCopy": { "message": "Копировать" },
-  "popupCopied": { "message": "Скопировано!" },
-  "popupClose": { "message": "Закрыть" },
-  "listenButtonTooltip": { "message": "Слушать перевод" },
-  "listenOriginalButtonTooltip": { "message": "Слушать оригинал" },
-  "optionsTitle": { "message": "Настройки перевода Gemini" },
-  "tabTranslate": { "message": "Перевод" },
-  "tabSettings": { "message": "Настройки" },
-  "tabHistory": { "message": "История" },
-  "originalTextTitle": { "message": "Оригинальный текст" },
-  "translateInputPlaceholder": { "message": "Введите текст для перевода..." },
-  "translateButton": { "message": "Перевести" },
-  "translationResult": { "message": "Результат перевода" },
-  "translationEngineLabel": { "message": "Движок:" },
-  "engineOptionGoogle": { "message": "Google Переводчик" },
-  "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
-  "engineOptionGemini3ProPreview": { "message": "Gemini 3 Pro Preview" },
-  "engineOptionGemini3FlashPreview": { "message": "Gemini 3 Flash Preview" },
-  "engineOptionGemini25Flash": { "message": "Gemini 2.5 Flash" },
-  "engineOptionGemini25FlashLite": { "message": "Gemini 2.5 Flash-Lite" },
-  "engineOptionGemini25Pro": { "message": "Gemini 2.5 Pro" },
-  "engineOptionGemini20FlashLite": { "message": "Gemini 2.0 Flash-Lite" },
-  "coreSettings": { "message": "Основные настройки" },
-  "geminiApiKey": { "message": "Ключ API Gemini:" },
-  "geminiModelLabel": { "message": "Модель умного режима:" },
-  "geminiModelDescription": { "message": "Когда 'Движок по умолчанию для контекстного меню' установлен на 'Умный', для длинных текстов будет использоваться указанная здесь модель Gemini." },
-  "geminiModelFlash": { "message": "Gemini 2.0 Flash (Быстрее, для общего использования)" },
-  "geminiModel3ProPreview": { "message": "Gemini 3 Pro Preview (Preview)" },
-  "geminiModel3FlashPreview": { "message": "Gemini 3 Flash Preview (Preview)" },
-  "geminiModel25Flash": { "message": "Gemini 2.5 Flash (Balanced)" },
-  "geminiModel25FlashLite": { "message": "Gemini 2.5 Flash-Lite (Cost efficient)" },
-  "geminiModel25Pro": { "message": "Gemini 2.5 Pro (Higher quality, long context)" },
-  "geminiModel20FlashLite": { "message": "Gemini 2.0 Flash-Lite (Cost efficient)" },
-  "apiKeyPlaceholder": { "message": "Пожалуйста, введите ваш ключ API" },
-  "apiKeyToggle": { "message": "Показать/скрыть ключ" },
-  "apiKeyStatusUnset": { "message": "(Не установлен, нажмите здесь, чтобы получить)" },
-  "apiKeyStatusInvalid": { "message": "(Недействительный ключ, нажмите здесь, чтобы получить)" },
-  "apiKeyStatusValid": { "message": "(Сохранено)" },
-  "targetLanguage": { "message": "Цель:" },
-  "targetLanguageSettings": { "message": "Целевой язык по умолчанию:" },
-  "contextMenuEngineLabel": { "message": "Движок контекстного меню:" },
-  "contextMenuEngineSmart": { "message": "Умный режим (по умолчанию)" },
-  "contextMenuEngineGoogle": { "message": "Всегда использовать Google Переводчик" },
-  "contextMenuEngineGeminiFlash": { "message": "Всегда использовать Gemini 2.0 Flash" },
-  "contextMenuEngineGemini3ProPreview": { "message": "Always use Gemini 3 Pro Preview" },
-  "contextMenuEngineGemini3FlashPreview": { "message": "Always use Gemini 3 Flash Preview" },
-  "contextMenuEngineGemini25Flash": { "message": "Always use Gemini 2.5 Flash" },
-  "contextMenuEngineGemini25FlashLite": { "message": "Always use Gemini 2.5 Flash-Lite" },
-  "contextMenuEngineGemini25Pro": { "message": "Always use Gemini 2.5 Pro" },
-  "contextMenuEngineGemini20FlashLite": { "message": "Always use Gemini 2.0 Flash-Lite" },
-  "langZhTw": { "message": "Традиционный китайский" },
-  "langZhCn": { "message": "Упрощенный китайский" },
-  "langEn": { "message": "Английский" },
-  "langJa": { "message": "Японский" },
-  "langKo": { "message": "Корейский" },
-  "langFr": { "message": "Французский" },
-  "langDe": { "message": "Немецкий" },
-  "langEs": { "message": "Испанский" },
-  "langRu": { "message": "Русский" },
-  "langHi": { "message": "Хинди" },
-  "langAr": { "message": "Арабский" },
-  "langBn": { "message": "Бенгальский" },
-  "langPt": { "message": "Португальский" },
-  "langId": { "message": "Индонезийский" },
-  "personalization": { "message": "Персонализация" },
-  "uiLanguage": { "message": "Язык интерфейса:" },
-  "langUiEn": { "message": "English" },
-  "langUiZhTw": { "message": "繁體中文" },
-  "langUiZhCn": { "message": "简体中文" },
-  "langUiJa": { "message": "日本語" },
-  "langUiKo": { "message": "한국어" },
-  "langUiFr": { "message": "Français" },
-  "langUiDe": { "message": "Deutsch" },
-  "langUiEs": { "message": "Español" },
-  "langUiRu": { "message": "Русский" },
-  "langUiHi": { "message": "हिन्दी" },
-  "langUiAr": { "message": "العربية" },
-  "langUiBn": { "message": "বাংলা" },
-  "langUiPt": { "message": "Português" },
-  "langUiId": { "message": "Bahasa Indonesia" },
-  "theme": { "message": "Тема:" },
-  "themeAuto": { "message": "Как в системе" },
-  "themeLight": { "message": "Светлая" },
-  "themeDark": { "message": "Темная" },
-  "maxHistory": { "message": "Максимальный размер истории:" },
-  "saveButton": { "message": "Сохранить настройки" },
-  "historyList": { "message": "Список истории" },
-  "clearHistoryButton": { "message": "Очистить всю историю" },
-  "noHistory": { "message": "Истории переводов пока нет." },
-  "copyOriginal": { "message": "Копировать оригинал" },
-  "copyTranslated": { "message": "Копировать перевод" },
-  "copied": { "message": "Скопировано!" },
-  "delete": { "message": "Удалить" },
-  "confirmDeleteHistoryItem": { "message": "Вы уверены, что хотите удалить эту запись?\n\nОригинал: ${original}", "placeholders": { "original": { "content": "$1" } } },
-  "confirmClearAllHistory": { "message": "Вы уверены, что хотите очистить всю историю переводов? Это действие нельзя отменить." },
-  "statusSaved": { "message": "Настройки сохранены" },
-  "statusCleared": { "message": "История очищена" },
-  "sourceLanguageLabel": { "message": "Источник: " },
-  "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "Flash" },
-  "modelTagPro": { "message": "Pro" }
+  "extName": {
+    "message": "Помощник по переводу Gemini"
+  },
+  "extDesc": {
+    "message": "Выберите текст на веб-странице, переведите его на пользовательский язык с помощью Gemini или Google и отобразите результат на странице."
+  },
+  "contextMenuTitle": {
+    "message": "Умный перевод"
+  },
+  "promptSystem": {
+    "message": "Вы — профессиональный движок перевода. Пожалуйста, строго следуйте приведенным ниже правилам, чтобы перевести текст в кавычках на ${targetLang}.\n\nПравила:\n1. **Категорически не предоставляйте** никаких объяснений, преамбул или дополнительной информации.\n2. Если исходный текст — это одно слово с несколькими распространенными значениями, перечислите их напрямую, разделив '、', например: 'жетон, символ, значок'.\n3. Если исходный текст — это предложение или фраза, предоставьте напрямую самый гладкий и естественный единичный результат перевода.\n4. **Категорически не используйте** никакого форматирования Markdown, такого как * или -.\n\nИсходный текст: \"${text}\"",
+    "placeholders": {
+      "targetLang": {
+        "content": "$1"
+      },
+      "text": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorGoogle": {
+    "message": "❌ Ошибка перевода Google"
+  },
+  "errorGemini": {
+    "message": "❌ Ошибка перевода Gemini"
+  },
+  "errorInvalidKey": {
+    "message": "Обнаружен недействительный ключ API Gemini, автоматическое переключение на Google Translate."
+  },
+  "popupCopy": {
+    "message": "Копировать"
+  },
+  "popupCopied": {
+    "message": "Скопировано!"
+  },
+  "popupClose": {
+    "message": "Закрыть"
+  },
+  "listenButtonTooltip": {
+    "message": "Слушать перевод"
+  },
+  "listenOriginalButtonTooltip": {
+    "message": "Слушать оригинал"
+  },
+  "optionsTitle": {
+    "message": "Настройки перевода Gemini"
+  },
+  "tabTranslate": {
+    "message": "Перевод"
+  },
+  "tabSettings": {
+    "message": "Настройки"
+  },
+  "tabHistory": {
+    "message": "История"
+  },
+  "originalTextTitle": {
+    "message": "Оригинальный текст"
+  },
+  "translateInputPlaceholder": {
+    "message": "Введите текст для перевода..."
+  },
+  "translateButton": {
+    "message": "Перевести"
+  },
+  "translationResult": {
+    "message": "Результат перевода"
+  },
+  "translationEngineLabel": {
+    "message": "Движок:"
+  },
+  "engineOptionGoogle": {
+    "message": "Google Переводчик"
+  },
+  "engineOptionGoogleCloud": {
+    "message": "Google Cloud Translation API"
+  },
+  "engineOptionGemini3ProPreview": {
+    "message": "Gemini 3 Pro Preview"
+  },
+  "engineOptionGemini3FlashPreview": {
+    "message": "Gemini 3 Flash Preview"
+  },
+  "engineOptionGemini25Flash": {
+    "message": "Gemini 2.5 Flash"
+  },
+  "engineOptionGemini25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite"
+  },
+  "engineOptionGemini25Pro": {
+    "message": "Gemini 2.5 Pro"
+  },
+  "coreSettings": {
+    "message": "Основные настройки"
+  },
+  "geminiApiKey": {
+    "message": "Ключ API Gemini:"
+  },
+  "googleCloudApiKey": {
+    "message": "Ключ API Google Cloud Translation:"
+  },
+  "geminiModelLabel": {
+    "message": "Модель умного режима:"
+  },
+  "geminiModelDescription": {
+    "message": "Когда 'Движок по умолчанию для контекстного меню' установлен на 'Умный', для длинных текстов будет использоваться указанная здесь модель Gemini."
+  },
+  "geminiModel3ProPreview": {
+    "message": "Gemini 3 Pro Preview (Preview)"
+  },
+  "geminiModel3FlashPreview": {
+    "message": "Gemini 3 Flash Preview (Preview)"
+  },
+  "geminiModel25Flash": {
+    "message": "Gemini 2.5 Flash (Balanced)"
+  },
+  "geminiModel25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite (Cost efficient)"
+  },
+  "geminiModel25Pro": {
+    "message": "Gemini 2.5 Pro (Higher quality, long context)"
+  },
+  "apiKeyPlaceholder": {
+    "message": "Пожалуйста, введите ваш ключ API"
+  },
+  "googleCloudApiKeyPlaceholder": {
+    "message": "Пожалуйста, введите ваш ключ API Google Cloud"
+  },
+  "apiKeyToggle": {
+    "message": "Показать/скрыть ключ"
+  },
+  "googleCloudRemoveKey": {
+    "message": "Удалить ключ Google Cloud"
+  },
+  "apiKeyStatusUnset": {
+    "message": "(Не установлен, нажмите здесь, чтобы получить)"
+  },
+  "apiKeyStatusInvalid": {
+    "message": "(Недействительный ключ, нажмите здесь, чтобы получить)"
+  },
+  "apiKeyStatusValid": {
+    "message": "(Сохранено)"
+  },
+  "targetLanguage": {
+    "message": "Цель:"
+  },
+  "targetLanguageSettings": {
+    "message": "Целевой язык по умолчанию:"
+  },
+  "contextMenuEngineLabel": {
+    "message": "Движок контекстного меню:"
+  },
+  "contextMenuEngineSmart": {
+    "message": "Умный режим (по умолчанию)"
+  },
+  "contextMenuEngineGoogle": {
+    "message": "Всегда использовать Google Переводчик"
+  },
+  "contextMenuEngineGoogleCloud": {
+    "message": "Всегда использовать Google Cloud Translation"
+  },
+  "contextMenuEngineGemini3ProPreview": {
+    "message": "Always use Gemini 3 Pro Preview"
+  },
+  "contextMenuEngineGemini3FlashPreview": {
+    "message": "Always use Gemini 3 Flash Preview"
+  },
+  "contextMenuEngineGemini25Flash": {
+    "message": "Always use Gemini 2.5 Flash"
+  },
+  "contextMenuEngineGemini25FlashLite": {
+    "message": "Always use Gemini 2.5 Flash-Lite"
+  },
+  "contextMenuEngineGemini25Pro": {
+    "message": "Always use Gemini 2.5 Pro"
+  },
+  "langZhTw": {
+    "message": "Традиционный китайский"
+  },
+  "langZhCn": {
+    "message": "Упрощенный китайский"
+  },
+  "langEn": {
+    "message": "Английский"
+  },
+  "langJa": {
+    "message": "Японский"
+  },
+  "langKo": {
+    "message": "Корейский"
+  },
+  "langFr": {
+    "message": "Французский"
+  },
+  "langDe": {
+    "message": "Немецкий"
+  },
+  "langEs": {
+    "message": "Испанский"
+  },
+  "langRu": {
+    "message": "Русский"
+  },
+  "langHi": {
+    "message": "Хинди"
+  },
+  "langAr": {
+    "message": "Арабский"
+  },
+  "langBn": {
+    "message": "Бенгальский"
+  },
+  "langPt": {
+    "message": "Португальский"
+  },
+  "langId": {
+    "message": "Индонезийский"
+  },
+  "personalization": {
+    "message": "Персонализация"
+  },
+  "uiLanguage": {
+    "message": "Язык интерфейса:"
+  },
+  "langUiEn": {
+    "message": "English"
+  },
+  "langUiZhTw": {
+    "message": "繁體中文"
+  },
+  "langUiZhCn": {
+    "message": "简体中文"
+  },
+  "langUiJa": {
+    "message": "日本語"
+  },
+  "langUiKo": {
+    "message": "한국어"
+  },
+  "langUiFr": {
+    "message": "Français"
+  },
+  "langUiDe": {
+    "message": "Deutsch"
+  },
+  "langUiEs": {
+    "message": "Español"
+  },
+  "langUiRu": {
+    "message": "Русский"
+  },
+  "langUiHi": {
+    "message": "हिन्दी"
+  },
+  "langUiAr": {
+    "message": "العربية"
+  },
+  "langUiBn": {
+    "message": "বাংলা"
+  },
+  "langUiPt": {
+    "message": "Português"
+  },
+  "langUiId": {
+    "message": "Bahasa Indonesia"
+  },
+  "theme": {
+    "message": "Тема:"
+  },
+  "themeAuto": {
+    "message": "Как в системе"
+  },
+  "themeLight": {
+    "message": "Светлая"
+  },
+  "themeDark": {
+    "message": "Темная"
+  },
+  "maxHistory": {
+    "message": "Максимальный размер истории:"
+  },
+  "saveButton": {
+    "message": "Сохранить настройки"
+  },
+  "historyList": {
+    "message": "Список истории"
+  },
+  "clearHistoryButton": {
+    "message": "Очистить всю историю"
+  },
+  "noHistory": {
+    "message": "Истории переводов пока нет."
+  },
+  "copyOriginal": {
+    "message": "Копировать оригинал"
+  },
+  "copyTranslated": {
+    "message": "Копировать перевод"
+  },
+  "copied": {
+    "message": "Скопировано!"
+  },
+  "delete": {
+    "message": "Удалить"
+  },
+  "confirmDeleteHistoryItem": {
+    "message": "Вы уверены, что хотите удалить эту запись?\n\nОригинал: ${original}",
+    "placeholders": {
+      "original": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmClearAllHistory": {
+    "message": "Вы уверены, что хотите очистить всю историю переводов? Это действие нельзя отменить."
+  },
+  "statusSaved": {
+    "message": "Настройки сохранены"
+  },
+  "statusCleared": {
+    "message": "История очищена"
+  },
+  "sourceLanguageLabel": {
+    "message": "Источник: "
+  },
+  "engineTagGemini": {
+    "message": "Gemini"
+  },
+  "modelTagFlash": {
+    "message": "Flash"
+  },
+  "modelTagPro": {
+    "message": "Pro"
+  }
 }

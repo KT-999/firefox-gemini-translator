@@ -69,13 +69,12 @@ export function renderUI() {
   document.title = i18n.t('optionsTitle');
 }
 
-export function displayApiKeyStatus(apiKey, isValid) {
-  const statusEl = document.getElementById("apiKeyStatus");
+function renderKeyStatus(statusEl, apiKey, isValid, linkUrl) {
   if (!statusEl) return;
   statusEl.innerHTML = '';
   const createLink = (text) => {
     const link = document.createElement('a');
-    link.href = "https://aistudio.google.com/app/apikey";
+    link.href = linkUrl;
     link.target = "_blank";
     link.textContent = text;
     return link;
@@ -92,6 +91,16 @@ export function displayApiKeyStatus(apiKey, isValid) {
     statusEl.className = "key-status valid";
     statusEl.appendChild(span);
   }
+}
+
+export function displayApiKeyStatus(apiKey, isValid) {
+  const statusEl = document.getElementById("apiKeyStatus");
+  renderKeyStatus(statusEl, apiKey, isValid, "https://aistudio.google.com/app/apikey");
+}
+
+export function displayGoogleCloudApiKeyStatus(apiKey, isValid) {
+  const statusEl = document.getElementById("googleCloudApiKeyStatus");
+  renderKeyStatus(statusEl, apiKey, isValid, "https://console.cloud.google.com/apis/credentials");
 }
 
 /**

@@ -36,6 +36,7 @@ export async function addHistoryItem(original, translated, engine, targetLang, s
 export async function getSettings() {
   const defaults = {
     GEMINI_API_KEY: '',
+    GOOGLE_CLOUD_API_KEY: '',
     TRANSLATE_LANG: '繁體中文',
     POPUP_TRANSLATE_LANG: null,
     POPUP_TRANSLATE_ENGINE: null,
@@ -43,8 +44,9 @@ export async function getSettings() {
     THEME: 'auto',
     maxHistorySize: 20,
     geminiKeyValid: false,
-    // 【更新】將預設模型更新為最新的 2.0 Flash
-    GEMINI_MODEL: 'gemini-2.0-flash',
+    googleCloudKeyValid: false,
+    // 【更新】將預設模型更新為最新的 2.5 Flash
+    GEMINI_MODEL: 'gemini-2.5-flash',
     CONTEXT_MENU_ENGINE: 'smart'
   };
   return browser.storage.local.get(defaults);
@@ -64,4 +66,3 @@ export async function getHistory() {
   const { translationHistory = [] } = await browser.storage.local.get("translationHistory");
   return translationHistory;
 }
-

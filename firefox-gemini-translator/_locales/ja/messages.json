@@ -1,110 +1,336 @@
 {
-  "extName": { "message": "Gemini 翻訳ヘルパー" },
-  "extDesc": { "message": "ウェブページ上のテキストを選択し、GeminiまたはGoogleを使用してカスタム言語に翻訳し、結果をページに表示します。" },
-  "contextMenuTitle": { "message": "スマート翻訳" },
-  "promptSystem": { "message": "あなたはプロの翻訳エンジンです。引用符で囲まれたテキストを${targetLang}に翻訳するために、以下の規則に厳密に従ってください。\n\n規則：\n1. **絶対に**説明、前置き、または追加の補足情報を提供しないでください。\n2. 元のテキストが複数の一般的な意味を持つ単一の単語である場合は、「、」で区切って直接リストしてください。例：「トークン、シンボル、バッジ」。\n3. 元のテキストが文またはフレーズである場合は、最も流暢で自然な単一の翻訳結果を直接提供してください。\n4. **絶対に** * や - などのMarkdown形式を使用しないでください。\n\n原文：「${text}」", "placeholders": { "targetLang": { "content": "$1" }, "text": { "content": "$2" } } },
-  "errorGoogle": { "message": "❌ Google翻訳に失敗しました" },
-  "errorGemini": { "message": "❌ Gemini翻訳に失敗しました" },
-  "errorInvalidKey": { "message": "無効なGemini APIキーが検出されました。自動的にGoogle翻訳にダウングレードします。" },
-  "popupCopy": { "message": "コピー" },
-  "popupCopied": { "message": "コピーしました！" },
-  "popupClose": { "message": "閉じる" },
-  "listenButtonTooltip": { "message": "訳文を聞く" },
-  "listenOriginalButtonTooltip": { "message": "原文を聞く" },
-  "optionsTitle": { "message": "Gemini翻訳設定" },
-  "tabTranslate": { "message": "翻訳" },
-  "tabSettings": { "message": "設定" },
-  "tabHistory": { "message": "翻訳履歴" },
-  "originalTextTitle": { "message": "原文" },
-  "translateInputPlaceholder": { "message": "翻訳するテキストを入力してください..." },
-  "translateButton": { "message": "翻訳" },
-  "translationResult": { "message": "翻訳結果" },
-  "translationEngineLabel": { "message": "エンジン：" },
-  "engineOptionGoogle": { "message": "Google翻訳" },
-  "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
-  "engineOptionGemini3ProPreview": { "message": "Gemini 3 Pro Preview" },
-  "engineOptionGemini3FlashPreview": { "message": "Gemini 3 Flash Preview" },
-  "engineOptionGemini25Flash": { "message": "Gemini 2.5 Flash" },
-  "engineOptionGemini25FlashLite": { "message": "Gemini 2.5 Flash-Lite" },
-  "engineOptionGemini25Pro": { "message": "Gemini 2.5 Pro" },
-  "engineOptionGemini20FlashLite": { "message": "Gemini 2.0 Flash-Lite" },
-  "coreSettings": { "message": "コア設定" },
-  "geminiApiKey": { "message": "Gemini APIキー:" },
-  "geminiModelLabel": { "message": "スマートモードモデル：" },
-  "geminiModelDescription": { "message": "「コンテキストメニューのデフォルトエンジン」が「スマート」に設定されている場合、長いテキストにはここで指定されたGeminiモデルが使用されます。" },
-  "geminiModelFlash": { "message": "Gemini 2.0 Flash (高速、一般的な用途向け)" },
-  "geminiModel3ProPreview": { "message": "Gemini 3 Pro Preview (Preview)" },
-  "geminiModel3FlashPreview": { "message": "Gemini 3 Flash Preview (Preview)" },
-  "geminiModel25Flash": { "message": "Gemini 2.5 Flash (Balanced)" },
-  "geminiModel25FlashLite": { "message": "Gemini 2.5 Flash-Lite (Cost efficient)" },
-  "geminiModel25Pro": { "message": "Gemini 2.5 Pro (Higher quality, long context)" },
-  "geminiModel20FlashLite": { "message": "Gemini 2.0 Flash-Lite (Cost efficient)" },
-  "apiKeyPlaceholder": { "message": "APIキーを入力してください" },
-  "apiKeyToggle": { "message": "キーの表示/非表示" },
-  "apiKeyStatusUnset": { "message": "（未設定、ここをクリックして取得）" },
-  "apiKeyStatusInvalid": { "message": "（無効なキー、ここをクリックして取得）" },
-  "apiKeyStatusValid": { "message": "（保存済み）" },
-  "targetLanguage": { "message": "ターゲット：" },
-  "targetLanguageSettings": { "message": "デフォルトのターゲット言語：" },
-  "contextMenuEngineLabel": { "message": "右クリックメニューエンジン：" },
-  "contextMenuEngineSmart": { "message": "スマートモード (デフォルト)" },
-  "contextMenuEngineGoogle": { "message": "常にGoogle翻訳を使用" },
-  "contextMenuEngineGeminiFlash": { "message": "常にGemini 2.0 Flashを使用" },
-  "contextMenuEngineGemini3ProPreview": { "message": "Always use Gemini 3 Pro Preview" },
-  "contextMenuEngineGemini3FlashPreview": { "message": "Always use Gemini 3 Flash Preview" },
-  "contextMenuEngineGemini25Flash": { "message": "Always use Gemini 2.5 Flash" },
-  "contextMenuEngineGemini25FlashLite": { "message": "Always use Gemini 2.5 Flash-Lite" },
-  "contextMenuEngineGemini25Pro": { "message": "Always use Gemini 2.5 Pro" },
-  "contextMenuEngineGemini20FlashLite": { "message": "Always use Gemini 2.0 Flash-Lite" },
-  "langZhTw": { "message": "繁体字中国語" },
-  "langZhCn": { "message": "簡体字中国語" },
-  "langEn": { "message": "英語" },
-  "langJa": { "message": "日本語" },
-  "langKo": { "message": "韓国語" },
-  "langFr": { "message": "フランス語" },
-  "langDe": { "message": "ドイツ語" },
-  "langEs": { "message": "スペイン語" },
-  "langRu": { "message": "ロシア語" },
-  "langHi": { "message": "ヒンディー語" },
-  "langAr": { "message": "アラビア語" },
-  "langBn": { "message": "ベンガル語" },
-  "langPt": { "message": "ポルトガル語" },
-  "langId": { "message": "インドネシア語" },
-  "personalization": { "message": "パーソナライゼーション" },
-  "uiLanguage": { "message": "UI言語:" },
-  "langUiEn": { "message": "English" },
-  "langUiZhTw": { "message": "繁體中文" },
-  "langUiZhCn": { "message": "简体中文" },
-  "langUiJa": { "message": "日本語" },
-  "langUiKo": { "message": "한국어" },
-  "langUiFr": { "message": "Français" },
-  "langUiDe": { "message": "Deutsch" },
-  "langUiEs": { "message": "Español" },
-  "langUiRu": { "message": "Русский" },
-  "langUiHi": { "message": "हिन्दी" },
-  "langUiAr": { "message": "العربية" },
-  "langUiBn": { "message": "বাংলা" },
-  "langUiPt": { "message": "Português" },
-  "langUiId": { "message": "Bahasa Indonesia" },
-  "theme": { "message": "テーマ:" },
-  "themeAuto": { "message": "システムに従う" },
-  "themeLight": { "message": "ライト" },
-  "themeDark": { "message": "ダーク" },
-  "maxHistory": { "message": "最大履歴サイズ:" },
-  "saveButton": { "message": "設定を保存" },
-  "historyList": { "message": "履歴リスト" },
-  "clearHistoryButton": { "message": "すべての履歴をクリア" },
-  "noHistory": { "message": "まだ翻訳履歴はありません。" },
-  "copyOriginal": { "message": "原文をコピー" },
-  "copyTranslated": { "message": "訳文をコピー" },
-  "copied": { "message": "コピーしました！" },
-  "delete": { "message": "削除" },
-  "confirmDeleteHistoryItem": { "message": "このレコードを削除してもよろしいですか？\n\n原文：${original}", "placeholders": { "original": { "content": "$1" } } },
-  "confirmClearAllHistory": { "message": "すべての翻訳履歴をクリアしてもよろしいですか？この操作は元に戻せません。" },
-  "statusSaved": { "message": "設定が保存されました" },
-  "statusCleared": { "message": "履歴がクリアされました" },
-  "sourceLanguageLabel": { "message": "原文言語：" },
-  "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "Flash" },
-  "modelTagPro": { "message": "Pro" }
+  "extName": {
+    "message": "Gemini 翻訳ヘルパー"
+  },
+  "extDesc": {
+    "message": "ウェブページ上のテキストを選択し、GeminiまたはGoogleを使用してカスタム言語に翻訳し、結果をページに表示します。"
+  },
+  "contextMenuTitle": {
+    "message": "スマート翻訳"
+  },
+  "promptSystem": {
+    "message": "あなたはプロの翻訳エンジンです。引用符で囲まれたテキストを${targetLang}に翻訳するために、以下の規則に厳密に従ってください。\n\n規則：\n1. **絶対に**説明、前置き、または追加の補足情報を提供しないでください。\n2. 元のテキストが複数の一般的な意味を持つ単一の単語である場合は、「、」で区切って直接リストしてください。例：「トークン、シンボル、バッジ」。\n3. 元のテキストが文またはフレーズである場合は、最も流暢で自然な単一の翻訳結果を直接提供してください。\n4. **絶対に** * や - などのMarkdown形式を使用しないでください。\n\n原文：「${text}」",
+    "placeholders": {
+      "targetLang": {
+        "content": "$1"
+      },
+      "text": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorGoogle": {
+    "message": "❌ Google翻訳に失敗しました"
+  },
+  "errorGemini": {
+    "message": "❌ Gemini翻訳に失敗しました"
+  },
+  "errorInvalidKey": {
+    "message": "無効なGemini APIキーが検出されました。自動的にGoogle翻訳にダウングレードします。"
+  },
+  "popupCopy": {
+    "message": "コピー"
+  },
+  "popupCopied": {
+    "message": "コピーしました！"
+  },
+  "popupClose": {
+    "message": "閉じる"
+  },
+  "listenButtonTooltip": {
+    "message": "訳文を聞く"
+  },
+  "listenOriginalButtonTooltip": {
+    "message": "原文を聞く"
+  },
+  "optionsTitle": {
+    "message": "Gemini翻訳設定"
+  },
+  "tabTranslate": {
+    "message": "翻訳"
+  },
+  "tabSettings": {
+    "message": "設定"
+  },
+  "tabHistory": {
+    "message": "翻訳履歴"
+  },
+  "originalTextTitle": {
+    "message": "原文"
+  },
+  "translateInputPlaceholder": {
+    "message": "翻訳するテキストを入力してください..."
+  },
+  "translateButton": {
+    "message": "翻訳"
+  },
+  "translationResult": {
+    "message": "翻訳結果"
+  },
+  "translationEngineLabel": {
+    "message": "エンジン："
+  },
+  "engineOptionGoogle": {
+    "message": "Google翻訳"
+  },
+  "engineOptionGoogleCloud": {
+    "message": "Google Cloud 翻訳 API"
+  },
+  "engineOptionGemini3ProPreview": {
+    "message": "Gemini 3 Pro Preview"
+  },
+  "engineOptionGemini3FlashPreview": {
+    "message": "Gemini 3 Flash Preview"
+  },
+  "engineOptionGemini25Flash": {
+    "message": "Gemini 2.5 Flash"
+  },
+  "engineOptionGemini25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite"
+  },
+  "engineOptionGemini25Pro": {
+    "message": "Gemini 2.5 Pro"
+  },
+  "coreSettings": {
+    "message": "コア設定"
+  },
+  "geminiApiKey": {
+    "message": "Gemini APIキー:"
+  },
+  "googleCloudApiKey": {
+    "message": "Google Cloud 翻訳 API キー:"
+  },
+  "geminiModelLabel": {
+    "message": "スマートモードモデル："
+  },
+  "geminiModelDescription": {
+    "message": "「コンテキストメニューのデフォルトエンジン」が「スマート」に設定されている場合、長いテキストにはここで指定されたGeminiモデルが使用されます。"
+  },
+  "geminiModel3ProPreview": {
+    "message": "Gemini 3 Pro Preview (Preview)"
+  },
+  "geminiModel3FlashPreview": {
+    "message": "Gemini 3 Flash Preview (Preview)"
+  },
+  "geminiModel25Flash": {
+    "message": "Gemini 2.5 Flash (Balanced)"
+  },
+  "geminiModel25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite (Cost efficient)"
+  },
+  "geminiModel25Pro": {
+    "message": "Gemini 2.5 Pro (Higher quality, long context)"
+  },
+  "apiKeyPlaceholder": {
+    "message": "APIキーを入力してください"
+  },
+  "googleCloudApiKeyPlaceholder": {
+    "message": "Google Cloud API キーを入力してください"
+  },
+  "apiKeyToggle": {
+    "message": "キーの表示/非表示"
+  },
+  "googleCloudRemoveKey": {
+    "message": "Google Cloud キーを削除"
+  },
+  "apiKeyStatusUnset": {
+    "message": "（未設定、ここをクリックして取得）"
+  },
+  "apiKeyStatusInvalid": {
+    "message": "（無効なキー、ここをクリックして取得）"
+  },
+  "apiKeyStatusValid": {
+    "message": "（保存済み）"
+  },
+  "targetLanguage": {
+    "message": "ターゲット："
+  },
+  "targetLanguageSettings": {
+    "message": "デフォルトのターゲット言語："
+  },
+  "contextMenuEngineLabel": {
+    "message": "右クリックメニューエンジン："
+  },
+  "contextMenuEngineSmart": {
+    "message": "スマートモード (デフォルト)"
+  },
+  "contextMenuEngineGoogle": {
+    "message": "常にGoogle翻訳を使用"
+  },
+  "contextMenuEngineGoogleCloud": {
+    "message": "常に Google Cloud 翻訳を使用"
+  },
+  "contextMenuEngineGemini3ProPreview": {
+    "message": "Always use Gemini 3 Pro Preview"
+  },
+  "contextMenuEngineGemini3FlashPreview": {
+    "message": "Always use Gemini 3 Flash Preview"
+  },
+  "contextMenuEngineGemini25Flash": {
+    "message": "Always use Gemini 2.5 Flash"
+  },
+  "contextMenuEngineGemini25FlashLite": {
+    "message": "Always use Gemini 2.5 Flash-Lite"
+  },
+  "contextMenuEngineGemini25Pro": {
+    "message": "Always use Gemini 2.5 Pro"
+  },
+  "langZhTw": {
+    "message": "繁体字中国語"
+  },
+  "langZhCn": {
+    "message": "簡体字中国語"
+  },
+  "langEn": {
+    "message": "英語"
+  },
+  "langJa": {
+    "message": "日本語"
+  },
+  "langKo": {
+    "message": "韓国語"
+  },
+  "langFr": {
+    "message": "フランス語"
+  },
+  "langDe": {
+    "message": "ドイツ語"
+  },
+  "langEs": {
+    "message": "スペイン語"
+  },
+  "langRu": {
+    "message": "ロシア語"
+  },
+  "langHi": {
+    "message": "ヒンディー語"
+  },
+  "langAr": {
+    "message": "アラビア語"
+  },
+  "langBn": {
+    "message": "ベンガル語"
+  },
+  "langPt": {
+    "message": "ポルトガル語"
+  },
+  "langId": {
+    "message": "インドネシア語"
+  },
+  "personalization": {
+    "message": "パーソナライゼーション"
+  },
+  "uiLanguage": {
+    "message": "UI言語:"
+  },
+  "langUiEn": {
+    "message": "English"
+  },
+  "langUiZhTw": {
+    "message": "繁體中文"
+  },
+  "langUiZhCn": {
+    "message": "简体中文"
+  },
+  "langUiJa": {
+    "message": "日本語"
+  },
+  "langUiKo": {
+    "message": "한국어"
+  },
+  "langUiFr": {
+    "message": "Français"
+  },
+  "langUiDe": {
+    "message": "Deutsch"
+  },
+  "langUiEs": {
+    "message": "Español"
+  },
+  "langUiRu": {
+    "message": "Русский"
+  },
+  "langUiHi": {
+    "message": "हिन्दी"
+  },
+  "langUiAr": {
+    "message": "العربية"
+  },
+  "langUiBn": {
+    "message": "বাংলা"
+  },
+  "langUiPt": {
+    "message": "Português"
+  },
+  "langUiId": {
+    "message": "Bahasa Indonesia"
+  },
+  "theme": {
+    "message": "テーマ:"
+  },
+  "themeAuto": {
+    "message": "システムに従う"
+  },
+  "themeLight": {
+    "message": "ライト"
+  },
+  "themeDark": {
+    "message": "ダーク"
+  },
+  "maxHistory": {
+    "message": "最大履歴サイズ:"
+  },
+  "saveButton": {
+    "message": "設定を保存"
+  },
+  "historyList": {
+    "message": "履歴リスト"
+  },
+  "clearHistoryButton": {
+    "message": "すべての履歴をクリア"
+  },
+  "noHistory": {
+    "message": "まだ翻訳履歴はありません。"
+  },
+  "copyOriginal": {
+    "message": "原文をコピー"
+  },
+  "copyTranslated": {
+    "message": "訳文をコピー"
+  },
+  "copied": {
+    "message": "コピーしました！"
+  },
+  "delete": {
+    "message": "削除"
+  },
+  "confirmDeleteHistoryItem": {
+    "message": "このレコードを削除してもよろしいですか？\n\n原文：${original}",
+    "placeholders": {
+      "original": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmClearAllHistory": {
+    "message": "すべての翻訳履歴をクリアしてもよろしいですか？この操作は元に戻せません。"
+  },
+  "statusSaved": {
+    "message": "設定が保存されました"
+  },
+  "statusCleared": {
+    "message": "履歴がクリアされました"
+  },
+  "sourceLanguageLabel": {
+    "message": "原文言語："
+  },
+  "engineTagGemini": {
+    "message": "Gemini"
+  },
+  "modelTagFlash": {
+    "message": "Flash"
+  },
+  "modelTagPro": {
+    "message": "Pro"
+  }
 }

@@ -60,8 +60,13 @@ async function createTranslationCard(data) {
     tagContainer.appendChild(modelTag);
   } else {
     const googleTag = document.createElement('span');
-    googleTag.className = 'gt-engine-tag engine-google';
-    googleTag.textContent = uiStrings.engineOptionGoogle;
+    if (engine === 'google-cloud') {
+      googleTag.className = 'gt-engine-tag engine-google-cloud';
+      googleTag.textContent = uiStrings.engineOptionGoogleCloud;
+    } else {
+      googleTag.className = 'gt-engine-tag engine-google';
+      googleTag.textContent = uiStrings.engineOptionGoogle;
+    }
     tagContainer.appendChild(googleTag);
   }
   card.appendChild(tagContainer);
@@ -200,6 +205,7 @@ function injectStyles() {
         .gt-tag-container { position: absolute; top: 0; right: 0; display: flex; border-radius: 0 8px 0 8px; overflow: hidden; }
         .gt-engine-tag { padding: 4px 10px; font-size: 11px; font-weight: bold; color: #fff; text-transform: capitalize; }
         .gt-engine-tag.engine-google { background-color: #888; }
+        .gt-engine-tag.engine-google-cloud { background-color: #5e35b1; }
         .gt-engine-tag.engine-gemini { background-color: var(--gt-primary); }
         .gt-engine-tag.model-flash { background-color: #00897b; }
         .gt-engine-tag.model-pro { background-color: #3949ab; }
