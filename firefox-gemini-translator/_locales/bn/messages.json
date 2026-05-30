@@ -1,110 +1,330 @@
 {
-  "extName": { "message": "জেমিনি অনুবাদ সহায়ক" },
-  "extDesc": { "message": "একটি ওয়েবপৃষ্ঠায় পাঠ্য নির্বাচন করুন, জেমিনি বা গুগল ব্যবহার করে এটি একটি কাস্টম ভাষায় অনুবাদ করুন এবং পৃষ্ঠায় ফলাফল প্রদর্শন করুন।" },
-  "contextMenuTitle": { "message": "স্মার্ট অনুবাদ" },
-  "promptSystem": { "message": "আপনি একজন পেশাদার অনুবাদ ইঞ্জিন। উদ্ধৃতি চিহ্নের মধ্যে থাকা পাঠ্যটিকে ${targetLang} এ অনুবাদ করতে দয়া করে নীচের নিয়মগুলি কঠোরভাবে অনুসরণ করুন।\n\nনিয়ম:\n1. **একেবারে কোনো** ব্যাখ্যা, প্রস্তাবনা বা অতিরিক্ত পরিপূরক তথ্য প্রদান করবেন না।\n2. যদি মূল পাঠ্যটি একাধিক সাধারণ অর্থ সহ একটি একক শব্দ হয়, তবে সেগুলিকে সরাসরি '、' দ্বারা বিভক্ত করে তালিকাভুক্ত করুন, উদাহরণস্বরূপ: 'টোকেন, প্রতীক, ব্যাজ'।\n3. যদি মূল পাঠ্যটি একটি বাক্য বা বাক্যাংশ হয়, তবে সরাসরি সবচেয়ে সাবলীল এবং প্রাকৃতিক একক অনুবাদ ফলাফল প্রদান করুন।\n4. **একেবারে কোনো** মার্কডাউন বিন্যাস, যেমন * বা -, ব্যবহার করবেন না।\n\nমূল পাঠ্য: \"${text}\"", "placeholders": { "targetLang": { "content": "$1" }, "text": { "content": "$2" } } },
-  "errorGoogle": { "message": "❌ গুগল অনুবাদ ব্যর্থ হয়েছে" },
-  "errorGemini": { "message": "❌ জেমিনি অনুবাদ ব্যর্থ হয়েছে" },
-  "errorInvalidKey": { "message": "অবৈধ জেমিনি এপিআই কী সনাক্ত করা হয়েছে, স্বয়ংক্রিয়ভাবে গুগল অনুবাদে ডাউনগ্রেড করা হচ্ছে।" },
-  "popupCopy": { "message": "অনুলিপি" },
-  "popupCopied": { "message": "অনুলিপি করা হয়েছে!" },
-  "popupClose": { "message": "বন্ধ করুন" },
-  "listenButtonTooltip": { "message": "অনুবাদ শুনুন" },
-  "listenOriginalButtonTooltip": { "message": "মূল শুনুন" },
-  "optionsTitle": { "message": "জেমিনি অনুবাদ সেটিংস" },
-  "tabTranslate": { "message": "অনুবাদ করুন" },
-  "tabSettings": { "message": "সেটিংস" },
-  "tabHistory": { "message": "ইতিহাস" },
-  "originalTextTitle": { "message": "মূল পাঠ্য" },
-  "translateInputPlaceholder": { "message": "অনুবাদ করার জন্য পাঠ্য লিখুন..." },
-  "translateButton": { "message": "অনুবাদ করুন" },
-  "translationResult": { "message": "অনুবাদের ফলাফল" },
-  "translationEngineLabel": { "message": "ইঞ্জিন:" },
-  "engineOptionGoogle": { "message": "গুগল অনুবাদ" },
-  "engineOptionGeminiFlash": { "message": "জেমিনি 2.0 ফ্ল্যাশ" },
-  "engineOptionGemini3ProPreview": { "message": "Gemini 3 Pro Preview" },
-  "engineOptionGemini3FlashPreview": { "message": "Gemini 3 Flash Preview" },
-  "engineOptionGemini25Flash": { "message": "Gemini 2.5 Flash" },
-  "engineOptionGemini25FlashLite": { "message": "Gemini 2.5 Flash-Lite" },
-  "engineOptionGemini25Pro": { "message": "Gemini 2.5 Pro" },
-  "engineOptionGemini20FlashLite": { "message": "Gemini 2.0 Flash-Lite" },
-  "coreSettings": { "message": "কোর সেটিংস" },
-  "geminiApiKey": { "message": "জেমিনি এপিআই কী:" },
-  "geminiModelLabel": { "message": "স্মার্ট মোড মডেল:" },
-  "geminiModelDescription": { "message": "যখন 'কনটেক্সট মেনু ডিফল্ট ইঞ্জিন' 'স্মার্ট' এ সেট করা থাকে, তখন দীর্ঘ পাঠ্য এখানে উল্লেখিত জেমিনি মডেল ব্যবহার করবে।" },
-  "geminiModelFlash": { "message": "জেমিনি 2.0 ফ্ল্যাশ (দ্রুত, সাধারণ ব্যবহারের জন্য)" },
-  "geminiModel3ProPreview": { "message": "Gemini 3 Pro Preview (Preview)" },
-  "geminiModel3FlashPreview": { "message": "Gemini 3 Flash Preview (Preview)" },
-  "geminiModel25Flash": { "message": "Gemini 2.5 Flash (Balanced)" },
-  "geminiModel25FlashLite": { "message": "Gemini 2.5 Flash-Lite (Cost efficient)" },
-  "geminiModel25Pro": { "message": "Gemini 2.5 Pro (Higher quality, long context)" },
-  "geminiModel20FlashLite": { "message": "Gemini 2.0 Flash-Lite (Cost efficient)" },
-  "apiKeyPlaceholder": { "message": "আপনার এপিআই কী লিখুন" },
-  "apiKeyToggle": { "message": "কী দেখান/লুকান" },
-  "apiKeyStatusUnset": { "message": "(সেট করা নেই, একটি পেতে এখানে ক্লিক করুন)" },
-  "apiKeyStatusInvalid": { "message": "(অবৈধ কী, একটি পেতে এখানে ক্লিক করুন)" },
-  "apiKeyStatusValid": { "message": "(সংরক্ষিত)" },
-  "targetLanguage": { "message": "লক্ষ্য:" },
-  "targetLanguageSettings": { "message": "ডিফল্ট লক্ষ্য ভাষা:" },
-  "contextMenuEngineLabel": { "message": "কনটেক্সট মেনু ইঞ্জিন:" },
-  "contextMenuEngineSmart": { "message": "স্মার্ট মোড (ডিফল্ট)" },
-  "contextMenuEngineGoogle": { "message": "সর্বদা গুগল অনুবাদ ব্যবহার করুন" },
-  "contextMenuEngineGeminiFlash": { "message": "সর্বদা জেমিনি 2.0 ফ্ল্যাশ ব্যবহার করুন" },
-  "contextMenuEngineGemini3ProPreview": { "message": "Always use Gemini 3 Pro Preview" },
-  "contextMenuEngineGemini3FlashPreview": { "message": "Always use Gemini 3 Flash Preview" },
-  "contextMenuEngineGemini25Flash": { "message": "Always use Gemini 2.5 Flash" },
-  "contextMenuEngineGemini25FlashLite": { "message": "Always use Gemini 2.5 Flash-Lite" },
-  "contextMenuEngineGemini25Pro": { "message": "Always use Gemini 2.5 Pro" },
-  "contextMenuEngineGemini20FlashLite": { "message": "Always use Gemini 2.0 Flash-Lite" },
-  "langZhTw": { "message": "ঐতিহ্যবাহী চীনা" },
-  "langZhCn": { "message": "সরলীকৃত চীনা" },
-  "langEn": { "message": "ইংরেজি" },
-  "langJa": { "message": "জাপানি" },
-  "langKo": { "message": "কোরিয়ান" },
-  "langFr": { "message": "ফরাসি" },
-  "langDe": { "message": "জার্মান" },
-  "langEs": { "message": "স্প্যানিশ" },
-  "langRu": { "message": "রাশিয়ান" },
-  "langHi": { "message": "হিন্দি" },
-  "langAr": { "message": "আরবি" },
-  "langBn": { "message": "বাংলা" },
-  "langPt": { "message": "পর্তুগিজ" },
-  "langId": { "message": "ইন্দোনেশিয়ান" },
-  "personalization": { "message": "ব্যক্তিগতকরণ" },
-  "uiLanguage": { "message": "ইউজার ইন্টারফেস ভাষা:" },
-  "langUiEn": { "message": "English" },
-  "langUiZhTw": { "message": "繁體中文" },
-  "langUiZhCn": { "message": "简体中文" },
-  "langUiJa": { "message": "日本語" },
-  "langUiKo": { "message": "한국어" },
-  "langUiFr": { "message": "Français" },
-  "langUiDe": { "message": "Deutsch" },
-  "langUiEs": { "message": "Español" },
-  "langUiRu": { "message": "Русский" },
-  "langUiHi": { "message": "हिन्दी" },
-  "langUiAr": { "message": "العربية" },
-  "langUiBn": { "message": "বাংলা" },
-  "langUiPt": { "message": "Português" },
-  "langUiId": { "message": "Bahasa Indonesia" },
-  "theme": { "message": "থিম:" },
-  "themeAuto": { "message": "সিস্টেম অনুসরণ করুন" },
-  "themeLight": { "message": "হালকা" },
-  "themeDark": { "message": "অন্ধকার" },
-  "maxHistory": { "message": "সর্বোচ্চ ইতিহাস আকার:" },
-  "saveButton": { "message": "সেটিংস সংরক্ষণ করুন" },
-  "historyList": { "message": "ইতিহাস তালিকা" },
-  "clearHistoryButton": { "message": "সমস্ত ইতিহাস মুছে ফেলুন" },
-  "noHistory": { "message": "এখনও কোনো অনুবাদের ইতিহাস নেই।" },
-  "copyOriginal": { "message": "মূল অনুলিপি করুন" },
-  "copyTranslated": { "message": "অনূদিত অনুলিপি করুন" },
-  "copied": { "message": "অনুলিপি করা হয়েছে!" },
-  "delete": { "message": "মুছে ফেলুন" },
-  "confirmDeleteHistoryItem": { "message": "আপনি কি নিশ্চিত যে আপনি এই রেকর্ডটি মুছে ফেলতে চান?\n\nমূল: ${original}", "placeholders": { "original": { "content": "$1" } } },
-  "confirmClearAllHistory": { "message": "আপনি কি নিশ্চিত যে আপনি সমস্ত অনুবাদের ইতিহাস মুছে ফেলতে চান? এই ক্রিয়াটি পূর্বাবস্থায় ফেরানো যাবে না।" },
-  "statusSaved": { "message": "সেটিংস সংরক্ষিত হয়েছে" },
-  "statusCleared": { "message": "ইতিহাস মুছে ফেলা হয়েছে" },
-  "sourceLanguageLabel": { "message": "উৎস: " },
-  "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "Flash" },
-  "modelTagPro": { "message": "Pro" }
+  "extName": {
+    "message": "জেমিনি অনুবাদ সহায়ক"
+  },
+  "extDesc": {
+    "message": "একটি ওয়েবপৃষ্ঠায় পাঠ্য নির্বাচন করুন, জেমিনি বা গুগল ব্যবহার করে এটি একটি কাস্টম ভাষায় অনুবাদ করুন এবং পৃষ্ঠায় ফলাফল প্রদর্শন করুন।"
+  },
+  "contextMenuTitle": {
+    "message": "স্মার্ট অনুবাদ"
+  },
+  "promptSystem": {
+    "message": "আপনি একজন পেশাদার অনুবাদ ইঞ্জিন। উদ্ধৃতি চিহ্নের মধ্যে থাকা পাঠ্যটিকে ${targetLang} এ অনুবাদ করতে দয়া করে নীচের নিয়মগুলি কঠোরভাবে অনুসরণ করুন।\n\nনিয়ম:\n1. **একেবারে কোনো** ব্যাখ্যা, প্রস্তাবনা বা অতিরিক্ত পরিপূরক তথ্য প্রদান করবেন না।\n2. যদি মূল পাঠ্যটি একাধিক সাধারণ অর্থ সহ একটি একক শব্দ হয়, তবে সেগুলিকে সরাসরি '、' দ্বারা বিভক্ত করে তালিকাভুক্ত করুন, উদাহরণস্বরূপ: 'টোকেন, প্রতীক, ব্যাজ'।\n3. যদি মূল পাঠ্যটি একটি বাক্য বা বাক্যাংশ হয়, তবে সরাসরি সবচেয়ে সাবলীল এবং প্রাকৃতিক একক অনুবাদ ফলাফল প্রদান করুন।\n4. **একেবারে কোনো** মার্কডাউন বিন্যাস, যেমন * বা -, ব্যবহার করবেন না।\n\nমূল পাঠ্য: \"${text}\"",
+    "placeholders": {
+      "targetLang": {
+        "content": "$1"
+      },
+      "text": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorGoogle": {
+    "message": "❌ গুগল অনুবাদ ব্যর্থ হয়েছে"
+  },
+  "errorGemini": {
+    "message": "❌ জেমিনি অনুবাদ ব্যর্থ হয়েছে"
+  },
+  "errorInvalidKey": {
+    "message": "অবৈধ জেমিনি এপিআই কী সনাক্ত করা হয়েছে, স্বয়ংক্রিয়ভাবে গুগল অনুবাদে ডাউনগ্রেড করা হচ্ছে।"
+  },
+  "popupCopy": {
+    "message": "অনুলিপি"
+  },
+  "popupCopied": {
+    "message": "অনুলিপি করা হয়েছে!"
+  },
+  "popupClose": {
+    "message": "বন্ধ করুন"
+  },
+  "listenButtonTooltip": {
+    "message": "অনুবাদ শুনুন"
+  },
+  "listenOriginalButtonTooltip": {
+    "message": "মূল শুনুন"
+  },
+  "optionsTitle": {
+    "message": "জেমিনি অনুবাদ সেটিংস"
+  },
+  "tabTranslate": {
+    "message": "অনুবাদ করুন"
+  },
+  "tabSettings": {
+    "message": "সেটিংস"
+  },
+  "tabHistory": {
+    "message": "ইতিহাস"
+  },
+  "originalTextTitle": {
+    "message": "মূল পাঠ্য"
+  },
+  "translateInputPlaceholder": {
+    "message": "অনুবাদ করার জন্য পাঠ্য লিখুন..."
+  },
+  "translateButton": {
+    "message": "অনুবাদ করুন"
+  },
+  "translationResult": {
+    "message": "অনুবাদের ফলাফল"
+  },
+  "translationEngineLabel": {
+    "message": "ইঞ্জিন:"
+  },
+  "engineOptionGoogle": {
+    "message": "গুগল অনুবাদ"
+  },
+  "engineOptionGemini25Flash": {
+    "message": "Gemini 2.5 Flash"
+  },
+  "engineOptionGemini25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite"
+  },
+  "engineOptionGemini25Pro": {
+    "message": "Gemini 2.5 Pro"
+  },
+  "coreSettings": {
+    "message": "কোর সেটিংস"
+  },
+  "geminiApiKey": {
+    "message": "জেমিনি এপিআই কী:"
+  },
+  "geminiModelLabel": {
+    "message": "স্মার্ট মোড মডেল:"
+  },
+  "geminiModelDescription": {
+    "message": "যখন 'কনটেক্সট মেনু ডিফল্ট ইঞ্জিন' 'স্মার্ট' এ সেট করা থাকে, তখন দীর্ঘ পাঠ্য এখানে উল্লেখিত জেমিনি মডেল ব্যবহার করবে।"
+  },
+  "geminiModel25Flash": {
+    "message": "Gemini 2.5 Flash (Balanced)"
+  },
+  "geminiModel25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite (Cost efficient)"
+  },
+  "geminiModel25Pro": {
+    "message": "Gemini 2.5 Pro (Higher quality, long context)"
+  },
+  "apiKeyPlaceholder": {
+    "message": "আপনার এপিআই কী লিখুন"
+  },
+  "apiKeyToggle": {
+    "message": "কী দেখান/লুকান"
+  },
+  "apiKeyStatusUnset": {
+    "message": "(সেট করা নেই, একটি পেতে এখানে ক্লিক করুন)"
+  },
+  "apiKeyStatusInvalid": {
+    "message": "(অবৈধ কী, একটি পেতে এখানে ক্লিক করুন)"
+  },
+  "apiKeyStatusValid": {
+    "message": "(সংরক্ষিত)"
+  },
+  "targetLanguage": {
+    "message": "লক্ষ্য:"
+  },
+  "targetLanguageSettings": {
+    "message": "ডিফল্ট লক্ষ্য ভাষা:"
+  },
+  "contextMenuEngineLabel": {
+    "message": "কনটেক্সট মেনু ইঞ্জিন:"
+  },
+  "contextMenuEngineSmart": {
+    "message": "স্মার্ট মোড (ডিফল্ট)"
+  },
+  "contextMenuEngineGoogle": {
+    "message": "সর্বদা গুগল অনুবাদ ব্যবহার করুন"
+  },
+  "contextMenuEngineGemini25Flash": {
+    "message": "Always use Gemini 2.5 Flash"
+  },
+  "contextMenuEngineGemini25FlashLite": {
+    "message": "Always use Gemini 2.5 Flash-Lite"
+  },
+  "contextMenuEngineGemini25Pro": {
+    "message": "Always use Gemini 2.5 Pro"
+  },
+  "langZhTw": {
+    "message": "ঐতিহ্যবাহী চীনা"
+  },
+  "langZhCn": {
+    "message": "সরলীকৃত চীনা"
+  },
+  "langEn": {
+    "message": "ইংরেজি"
+  },
+  "langJa": {
+    "message": "জাপানি"
+  },
+  "langKo": {
+    "message": "কোরিয়ান"
+  },
+  "langFr": {
+    "message": "ফরাসি"
+  },
+  "langDe": {
+    "message": "জার্মান"
+  },
+  "langEs": {
+    "message": "স্প্যানিশ"
+  },
+  "langRu": {
+    "message": "রাশিয়ান"
+  },
+  "langHi": {
+    "message": "হিন্দি"
+  },
+  "langAr": {
+    "message": "আরবি"
+  },
+  "langBn": {
+    "message": "বাংলা"
+  },
+  "langPt": {
+    "message": "পর্তুগিজ"
+  },
+  "langId": {
+    "message": "ইন্দোনেশিয়ান"
+  },
+  "personalization": {
+    "message": "ব্যক্তিগতকরণ"
+  },
+  "uiLanguage": {
+    "message": "ইউজার ইন্টারফেস ভাষা:"
+  },
+  "langUiEn": {
+    "message": "English"
+  },
+  "langUiZhTw": {
+    "message": "繁體中文"
+  },
+  "langUiZhCn": {
+    "message": "简体中文"
+  },
+  "langUiJa": {
+    "message": "日本語"
+  },
+  "langUiKo": {
+    "message": "한국어"
+  },
+  "langUiFr": {
+    "message": "Français"
+  },
+  "langUiDe": {
+    "message": "Deutsch"
+  },
+  "langUiEs": {
+    "message": "Español"
+  },
+  "langUiRu": {
+    "message": "Русский"
+  },
+  "langUiHi": {
+    "message": "हिन्दी"
+  },
+  "langUiAr": {
+    "message": "العربية"
+  },
+  "langUiBn": {
+    "message": "বাংলা"
+  },
+  "langUiPt": {
+    "message": "Português"
+  },
+  "langUiId": {
+    "message": "Bahasa Indonesia"
+  },
+  "theme": {
+    "message": "থিম:"
+  },
+  "themeAuto": {
+    "message": "সিস্টেম অনুসরণ করুন"
+  },
+  "themeLight": {
+    "message": "হালকা"
+  },
+  "themeDark": {
+    "message": "অন্ধকার"
+  },
+  "maxHistory": {
+    "message": "সর্বোচ্চ ইতিহাস আকার:"
+  },
+  "saveButton": {
+    "message": "সেটিংস সংরক্ষণ করুন"
+  },
+  "historyList": {
+    "message": "ইতিহাস তালিকা"
+  },
+  "clearHistoryButton": {
+    "message": "সমস্ত ইতিহাস মুছে ফেলুন"
+  },
+  "noHistory": {
+    "message": "এখনও কোনো অনুবাদের ইতিহাস নেই।"
+  },
+  "copyOriginal": {
+    "message": "মূল অনুলিপি করুন"
+  },
+  "copyTranslated": {
+    "message": "অনূদিত অনুলিপি করুন"
+  },
+  "copied": {
+    "message": "অনুলিপি করা হয়েছে!"
+  },
+  "delete": {
+    "message": "মুছে ফেলুন"
+  },
+  "confirmDeleteHistoryItem": {
+    "message": "আপনি কি নিশ্চিত যে আপনি এই রেকর্ডটি মুছে ফেলতে চান?\n\nমূল: ${original}",
+    "placeholders": {
+      "original": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmClearAllHistory": {
+    "message": "আপনি কি নিশ্চিত যে আপনি সমস্ত অনুবাদের ইতিহাস মুছে ফেলতে চান? এই ক্রিয়াটি পূর্বাবস্থায় ফেরানো যাবে না।"
+  },
+  "statusSaved": {
+    "message": "সেটিংস সংরক্ষিত হয়েছে"
+  },
+  "statusCleared": {
+    "message": "ইতিহাস মুছে ফেলা হয়েছে"
+  },
+  "sourceLanguageLabel": {
+    "message": "উৎস: "
+  },
+  "engineTagGemini": {
+    "message": "Gemini"
+  },
+  "modelTagFlash": {
+    "message": "Flash"
+  },
+  "modelTagPro": {
+    "message": "Pro"
+  },
+  "engineOptionGemini35Flash": {
+    "message": "Gemini 3.5 Flash"
+  },
+  "engineOptionGemini31ProPreview": {
+    "message": "Gemini 3.1 Pro Preview"
+  },
+  "engineOptionGemini31FlashLite": {
+    "message": "Gemini 3.1 Flash-Lite"
+  },
+  "geminiModel35Flash": {
+    "message": "Gemini 3.5 Flash (Fast & Smart)"
+  },
+  "geminiModel31ProPreview": {
+    "message": "Gemini 3.1 Pro Preview"
+  },
+  "geminiModel31FlashLite": {
+    "message": "Gemini 3.1 Flash-Lite (Efficient)"
+  },
+  "contextMenuEngineGemini35Flash": {
+    "message": "Always use Gemini 3.5 Flash"
+  },
+  "contextMenuEngineGemini31ProPreview": {
+    "message": "Always use Gemini 3.1 Pro Preview"
+  },
+  "contextMenuEngineGemini31FlashLite": {
+    "message": "Always use Gemini 3.1 Flash-Lite"
+  }
 }

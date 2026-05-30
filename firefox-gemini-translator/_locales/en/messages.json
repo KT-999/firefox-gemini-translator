@@ -1,110 +1,330 @@
 {
-  "extName": { "message": "Gemini Translate Helper" },
-  "extDesc": { "message": "Select text on a webpage, translate it to a custom language using Gemini or Google, and display the result on the page." },
-  "contextMenuTitle": { "message": "Smart Translate" },
-  "promptSystem": { "message": "You are a professional translation engine. Please strictly follow the rules below to translate the text enclosed in quotation marks into ${targetLang}.\n\nRules:\n1. **Absolutely do not** provide any explanations, preambles, or additional supplementary information.\n2. If the original text is a single word with multiple common meanings, list them directly separated by '、', for example: 'token, symbol, badge'.\n3. If the original text is a sentence or phrase, directly provide the most fluent and natural single translation result.\n4. **Absolutely do not** use any Markdown formatting, such as * or -.\n\nOriginal text: \"${text}\"", "placeholders": { "targetLang": { "content": "$1" }, "text": { "content": "$2" } } },
-  "errorGoogle": { "message": "❌ Google Translate failed" },
-  "errorGemini": { "message": "❌ Gemini Translate failed" },
-  "errorInvalidKey": { "message": "Detected invalid Gemini API Key, automatically downgrading to Google Translate." },
-  "popupCopy": { "message": "Copy" },
-  "popupCopied": { "message": "Copied!" },
-  "popupClose": { "message": "Close" },
-  "listenButtonTooltip": { "message": "Listen to Translated" },
-  "listenOriginalButtonTooltip": { "message": "Listen to Original" },
-  "optionsTitle": { "message": "Gemini Translate Settings" },
-  "tabTranslate": { "message": "Translate" },
-  "tabSettings": { "message": "Settings" },
-  "tabHistory": { "message": "History" },
-  "originalTextTitle": { "message": "Original Text" },
-  "translateInputPlaceholder": { "message": "Enter text to translate..." },
-  "translateButton": { "message": "Translate" },
-  "translationResult": { "message": "Translation Result" },
-  "translationEngineLabel": { "message": "Engine:" },
-  "engineOptionGoogle": { "message": "Google Translate" },
-  "engineOptionGeminiFlash": { "message": "Gemini 2.0 Flash" },
-  "engineOptionGemini3ProPreview": { "message": "Gemini 3 Pro Preview" },
-  "engineOptionGemini3FlashPreview": { "message": "Gemini 3 Flash Preview" },
-  "engineOptionGemini25Flash": { "message": "Gemini 2.5 Flash" },
-  "engineOptionGemini25FlashLite": { "message": "Gemini 2.5 Flash-Lite" },
-  "engineOptionGemini25Pro": { "message": "Gemini 2.5 Pro" },
-  "engineOptionGemini20FlashLite": { "message": "Gemini 2.0 Flash-Lite" },
-  "coreSettings": { "message": "Core Settings" },
-  "geminiApiKey": { "message": "Gemini API Key:" },
-  "geminiModelLabel": { "message": "Smart Mode Model:" },
-  "geminiModelDescription": { "message": "When 'Context Menu Default Engine' is set to 'Smart', long text will use the Gemini model specified here." },
-  "geminiModelFlash": { "message": "Gemini 2.0 Flash (Faster, for general use)" },
-  "geminiModel3ProPreview": { "message": "Gemini 3 Pro Preview (Preview)" },
-  "geminiModel3FlashPreview": { "message": "Gemini 3 Flash Preview (Preview)" },
-  "geminiModel25Flash": { "message": "Gemini 2.5 Flash (Balanced)" },
-  "geminiModel25FlashLite": { "message": "Gemini 2.5 Flash-Lite (Cost efficient)" },
-  "geminiModel25Pro": { "message": "Gemini 2.5 Pro (Higher quality, long context)" },
-  "geminiModel20FlashLite": { "message": "Gemini 2.0 Flash-Lite (Cost efficient)" },
-  "apiKeyPlaceholder": { "message": "Please enter your API Key" },
-  "apiKeyToggle": { "message": "Show/Hide Key" },
-  "apiKeyStatusUnset": { "message": "(Not set, click here to get one)" },
-  "apiKeyStatusInvalid": { "message": "(Invalid key, click here to get one)" },
-  "apiKeyStatusValid": { "message": "(Saved)" },
-  "targetLanguage": { "message": "Target:" },
-  "targetLanguageSettings": { "message": "Default Target Language:" },
-  "contextMenuEngineLabel": { "message": "Context Menu Engine:" },
-  "contextMenuEngineSmart": { "message": "Smart Mode (Default)" },
-  "contextMenuEngineGoogle": { "message": "Always use Google Translate" },
-  "contextMenuEngineGeminiFlash": { "message": "Always use Gemini 2.0 Flash" },
-  "contextMenuEngineGemini3ProPreview": { "message": "Always use Gemini 3 Pro Preview" },
-  "contextMenuEngineGemini3FlashPreview": { "message": "Always use Gemini 3 Flash Preview" },
-  "contextMenuEngineGemini25Flash": { "message": "Always use Gemini 2.5 Flash" },
-  "contextMenuEngineGemini25FlashLite": { "message": "Always use Gemini 2.5 Flash-Lite" },
-  "contextMenuEngineGemini25Pro": { "message": "Always use Gemini 2.5 Pro" },
-  "contextMenuEngineGemini20FlashLite": { "message": "Always use Gemini 2.0 Flash-Lite" },
-  "langZhTw": { "message": "Traditional Chinese" },
-  "langZhCn": { "message": "Simplified Chinese" },
-  "langEn": { "message": "English" },
-  "langJa": { "message": "Japanese" },
-  "langKo": { "message": "Korean" },
-  "langFr": { "message": "French" },
-  "langDe": { "message": "German" },
-  "langEs": { "message": "Spanish" },
-  "langRu": { "message": "Russian" },
-  "langHi": { "message": "Hindi" },
-  "langAr": { "message": "Arabic" },
-  "langBn": { "message": "Bengali" },
-  "langPt": { "message": "Portuguese" },
-  "langId": { "message": "Indonesian" },
-  "personalization": { "message": "Personalization" },
-  "uiLanguage": { "message": "UI Language:" },
-  "langUiEn": { "message": "English" },
-  "langUiZhTw": { "message": "繁體中文" },
-  "langUiZhCn": { "message": "简体中文" },
-  "langUiJa": { "message": "日本語" },
-  "langUiKo": { "message": "한국어" },
-  "langUiFr": { "message": "Français" },
-  "langUiDe": { "message": "Deutsch" },
-  "langUiEs": { "message": "Español" },
-  "langUiRu": { "message": "Русский" },
-  "langUiHi": { "message": "हिन्दी" },
-  "langUiAr": { "message": "العربية" },
-  "langUiBn": { "message": "বাংলা" },
-  "langUiPt": { "message": "Português" },
-  "langUiId": { "message": "Bahasa Indonesia" },
-  "theme": { "message": "Theme:" },
-  "themeAuto": { "message": "Follow system" },
-  "themeLight": { "message": "Light" },
-  "themeDark": { "message": "Dark" },
-  "maxHistory": { "message": "Max History Size:" },
-  "saveButton": { "message": "Save Settings" },
-  "historyList": { "message": "History List" },
-  "clearHistoryButton": { "message": "Clear All History" },
-  "noHistory": { "message": "No translation history yet." },
-  "copyOriginal": { "message": "Copy Original" },
-  "copyTranslated": { "message": "Copy Translated" },
-  "copied": { "message": "Copied!" },
-  "delete": { "message": "Delete" },
-  "confirmDeleteHistoryItem": { "message": "Are you sure you want to delete this record?\n\nOriginal: ${original}", "placeholders": { "original": { "content": "$1" } } },
-  "confirmClearAllHistory": { "message": "Are you sure you want to clear all translation history? This action cannot be undone." },
-  "statusSaved": { "message": "Settings saved" },
-  "statusCleared": { "message": "History cleared" },
-  "sourceLanguageLabel": { "message": "Source: " },
-  "engineTagGemini": { "message": "Gemini" },
-  "modelTagFlash": { "message": "Flash" },
-  "modelTagPro": { "message": "Pro" }
+  "extName": {
+    "message": "Gemini Translate Helper"
+  },
+  "extDesc": {
+    "message": "Select text on a webpage, translate it to a custom language using Gemini or Google, and display the result on the page."
+  },
+  "contextMenuTitle": {
+    "message": "Smart Translate"
+  },
+  "promptSystem": {
+    "message": "You are a professional translation engine. Please strictly follow the rules below to translate the text enclosed in quotation marks into ${targetLang}.\n\nRules:\n1. **Absolutely do not** provide any explanations, preambles, or additional supplementary information.\n2. If the original text is a single word with multiple common meanings, list them directly separated by '、', for example: 'token, symbol, badge'.\n3. If the original text is a sentence or phrase, directly provide the most fluent and natural single translation result.\n4. **Absolutely do not** use any Markdown formatting, such as * or -.\n\nOriginal text: \"${text}\"",
+    "placeholders": {
+      "targetLang": {
+        "content": "$1"
+      },
+      "text": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorGoogle": {
+    "message": "❌ Google Translate failed"
+  },
+  "errorGemini": {
+    "message": "❌ Gemini Translate failed"
+  },
+  "errorInvalidKey": {
+    "message": "Detected invalid Gemini API Key, automatically downgrading to Google Translate."
+  },
+  "popupCopy": {
+    "message": "Copy"
+  },
+  "popupCopied": {
+    "message": "Copied!"
+  },
+  "popupClose": {
+    "message": "Close"
+  },
+  "listenButtonTooltip": {
+    "message": "Listen to Translated"
+  },
+  "listenOriginalButtonTooltip": {
+    "message": "Listen to Original"
+  },
+  "optionsTitle": {
+    "message": "Gemini Translate Settings"
+  },
+  "tabTranslate": {
+    "message": "Translate"
+  },
+  "tabSettings": {
+    "message": "Settings"
+  },
+  "tabHistory": {
+    "message": "History"
+  },
+  "originalTextTitle": {
+    "message": "Original Text"
+  },
+  "translateInputPlaceholder": {
+    "message": "Enter text to translate..."
+  },
+  "translateButton": {
+    "message": "Translate"
+  },
+  "translationResult": {
+    "message": "Translation Result"
+  },
+  "translationEngineLabel": {
+    "message": "Engine:"
+  },
+  "engineOptionGoogle": {
+    "message": "Google Translate"
+  },
+  "engineOptionGemini25Flash": {
+    "message": "Gemini 2.5 Flash"
+  },
+  "engineOptionGemini25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite"
+  },
+  "engineOptionGemini25Pro": {
+    "message": "Gemini 2.5 Pro"
+  },
+  "coreSettings": {
+    "message": "Core Settings"
+  },
+  "geminiApiKey": {
+    "message": "Gemini API Key:"
+  },
+  "geminiModelLabel": {
+    "message": "Smart Mode Model:"
+  },
+  "geminiModelDescription": {
+    "message": "When 'Context Menu Default Engine' is set to 'Smart', long text will use the Gemini model specified here."
+  },
+  "geminiModel25Flash": {
+    "message": "Gemini 2.5 Flash (Balanced)"
+  },
+  "geminiModel25FlashLite": {
+    "message": "Gemini 2.5 Flash-Lite (Cost efficient)"
+  },
+  "geminiModel25Pro": {
+    "message": "Gemini 2.5 Pro (Higher quality, long context)"
+  },
+  "apiKeyPlaceholder": {
+    "message": "Please enter your API Key"
+  },
+  "apiKeyToggle": {
+    "message": "Show/Hide Key"
+  },
+  "apiKeyStatusUnset": {
+    "message": "(Not set, click here to get one)"
+  },
+  "apiKeyStatusInvalid": {
+    "message": "(Invalid key, click here to get one)"
+  },
+  "apiKeyStatusValid": {
+    "message": "(Saved)"
+  },
+  "targetLanguage": {
+    "message": "Target:"
+  },
+  "targetLanguageSettings": {
+    "message": "Default Target Language:"
+  },
+  "contextMenuEngineLabel": {
+    "message": "Context Menu Engine:"
+  },
+  "contextMenuEngineSmart": {
+    "message": "Smart Mode (Default)"
+  },
+  "contextMenuEngineGoogle": {
+    "message": "Always use Google Translate"
+  },
+  "contextMenuEngineGemini25Flash": {
+    "message": "Always use Gemini 2.5 Flash"
+  },
+  "contextMenuEngineGemini25FlashLite": {
+    "message": "Always use Gemini 2.5 Flash-Lite"
+  },
+  "contextMenuEngineGemini25Pro": {
+    "message": "Always use Gemini 2.5 Pro"
+  },
+  "langZhTw": {
+    "message": "Traditional Chinese"
+  },
+  "langZhCn": {
+    "message": "Simplified Chinese"
+  },
+  "langEn": {
+    "message": "English"
+  },
+  "langJa": {
+    "message": "Japanese"
+  },
+  "langKo": {
+    "message": "Korean"
+  },
+  "langFr": {
+    "message": "French"
+  },
+  "langDe": {
+    "message": "German"
+  },
+  "langEs": {
+    "message": "Spanish"
+  },
+  "langRu": {
+    "message": "Russian"
+  },
+  "langHi": {
+    "message": "Hindi"
+  },
+  "langAr": {
+    "message": "Arabic"
+  },
+  "langBn": {
+    "message": "Bengali"
+  },
+  "langPt": {
+    "message": "Portuguese"
+  },
+  "langId": {
+    "message": "Indonesian"
+  },
+  "personalization": {
+    "message": "Personalization"
+  },
+  "uiLanguage": {
+    "message": "UI Language:"
+  },
+  "langUiEn": {
+    "message": "English"
+  },
+  "langUiZhTw": {
+    "message": "繁體中文"
+  },
+  "langUiZhCn": {
+    "message": "简体中文"
+  },
+  "langUiJa": {
+    "message": "日本語"
+  },
+  "langUiKo": {
+    "message": "한국어"
+  },
+  "langUiFr": {
+    "message": "Français"
+  },
+  "langUiDe": {
+    "message": "Deutsch"
+  },
+  "langUiEs": {
+    "message": "Español"
+  },
+  "langUiRu": {
+    "message": "Русский"
+  },
+  "langUiHi": {
+    "message": "हिन्दी"
+  },
+  "langUiAr": {
+    "message": "العربية"
+  },
+  "langUiBn": {
+    "message": "বাংলা"
+  },
+  "langUiPt": {
+    "message": "Português"
+  },
+  "langUiId": {
+    "message": "Bahasa Indonesia"
+  },
+  "theme": {
+    "message": "Theme:"
+  },
+  "themeAuto": {
+    "message": "Follow system"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "maxHistory": {
+    "message": "Max History Size:"
+  },
+  "saveButton": {
+    "message": "Save Settings"
+  },
+  "historyList": {
+    "message": "History List"
+  },
+  "clearHistoryButton": {
+    "message": "Clear All History"
+  },
+  "noHistory": {
+    "message": "No translation history yet."
+  },
+  "copyOriginal": {
+    "message": "Copy Original"
+  },
+  "copyTranslated": {
+    "message": "Copy Translated"
+  },
+  "copied": {
+    "message": "Copied!"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "confirmDeleteHistoryItem": {
+    "message": "Are you sure you want to delete this record?\n\nOriginal: ${original}",
+    "placeholders": {
+      "original": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmClearAllHistory": {
+    "message": "Are you sure you want to clear all translation history? This action cannot be undone."
+  },
+  "statusSaved": {
+    "message": "Settings saved"
+  },
+  "statusCleared": {
+    "message": "History cleared"
+  },
+  "sourceLanguageLabel": {
+    "message": "Source: "
+  },
+  "engineTagGemini": {
+    "message": "Gemini"
+  },
+  "modelTagFlash": {
+    "message": "Flash"
+  },
+  "modelTagPro": {
+    "message": "Pro"
+  },
+  "engineOptionGemini35Flash": {
+    "message": "Gemini 3.5 Flash"
+  },
+  "engineOptionGemini31ProPreview": {
+    "message": "Gemini 3.1 Pro Preview"
+  },
+  "engineOptionGemini31FlashLite": {
+    "message": "Gemini 3.1 Flash-Lite"
+  },
+  "geminiModel35Flash": {
+    "message": "Gemini 3.5 Flash (Fast & Smart)"
+  },
+  "geminiModel31ProPreview": {
+    "message": "Gemini 3.1 Pro Preview"
+  },
+  "geminiModel31FlashLite": {
+    "message": "Gemini 3.1 Flash-Lite (Efficient)"
+  },
+  "contextMenuEngineGemini35Flash": {
+    "message": "Always use Gemini 3.5 Flash"
+  },
+  "contextMenuEngineGemini31ProPreview": {
+    "message": "Always use Gemini 3.1 Pro Preview"
+  },
+  "contextMenuEngineGemini31FlashLite": {
+    "message": "Always use Gemini 3.1 Flash-Lite"
+  }
 }

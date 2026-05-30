@@ -73,12 +73,11 @@ export async function translateWithGoogle(text, targetLang) {
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
     let resolvedModelName = modelName;
-    if (modelName && modelName.includes('1.5')) {
-        console.warn(`Gemini 1.5 模型已停用，改用 gemini-2.0-flash: ${modelName}`);
-        resolvedModelName = 'gemini-2.0-flash';
+    if (modelName && (modelName.includes('1.5') || modelName.includes('2.0') || modelName === 'gemini-3-pro-preview' || modelName === 'gemini-3-flash-preview')) {
+        console.warn(`舊版模型 ${modelName} 已過期或即將停用，改用 gemini-3.5-flash`);
+        resolvedModelName = 'gemini-3.5-flash';
     }
-    // 只有穩定的 'gemini-pro' 使用 v1，其餘（包含 1.5 和 2.0 系列）都使用 v1beta
-    const apiVersion = (resolvedModelName === 'gemini-pro') ? 'v1' : 'v1beta';
+    const apiVersion = 'v1beta';
     // 【修正】移除 URL 中的 API Key
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${resolvedModelName}:generateContent`;
     
