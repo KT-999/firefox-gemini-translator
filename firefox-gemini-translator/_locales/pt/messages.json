@@ -73,6 +73,12 @@
   "engineOptionGoogle": {
     "message": "Google Tradutor"
   },
+  "engineOptionGoogleCloud": {
+    "message": "API Google Cloud Translation"
+  },
+  "engineOptionGemini3FlashPreview": {
+    "message": "Gemini 3 Flash Preview"
+  },
   "engineOptionGemini25Flash": {
     "message": "Gemini 2.5 Flash"
   },
@@ -88,26 +94,38 @@
   "geminiApiKey": {
     "message": "Chave de API do Gemini:"
   },
+  "googleCloudApiKey": {
+    "message": "Chave de API do Google Cloud Translation:"
+  },
   "geminiModelLabel": {
     "message": "Modelo do Modo Inteligente:"
   },
   "geminiModelDescription": {
     "message": "Quando o 'Motor Padrão do Menu de Contexto' está definido como 'Inteligente', o texto longo usará o modelo Gemini especificado aqui."
   },
+  "geminiModel3FlashPreview": {
+    "message": "Gemini 3 Flash Preview (Preview)"
+  },
   "geminiModel25Flash": {
-    "message": "Gemini 2.5 Flash (Balanced)"
+    "message": "Gemini 2.5 Flash (Legacy)"
   },
   "geminiModel25FlashLite": {
-    "message": "Gemini 2.5 Flash-Lite (Cost efficient)"
+    "message": "Gemini 2.5 Flash-Lite (Legacy)"
   },
   "geminiModel25Pro": {
-    "message": "Gemini 2.5 Pro (Higher quality, long context)"
+    "message": "Gemini 2.5 Pro (Legacy)"
   },
   "apiKeyPlaceholder": {
     "message": "Por favor, insira sua Chave de API"
   },
+  "googleCloudApiKeyPlaceholder": {
+    "message": "Por favor, insira sua chave de API do Google Cloud"
+  },
   "apiKeyToggle": {
     "message": "Mostrar/Ocultar Chave"
+  },
+  "googleCloudRemoveKey": {
+    "message": "Remover chave do Google Cloud"
   },
   "apiKeyStatusUnset": {
     "message": "(Não definido, clique aqui para obter uma)"
@@ -132,6 +150,12 @@
   },
   "contextMenuEngineGoogle": {
     "message": "Sempre usar o Google Tradutor"
+  },
+  "contextMenuEngineGoogleCloud": {
+    "message": "Sempre usar Google Cloud Translation"
+  },
+  "contextMenuEngineGemini3FlashPreview": {
+    "message": "Always use Gemini 3 Flash Preview"
   },
   "contextMenuEngineGemini25Flash": {
     "message": "Always use Gemini 2.5 Flash"
@@ -300,31 +324,61 @@
   "modelTagPro": {
     "message": "Pro"
   },
+  "engineOptionGemini38Flash": {
+    "message": "Gemini 3.8 Flash"
+  },
+  "engineOptionGemini37Flash": {
+    "message": "Gemini 3.7 Flash"
+  },
   "engineOptionGemini35Flash": {
     "message": "Gemini 3.5 Flash"
   },
-  "engineOptionGemini31ProPreview": {
-    "message": "Gemini 3.1 Pro Preview"
+  "engineOptionGemini35FlashLite": {
+    "message": "Gemini 3.5 Flash-Lite"
   },
   "engineOptionGemini31FlashLite": {
     "message": "Gemini 3.1 Flash-Lite"
   },
-  "geminiModel35Flash": {
-    "message": "Gemini 3.5 Flash (Fast & Smart)"
-  },
-  "geminiModel31ProPreview": {
+  "engineOptionGemini31ProPreview": {
     "message": "Gemini 3.1 Pro Preview"
   },
+  "geminiModel38Flash": {
+    "message": "Gemini 3.8 Flash (Recommended)"
+  },
+  "geminiModel37Flash": {
+    "message": "Gemini 3.7 Flash (Balanced)"
+  },
+  "geminiModel35Flash": {
+    "message": "Gemini 3.5 Flash (Baseline)"
+  },
+  "geminiModel35FlashLite": {
+    "message": "Gemini 3.5 Flash-Lite (Fast, cost-effective)"
+  },
   "geminiModel31FlashLite": {
-    "message": "Gemini 3.1 Flash-Lite (Efficient)"
+    "message": "Gemini 3.1 Flash-Lite (High efficiency)"
+  },
+  "geminiModel31ProPreview": {
+    "message": "Gemini 3.1 Pro Preview (Preview)"
+  },
+  "contextMenuEngineGemini38Flash": {
+    "message": "Always use Gemini 3.8 Flash"
+  },
+  "contextMenuEngineGemini37Flash": {
+    "message": "Always use Gemini 3.7 Flash"
   },
   "contextMenuEngineGemini35Flash": {
     "message": "Always use Gemini 3.5 Flash"
   },
-  "contextMenuEngineGemini31ProPreview": {
-    "message": "Always use Gemini 3.1 Pro Preview"
+  "contextMenuEngineGemini35FlashLite": {
+    "message": "Always use Gemini 3.5 Flash-Lite"
   },
   "contextMenuEngineGemini31FlashLite": {
     "message": "Always use Gemini 3.1 Flash-Lite"
+  },
+  "contextMenuEngineGemini31ProPreview": {
+    "message": "Always use Gemini 3.1 Pro Preview"
+  },
+  "geminiRemoveKey": {
+    "message": "Remover chave do Gemini"
   }
 }

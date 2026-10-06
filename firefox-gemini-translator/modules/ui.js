@@ -1,6 +1,7 @@
 // modules/ui.js
 import { playTTS } from './tts.js';
 import { i18n } from '../options/i18n.js';
+import { LANG_NAME_TO_CODE_MAP, getDisplayLanguageName } from './languages.js';
 
 /**
  * 將 ISO 日期字串格式化為 'YYYY/MM/DD HH:mm:ss' 的 24 小時制格式。
@@ -69,13 +70,12 @@ export function renderUI() {
   document.title = i18n.t('optionsTitle');
 }
 
-export function displayApiKeyStatus(apiKey, isValid) {
-  const statusEl = document.getElementById("apiKeyStatus");
+function renderKeyStatus(statusEl, apiKey, isValid, linkUrl) {
   if (!statusEl) return;
   statusEl.innerHTML = '';
   const createLink = (text) => {
     const link = document.createElement('a');
-    link.href = "https://aistudio.google.com/app/apikey";
+    link.href = linkUrl;
     link.target = "_blank";
     link.textContent = text;
     return link;
@@ -94,6 +94,16 @@ export function displayApiKeyStatus(apiKey, isValid) {
   }
 }
 
+export function displayApiKeyStatus(apiKey, isValid) {
+  const statusEl = document.getElementById("apiKeyStatus");
+  renderKeyStatus(statusEl, apiKey, isValid, "https://aistudio.google.com/app/apikey");
+}
+
+export function displayGoogleCloudApiKeyStatus(apiKey, isValid) {
+  const statusEl = document.getElementById("googleCloudApiKeyStatus");
+  renderKeyStatus(statusEl, apiKey, isValid, "https://console.cloud.google.com/apis/credentials");
+}
+
 /**
  * 渲染翻譯紀錄列表。
  */
@@ -107,9 +117,7 @@ export async function renderHistory(history = []) {
   }
   
   const { UI_LANG } = await browser.storage.local.get('UI_LANG');
-  const uiLang = (UI_LANG || 'zh_TW').replace('_', '-');
-  const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
-  const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
+  const uiLang = UI_LANG || 'zh_TW';
 
   history.forEach(item => {
     const itemDiv = document.createElement("div");
@@ -159,12 +167,8 @@ export async function renderHistory(history = []) {
     if (item.sourceLang && item.sourceLang !== 'und') {
         const sourceLangSpan = document.createElement("span");
         sourceLangSpan.className = "history-source-lang";
-        try {
-            const sourceLangName = displayLang.of(item.sourceLang);
-            sourceLangSpan.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
-        } catch (e) {
-            sourceLangSpan.textContent = `${i18n.t('sourceLanguageLabel')}${item.sourceLang}`;
-        }
+        const sourceLangName = getDisplayLanguageName(item.sourceLang, uiLang);
+        sourceLangSpan.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
         infoContainer.appendChild(sourceLangSpan);
     }
     
@@ -185,7 +189,7 @@ export async function renderHistory(history = []) {
     listenBtn.className = "listen-btn";
     listenBtn.title = i18n.t("listenButtonTooltip");
     listenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
-    const targetLangCode = langNameToCodeMap[item.targetLang];
+    const targetLangCode = LANG_NAME_TO_CODE_MAP[item.targetLang] || 'zh-TW';
     listenBtn.onclick = () => playTTS(item.translated, targetLangCode);
     buttonGroup.appendChild(listenBtn);
 
