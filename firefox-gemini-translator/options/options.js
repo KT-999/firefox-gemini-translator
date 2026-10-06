@@ -1,13 +1,15 @@
 // options/options.js
 import { i18n } from './i18n.js';
 import { getSettings, saveSettings, addHistoryItem, getHistory } from '../modules/storage.js';
-import { translateWithGoogle, translateWithGoogleCloud, translateWithGemini, containsCjk } from '../modules/translator.js';
+import { translateWithGoogle, translateWithGoogleCloud, translateWithGemini, resolveGeminiModelName } from '../modules/translator.js';
+import { LANG_NAME_TO_CODE_MAP, detectSourceLanguage, getDisplayLanguageName } from '../modules/languages.js';
 import { applyTheme, renderUI, displayApiKeyStatus, displayGoogleCloudApiKeyStatus, renderHistory, showStatus, formatGeminiModelLabel } from '../modules/ui.js';
 import { playTTS } from '../modules/tts.js';
 
-async function handlePopupTranslate(text, targetLang, engineSelection, resultEl, listenBtn, listenOriginalBtn) {
+async function handlePopupTranslate(text, targetLang, engineSelection, resultEl, listenBtn, listenOriginalBtn, copyResultBtn) {
   listenBtn.classList.add('hidden');
   listenOriginalBtn.classList.add('hidden');
+  if (copyResultBtn) copyResultBtn.classList.add('hidden');
   resultEl.innerHTML = '<div class="loading-spinner"></div>';
   const sourceLangEl = document.getElementById('sourceLangDisplay');
   const sourceDisplayEl = document.getElementById('translationSourceDisplay');
@@ -40,7 +42,7 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       await saveSettings({ googleCloudKeyValid: true });
     } else { // A Gemini model is selected
       engine = 'gemini';
-      modelName = engineSelection;
+      modelName = resolveGeminiModelName(engineSelection);
       if (!settings.GEMINI_API_KEY) {
         alert(i18n.t("apiKeyStatusUnset"));
         document.getElementById('tab-settings').click();
@@ -53,36 +55,9 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       await saveSettings({ geminiKeyValid: true });
     }
 
-    const detectedLangInfo = await browser.i18n.detectLanguage(text);
-    sourceLang = detectedLangInfo.languages?.[0]?.language || 'und';
-    if (sourceLang === 'und') {
-      if (/[\u0900-\u097F]/.test(text)) sourceLang = 'hi';
-      else if (/[\u0600-\u06FF]/.test(text)) sourceLang = 'ar';
-      else if (/[\u0980-\u09FF]/.test(text)) sourceLang = 'bn';
-      else if (/[\uAC00-\uD7A3]/.test(text)) sourceLang = 'ko';
-      else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) sourceLang = 'ja';
-      else if (containsCjk(text)) sourceLang = 'zh';
-      else if (/[\u0400-\u04FF]/.test(text)) sourceLang = 'ru';
-      else if (/[àâçéèêëîïôûùüÿæœ]/i.test(text)) sourceLang = 'fr';
-      else if (/[äöüß]/i.test(text)) sourceLang = 'de';
-      else if (/[áéíóúüñ]/i.test(text)) sourceLang = 'es';
-      else if (/[ãõàáâéêíóôõúç]/i.test(text)) sourceLang = 'pt';
-      else if (/^[a-z\u00C0-\u017F\s.,'’!-]+$/i.test(text)) sourceLang = 'en';
-    }
-
-    const uiLang = (settings.UI_LANG || 'zh_TW').replace('_', '-');
-    const displayLang = new Intl.DisplayNames([uiLang], { type: 'language' });
-
-    if (sourceLang !== 'und') {
-      try {
-        const sourceLangName = displayLang.of(sourceLang);
-        sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLangName}`;
-      } catch (e) {
-        sourceLangEl.textContent = `${i18n.t('sourceLanguageLabel')}${sourceLang}`;
-      }
-    } else {
-      sourceLangEl.textContent = '';
-    }
+    sourceLang = await detectSourceLanguage(text);
+    const sourceLangName = getDisplayLanguageName(sourceLang, settings.UI_LANG || 'zh_TW');
+    sourceLangEl.textContent = sourceLangName ? `${i18n.t('sourceLanguageLabel')}${sourceLangName}` : '';
 
     resultEl.textContent = translatedText;
 
@@ -103,8 +78,7 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
     }
     sourceDisplayEl.textContent = sourceText;
 
-    const langNameToCodeMap = { "繁體中文": "zh-TW", "簡體中文": "zh-CN", "英文": "en", "日文": "ja", "韓文": "ko", "法文": "fr", "德文": "de", "西班牙文": "es", "俄文": "ru", "印地文": "hi", "阿拉伯文": "ar", "孟加拉文": "bn", "葡萄牙文": "pt", "印尼文": "id" };
-    const targetLangCode = langNameToCodeMap[targetLang];
+    const targetLangCode = LANG_NAME_TO_CODE_MAP[targetLang] || 'zh-TW';
 
     listenBtn.classList.remove('hidden');
     listenBtn.onclick = () => playTTS(translatedText, targetLangCode);
@@ -114,6 +88,15 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       listenOriginalBtn.onclick = () => playTTS(text, sourceLang);
     }
 
+    if (copyResultBtn) {
+      copyResultBtn.classList.remove('hidden');
+      copyResultBtn.onclick = () => {
+        navigator.clipboard.writeText(translatedText).then(() => {
+          showStatus("copied", document.getElementById("status"));
+        });
+      };
+    }
+
     await addHistoryItem(text, translatedText, engine, targetLang, sourceLang, modelName);
 
   } catch (error) {
@@ -121,12 +104,11 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
     if (error.message === 'Invalid API Key') {
       await saveSettings({ geminiKeyValid: false });
       console.log("Popup Gemini API Key 無效，自動降級使用 Google 翻譯。");
-      // Re-run the translation forcing Google as the engine.
-      await handlePopupTranslate(text, targetLang, 'google', resultEl, listenBtn, listenOriginalBtn);
+      await handlePopupTranslate(text, targetLang, 'google', resultEl, listenBtn, listenOriginalBtn, copyResultBtn);
     } else if (error.message === 'Invalid Google Cloud API Key') {
       await saveSettings({ googleCloudKeyValid: false });
       console.log("Popup Google Cloud API Key 無效，自動降級使用 Google 翻譯。");
-      await handlePopupTranslate(text, targetLang, 'google', resultEl, listenBtn, listenOriginalBtn);
+      await handlePopupTranslate(text, targetLang, 'google', resultEl, listenBtn, listenOriginalBtn, copyResultBtn);
     } else {
       const isGeminiEngine = !['google', 'google-cloud'].includes(engineSelection);
       resultEl.textContent = isGeminiEngine ? i18n.t("errorGemini") : i18n.t("errorGoogle");
@@ -159,6 +141,7 @@ async function main() {
     },
     apiKeyInput: document.getElementById("apiKey"),
     toggleApiKeyBtn: document.getElementById("toggleApiKey"),
+    removeApiKeyBtn: document.getElementById("removeApiKey"),
     googleCloudApiKeyInput: document.getElementById("googleCloudApiKey"),
     toggleGoogleCloudApiKeyBtn: document.getElementById("toggleGoogleCloudApiKey"),
     removeGoogleCloudApiKeyBtn: document.getElementById("removeGoogleCloudApiKey"),
@@ -176,6 +159,7 @@ async function main() {
     popupEngineSelect: document.getElementById('popupEngineSelect'),
     popupListenBtn: document.getElementById('popupListenBtn'),
     popupListenOriginalBtn: document.getElementById('popupListenOriginalBtn'),
+    popupCopyResultBtn: document.getElementById('popupCopyResultBtn'),
     geminiModelSelect: document.getElementById('geminiModelSelect'),
     contextMenuEngineSelect: document.getElementById('contextMenuEngineSelect')
   };
@@ -207,13 +191,18 @@ async function main() {
     settings.POPUP_TRANSLATE_LANG || settings.TRANSLATE_LANG,
     defaultTargetLang
   );
+  const migrateModelValue = (val) => {
+    if (val === 'gemini-3-pro-preview') return 'gemini-3.1-pro-preview';
+    if (val === 'gemini-3.1-flash-lite-preview') return 'gemini-3.1-flash-lite';
+    return val;
+  };
   dom.popupEngineSelect.value = normalizeSelectValue(
     dom.popupEngineSelect,
-    settings.POPUP_TRANSLATE_ENGINE,
+    migrateModelValue(settings.POPUP_TRANSLATE_ENGINE),
     defaultPopupEngine
   );
-  const normalizedGeminiModel = normalizeSelectValue(dom.geminiModelSelect, settings.GEMINI_MODEL, 'gemini-2.5-flash');
-  const normalizedContextMenuEngine = normalizeSelectValue(dom.contextMenuEngineSelect, settings.CONTEXT_MENU_ENGINE, 'gemini-2.5-flash');
+  const normalizedGeminiModel = normalizeSelectValue(dom.geminiModelSelect, migrateModelValue(settings.GEMINI_MODEL), 'gemini-3.8-flash');
+  const normalizedContextMenuEngine = normalizeSelectValue(dom.contextMenuEngineSelect, migrateModelValue(settings.CONTEXT_MENU_ENGINE), 'smart');
   dom.geminiModelSelect.value = normalizedGeminiModel;
   dom.contextMenuEngineSelect.value = normalizedContextMenuEngine;
   if (normalizedGeminiModel !== settings.GEMINI_MODEL || normalizedContextMenuEngine !== settings.CONTEXT_MENU_ENGINE) {
@@ -243,7 +232,7 @@ async function main() {
   renderHistory(await getHistory());
   displayApiKeyStatus(settings.GEMINI_API_KEY, settings.geminiKeyValid);
   displayGoogleCloudApiKeyStatus(settings.GOOGLE_CLOUD_API_KEY, settings.googleCloudKeyValid);
-  toggleGeminiModelSelector(); // Initial check
+  toggleGeminiModelSelector();
 
   dom.contextMenuEngineSelect.addEventListener('change', toggleGeminiModelSelector);
 
@@ -254,11 +243,19 @@ async function main() {
     });
   };
 
-  dom.translateBtn.addEventListener('click', async () => {
+  const triggerPopupTranslate = async () => {
     const text = dom.translateInput.value.trim();
     if (!text) return;
     await savePopupSelection();
-    handlePopupTranslate(text, dom.popupTargetLang.value, dom.popupEngineSelect.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn);
+    handlePopupTranslate(text, dom.popupTargetLang.value, dom.popupEngineSelect.value, dom.translateResult, dom.popupListenBtn, dom.popupListenOriginalBtn, dom.popupCopyResultBtn);
+  };
+
+  dom.translateBtn.addEventListener('click', triggerPopupTranslate);
+  dom.translateInput.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      triggerPopupTranslate();
+    }
   });
 
   dom.popupTargetLang.addEventListener('change', savePopupSelection);
@@ -290,6 +287,14 @@ async function main() {
     dom.toggleGoogleCloudApiKeyBtn.querySelector('.icon-eye').classList.toggle('hidden', isPassword);
     dom.toggleGoogleCloudApiKeyBtn.querySelector('.icon-eye-off').classList.toggle('hidden', !isPassword);
   });
+
+  if (dom.removeApiKeyBtn) {
+    dom.removeApiKeyBtn.addEventListener('click', async () => {
+      dom.apiKeyInput.value = '';
+      await saveSettings({ GEMINI_API_KEY: '', geminiKeyValid: false });
+      displayApiKeyStatus('', false);
+    });
+  }
 
   dom.removeGoogleCloudApiKeyBtn.addEventListener('click', async () => {
     dom.googleCloudApiKeyInput.value = '';
@@ -332,4 +337,3 @@ async function main() {
 }
 
 document.addEventListener("DOMContentLoaded", main);
-

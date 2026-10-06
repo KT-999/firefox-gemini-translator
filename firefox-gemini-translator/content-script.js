@@ -1,4 +1,5 @@
-let currentCard = null;
+let currentHost = null;
+let lastCardPosition = null;
 
 document.addEventListener('mousemove', (e) => {
   window.lastMouseX = e.clientX;
@@ -6,39 +7,191 @@ document.addEventListener('mousemove', (e) => {
 });
 
 function closeCard() {
-  if (currentCard) {
-    currentCard.remove();
-    currentCard = null;
+  if (currentHost) {
+    currentHost.remove();
+    currentHost = null;
   }
+  lastCardPosition = null;
   document.removeEventListener('mousedown', handleClickOutside);
+  document.removeEventListener('keydown', handleKeyDown);
 }
 
 function handleClickOutside(event) {
-  if (currentCard && !currentCard.contains(event.target)) {
+  if (!currentHost) return;
+  const path = event.composedPath ? event.composedPath() : [];
+  if (!path.includes(currentHost) && !currentHost.contains(event.target)) {
     closeCard();
   }
 }
 
-async function createTranslationCard(data) {
-  closeCard();
+function handleKeyDown(event) {
+  if (event.key === 'Escape') {
+    closeCard();
+  }
+}
 
-  const {
-    originalText, translatedText, engine, modelName,
-    sourceLangCode, sourceLangName, targetLangCode, uiStrings
-  } = data;
+function getCardStyles() {
+  return `
+    :host {
+      all: initial;
+      --gt-primary: #007bff;
+      --gt-text-light: #333;
+      --gt-text-dark: #e8eaed;
+      --gt-bg-light: #fff;
+      --gt-bg-dark: #2d2e30;
+      --gt-border-light: #e0e0e0;
+      --gt-border-dark: #555;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    #gemini-translate-card {
+      position: fixed;
+      z-index: 2147483647;
+      width: 380px;
+      max-width: 90vw;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+    }
+    .gt-card-theme-light {
+      background: var(--gt-bg-light);
+      color: var(--gt-text-light);
+      border: 1px solid var(--gt-border-light);
+    }
+    .gt-card-theme-dark {
+      background: var(--gt-bg-dark);
+      color: var(--gt-text-dark);
+      border: 1px solid var(--gt-border-dark);
+    }
 
+    /* --- Header: Tags & Close Button --- */
+    .gt-tag-container {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      border-radius: 0 8px 0 8px;
+      overflow: hidden;
+    }
+    .gt-engine-tag {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+      text-transform: capitalize;
+    }
+    .gt-engine-tag.engine-google { background-color: #888; }
+    .gt-engine-tag.engine-google-cloud { background-color: #5e35b1; }
+    .gt-engine-tag.engine-gemini { background-color: var(--gt-primary); }
+    .gt-engine-tag.model-flash { background-color: #00897b; }
+    .gt-engine-tag.model-pro { background-color: #3949ab; }
+
+    .gt-close-btn {
+      position: absolute;
+      top: 2px;
+      left: 8px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      opacity: 0.5;
+      padding: 0;
+      line-height: 1;
+    }
+    .gt-card-theme-light .gt-close-btn { color: #000; }
+    .gt-card-theme-dark .gt-close-btn { color: #fff; }
+    .gt-close-btn:hover { opacity: 1; }
+
+    /* --- Content & Spacing --- */
+    .gt-content {
+      padding: 40px 16px 16px 16px;
+      line-height: 1.6;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .gt-content p { margin: 0; }
+    .gt-original-text {
+      font-weight: 600;
+      color: var(--gt-primary);
+      margin-bottom: 8px;
+      word-wrap: break-word;
+    }
+    .gt-translated-text {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .gt-error-text {
+      color: #dc3545;
+      font-weight: 500;
+    }
+
+    /* --- Loading Spinner --- */
+    .gt-loading-spinner {
+      border: 3px solid rgba(128, 128, 128, 0.25);
+      border-top: 3px solid var(--gt-primary);
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      animation: gt-spin 0.9s linear infinite;
+      margin: 12px auto 4px auto;
+    }
+    @keyframes gt-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* --- Footer --- */
+    .gt-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-top: 1px solid;
+    }
+    .gt-card-theme-light .gt-footer { border-top-color: var(--gt-border-light); }
+    .gt-card-theme-dark .gt-footer { border-top-color: var(--gt-border-dark); }
+    .gt-footer-info { font-size: 12px; opacity: 0.7; }
+    .gt-footer-buttons { display: flex; align-items: center; gap: 8px; }
+    .gt-icon-btn, .gt-text-btn {
+      background: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-family: inherit;
+    }
+    .gt-icon-btn { border: none; padding: 4px; opacity: 0.7; }
+    .gt-icon-btn:hover { opacity: 1; background-color: rgba(128,128,128,0.2); }
+    .gt-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .gt-card-theme-light .gt-icon-btn svg { stroke: #333; }
+    .gt-card-theme-dark .gt-icon-btn svg { stroke: #eee; }
+    .gt-text-btn { font-size: 12px; padding: 4px 8px; border: 1px solid; }
+    .gt-card-theme-light .gt-text-btn { color: #555; border-color: #ccc; }
+    .gt-card-theme-light .gt-text-btn:hover { background-color: #f0f0f0; }
+    .gt-card-theme-dark .gt-text-btn { color: #ccc; border-color: #666; }
+    .gt-card-theme-dark .gt-text-btn:hover { background-color: #444; }
+  `;
+}
+
+async function resolveTheme() {
   const { THEME } = await browser.storage.local.get("THEME");
-  const theme = (THEME === 'auto')
+  return (THEME === 'auto')
     ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : (THEME || 'light');
+}
 
-  const card = document.createElement('div');
-  card.id = 'gemini-translate-card';
-  card.className = `gt-card-theme-${theme}`;
-
-  // --- Safely Create Card Structure ---
-
-  // Header Tags
+function buildTagContainer(engine, modelName, modelLabel, uiStrings) {
   const tagContainer = document.createElement('div');
   tagContainer.className = 'gt-tag-container';
 
@@ -52,10 +205,13 @@ async function createTranslationCard(data) {
     modelTag.className = 'gt-engine-tag model-tag';
     if (modelName.includes('flash')) {
       modelTag.classList.add('model-flash');
-      modelTag.textContent = uiStrings.modelTagFlash;
+      modelTag.textContent = modelLabel || uiStrings.modelTagFlash;
     } else if (modelName.includes('pro')) {
       modelTag.classList.add('model-pro');
-      modelTag.textContent = uiStrings.modelTagPro;
+      modelTag.textContent = modelLabel || uiStrings.modelTagPro;
+    } else {
+      modelTag.classList.add('model-flash');
+      modelTag.textContent = modelLabel || modelName;
     }
     tagContainer.appendChild(modelTag);
   } else {
@@ -69,13 +225,104 @@ async function createTranslationCard(data) {
     }
     tagContainer.appendChild(googleTag);
   }
-  card.appendChild(tagContainer);
+  return tagContainer;
+}
+
+function mountCardInShadowDom(card, preservePosition = false) {
+  const initialLeft = (preservePosition && lastCardPosition) ? lastCardPosition.left : (window.lastMouseX || 100);
+  const initialTop = (preservePosition && lastCardPosition) ? lastCardPosition.top : (window.lastMouseY || 100);
+
+  if (currentHost) {
+    currentHost.remove();
+    currentHost = null;
+  }
+
+  const host = document.createElement('div');
+  host.id = 'gemini-translate-host';
+  const shadow = host.attachShadow({ mode: 'open' });
+
+  const style = document.createElement('style');
+  style.textContent = getCardStyles();
+  shadow.appendChild(style);
+  shadow.appendChild(card);
+
+  card.style.left = `${initialLeft}px`;
+  card.style.top = `${initialTop}px`;
+
+  document.body.appendChild(host);
+  currentHost = host;
+
+  const rect = card.getBoundingClientRect();
+  let finalLeft = initialLeft;
+  let finalTop = initialTop;
+  if (rect.right > window.innerWidth) {
+    finalLeft = Math.max(10, window.innerWidth - rect.width - 20);
+    card.style.left = `${finalLeft}px`;
+  }
+  if (rect.bottom > window.innerHeight) {
+    finalTop = Math.max(10, window.innerHeight - rect.height - 20);
+    card.style.top = `${finalTop}px`;
+  }
+  lastCardPosition = { left: finalLeft, top: finalTop };
+
+  setTimeout(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+  }, 0);
+}
+
+async function createLoadingCard(data) {
+  const { originalText, engine, modelName, modelLabel, uiStrings } = data;
+  const theme = await resolveTheme();
+
+  const card = document.createElement('div');
+  card.id = 'gemini-translate-card';
+  card.className = `gt-card-theme-${theme}`;
+
+  card.appendChild(buildTagContainer(engine, modelName, modelLabel, uiStrings));
+
+  const closeBtn = document.createElement('button');
+  closeBtn.id = 'gt-close-btn';
+  closeBtn.className = 'gt-close-btn';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', closeCard);
+  card.appendChild(closeBtn);
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'gt-content';
+  const originalP = document.createElement('p');
+  originalP.className = 'gt-original-text';
+  originalP.textContent = originalText;
+  const spinner = document.createElement('div');
+  spinner.className = 'gt-loading-spinner';
+
+  contentDiv.appendChild(originalP);
+  contentDiv.appendChild(spinner);
+  card.appendChild(contentDiv);
+
+  mountCardInShadowDom(card, false);
+}
+
+async function createTranslationCard(data) {
+  const {
+    originalText, translatedText, engine, modelName, modelLabel,
+    sourceLangCode, sourceLangName, targetLangCode, uiStrings
+  } = data;
+
+  const theme = await resolveTheme();
+
+  const card = document.createElement('div');
+  card.id = 'gemini-translate-card';
+  card.className = `gt-card-theme-${theme}`;
+
+  card.appendChild(buildTagContainer(engine, modelName, modelLabel, uiStrings));
 
   // Close Button
   const closeBtn = document.createElement('button');
   closeBtn.id = 'gt-close-btn';
   closeBtn.className = 'gt-close-btn';
-  closeBtn.innerHTML = '&times;'; // Safe as it's a static character entity
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', closeCard);
   card.appendChild(closeBtn);
 
   // Content Area
@@ -86,7 +333,7 @@ async function createTranslationCard(data) {
   originalP.textContent = originalText;
   const translatedP = document.createElement('p');
   translatedP.className = 'gt-translated-text';
-  // Safely handle newlines
+
   translatedText.split('__NEWLINE__').forEach((part, index, arr) => {
     translatedP.appendChild(document.createTextNode(part));
     if (index < arr.length - 1) {
@@ -111,7 +358,6 @@ async function createTranslationCard(data) {
   const footerButtons = document.createElement('div');
   footerButtons.className = 'gt-footer-buttons';
 
-  // Footer Buttons
   const listenOriginalBtn = document.createElement('button');
   listenOriginalBtn.className = 'gt-icon-btn';
   listenOriginalBtn.id = 'gt-listen-original-btn';
@@ -142,24 +388,6 @@ async function createTranslationCard(data) {
   footerDiv.appendChild(footerButtons);
   card.appendChild(footerDiv);
 
-  // --- Position and Display Card ---
-  card.style.left = `${window.lastMouseX || 100}px`;
-  card.style.top = `${window.lastMouseY || 100}px`;
-
-  document.body.appendChild(card);
-  currentCard = card;
-
-  const rect = card.getBoundingClientRect();
-  if (rect.right > window.innerWidth) {
-    card.style.left = `${window.innerWidth - rect.width - 20}px`;
-  }
-  if (rect.bottom > window.innerHeight) {
-    card.style.top = `${window.innerHeight - rect.height - 20}px`;
-  }
-
-  // --- Bind Events ---
-  closeBtn.addEventListener('click', closeCard);
-
   if (!sourceLangCode || sourceLangCode === 'und') {
     listenOriginalBtn.style.display = 'none';
   } else {
@@ -187,70 +415,33 @@ async function createTranslationCard(data) {
     });
   });
 
-  setTimeout(() => document.addEventListener('mousedown', handleClickOutside), 0);
+  mountCardInShadowDom(card, Boolean(currentHost));
 }
 
-
-function injectStyles() {
-  const styleId = 'gemini-translate-card-styles';
-  if (document.getElementById(styleId)) return;
-
-  const css = `
-        :root { --gt-primary: #007bff; --gt-text-light: #333; --gt-text-dark: #e8eaed; --gt-bg-light: #fff; --gt-bg-dark: #2d2e30; --gt-border-light: #e0e0e0; --gt-border-dark: #555; }
-        #gemini-translate-card { position: fixed; z-index: 2147483647; width: 380px; max-width: 90vw; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; }
-        .gt-card-theme-light { background: var(--gt-bg-light); color: var(--gt-text-light); border: 1px solid var(--gt-border-light); }
-        .gt-card-theme-dark { background: var(--gt-bg-dark); color: var(--gt-text-dark); border: 1px solid var(--gt-border-dark); }
-        
-        /* --- Header: Tags & Close Button --- */
-        .gt-tag-container { position: absolute; top: 0; right: 0; display: flex; border-radius: 0 8px 0 8px; overflow: hidden; }
-        .gt-engine-tag { padding: 4px 10px; font-size: 11px; font-weight: bold; color: #fff; text-transform: capitalize; }
-        .gt-engine-tag.engine-google { background-color: #888; }
-        .gt-engine-tag.engine-google-cloud { background-color: #5e35b1; }
-        .gt-engine-tag.engine-gemini { background-color: var(--gt-primary); }
-        .gt-engine-tag.model-flash { background-color: #00897b; }
-        .gt-engine-tag.model-pro { background-color: #3949ab; }
-        
-        .gt-close-btn { position: absolute; top: 2px; left: 8px; background: none; border: none; font-size: 24px; cursor: pointer; opacity: 0.5; padding: 0; line-height: 1; }
-        .gt-card-theme-light .gt-close-btn { color: #000; }
-        .gt-card-theme-dark .gt-close-btn { color: #fff; }
-        .gt-close-btn:hover { opacity: 1; }
-        
-        /* --- Content & Spacing --- */
-        .gt-content { padding: 40px 16px 16px 16px; line-height: 1.6; }
-        .gt-content p { margin: 0; }
-        .gt-original-text { font-weight: 600; color: var(--gt-primary); margin-bottom: 8px; }
-        .gt-translated-text { white-space: pre-wrap; word-wrap: break-word; }
-
-        /* --- Footer --- */
-        .gt-footer { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid; }
-        .gt-card-theme-light .gt-footer { border-top-color: var(--gt-border-light); }
-        .gt-card-theme-dark .gt-footer { border-top-color: var(--gt-border-dark); }
-        .gt-footer-info { font-size: 12px; opacity: 0.7; }
-        .gt-footer-buttons { display: flex; align-items: center; gap: 8px; }
-        .gt-icon-btn, .gt-text-btn { background: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
-        .gt-icon-btn { border: none; padding: 4px; opacity: 0.7; }
-        .gt-icon-btn:hover { opacity: 1; background-color: rgba(128,128,128,0.2); }
-        .gt-icon-btn svg { width: 16px; height: 16px; display: block; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .gt-card-theme-light .gt-icon-btn svg { stroke: #333; }
-        .gt-card-theme-dark .gt-icon-btn svg { stroke: #eee; }
-        .gt-text-btn { font-size: 12px; padding: 4px 8px; border: 1px solid; }
-        .gt-card-theme-light .gt-text-btn { color: #555; border-color: #ccc; }
-        .gt-card-theme-light .gt-text-btn:hover { background-color: #f0f0f0; }
-        .gt-card-theme-dark .gt-text-btn { color: #ccc; border-color: #666; }
-        .gt-card-theme-dark .gt-text-btn:hover { background-color: #444; }
-    `;
-  const style = document.createElement('style');
-  style.id = styleId;
-  style.textContent = css;
-  document.head.appendChild(style);
+async function showErrorCard(errorText) {
+  if (currentHost && currentHost.shadowRoot) {
+    const contentDiv = currentHost.shadowRoot.querySelector('.gt-content');
+    const spinner = currentHost.shadowRoot.querySelector('.gt-loading-spinner');
+    if (contentDiv && spinner) {
+      spinner.remove();
+      const errP = document.createElement('p');
+      errP.className = 'gt-error-text';
+      errP.textContent = errorText;
+      contentDiv.appendChild(errP);
+      return;
+    }
+  }
+  alert(errorText);
 }
 
 browser.runtime.onMessage.addListener((message) => {
-  if (message.type === 'showTranslationCard') {
-    injectStyles();
+  if (message.type === 'showLoadingCard') {
+    createLoadingCard(message.data);
+  } else if (message.type === 'showTranslationCard') {
     createTranslationCard(message.data);
   } else if (message.type === 'showError') {
-    alert(message.text);
+    showErrorCard(message.text);
+  } else if (message.type === 'getSelectedText') {
+    return Promise.resolve({ selectedText: window.getSelection()?.toString() || '' });
   }
 });
-

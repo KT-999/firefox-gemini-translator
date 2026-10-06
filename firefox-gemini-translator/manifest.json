@@ -1,15 +1,17 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extName__",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "__MSG_extDesc__",
   "default_locale": "en",
   "permissions": [
     "contextMenus",
     "activeTab",
     "storage",
-    "https://generativelanguage.googleapis.com/",
-    "https://translate.googleapis.com/"
+    "https://generativelanguage.googleapis.com/*",
+    "https://translate.googleapis.com/*",
+    "https://translation.googleapis.com/*",
+    "https://translate.google.com/*"
   ],
   "background": {
     "page": "background.html"
@@ -28,6 +30,15 @@
     "default_icon": "icons/icon-48.png",
     "default_popup": "options/options.html",
     "default_title": "__MSG_extName__"
+  },
+  "commands": {
+    "translate-selection": {
+      "suggested_key": {
+        "default": "Alt+Shift+T",
+        "mac": "Alt+Shift+T"
+      },
+      "description": "__MSG_contextMenuTitle__"
+    }
   },
   "options_ui": {
     "page": "options/options.html",

@@ -25,11 +25,15 @@ export const i18n = (() => {
   }
 
   // 初始化管理器，決定要載入哪種語言
-  async function init() {
+  async function init(options = {}) {
     try {
-      // 從儲存空間讀取使用者設定的語言
-      const { UI_LANG } = await browser.storage.local.get('UI_LANG');
-      let lang = UI_LANG;
+      let lang = options?.langOverride;
+
+      // 若未指定 langOverride，從儲存空間讀取使用者設定的語言
+      if (!lang) {
+        const { UI_LANG } = await browser.storage.local.get('UI_LANG');
+        lang = UI_LANG;
+      }
 
       // 如果使用者從未設定過語言 (初次使用)，偵測瀏覽器語言
       if (!lang) {
@@ -38,16 +42,16 @@ export const i18n = (() => {
         const baseLang = browserLang.split('-')[0]; // e.g., "zh", "fr"
 
         if (browserLang === 'zh-CN') {
-            lang = 'zh_CN';
+          lang = 'zh_CN';
         } else if (baseLang === 'zh') {
-            lang = 'zh_TW';
+          lang = 'zh_TW';
         } else if (supportedLangs.includes(baseLang)) {
-            lang = baseLang;
+          lang = baseLang;
         } else {
-            lang = 'en'; // 預設為英文
+          lang = 'en'; // 預設為英文
         }
       }
-      
+
       await loadMessages(lang);
     } catch (e) {
       console.error("初始化 i18n 管理器失敗", e);
@@ -87,4 +91,3 @@ export const i18n = (() => {
     t,
   };
 })();
-

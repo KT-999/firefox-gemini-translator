@@ -45,8 +45,8 @@ export async function getSettings() {
     maxHistorySize: 20,
     geminiKeyValid: false,
     googleCloudKeyValid: false,
-    // 【更新】將預設模型更新為最新的 2.5 Flash
-    GEMINI_MODEL: 'gemini-2.5-flash',
+    // 【更新】將預設模型更新為最新的 3.8 Flash
+    GEMINI_MODEL: 'gemini-3.8-flash',
     CONTEXT_MENU_ENGINE: 'smart'
   };
   return browser.storage.local.get(defaults);
