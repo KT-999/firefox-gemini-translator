@@ -10,7 +10,17 @@ async function sendMessageToTab(tabId, message) {
     try {
         return await browser.tabs.sendMessage(tabId, message);
     } catch (e) {
-        console.warn(`無法將訊息傳送至分頁 ${tabId}。`, e.message);
+        // 若分頁在擴充功能載入或更新前就已開啟，Content Script 可能尚未注入，自動嘗試動態注入並重試
+        if (browser.tabs && browser.tabs.executeScript) {
+            try {
+                await browser.tabs.executeScript(tabId, { file: "/content-script.js" });
+                return await browser.tabs.sendMessage(tabId, message);
+            } catch (injectErr) {
+                console.warn(`無法動態注入或傳送訊息至分頁 ${tabId}:`, injectErr.message);
+            }
+        } else {
+            console.warn(`無法將訊息傳送至分頁 ${tabId}。`, e.message);
+        }
         return null;
     }
 }
@@ -134,13 +144,19 @@ async function handleTranslation(selectedText, tabId, engineOverride = null) {
 
 async function handleContextMenuClick(info, tab) {
     if (info.menuItemId !== "smart-translate") return;
+    let targetTabId = tab?.id;
+    if (!targetTabId || targetTabId < 0) {
+        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+        targetTabId = tabs?.[0]?.id;
+    }
     const selectedText = info.selectionText?.trim();
-    if (!selectedText || !tab?.id) return;
-    await handleTranslation(selectedText, tab.id);
+    if (!selectedText || !targetTabId) return;
+    await handleTranslation(selectedText, targetTabId);
 }
 
 async function initialize() {
     await i18n.init();
+    await browser.contextMenus.removeAll().catch(() => {});
     browser.contextMenus.create({
         id: "smart-translate",
         title: i18n.t("contextMenuTitle"),
@@ -164,11 +180,12 @@ async function initialize() {
         });
     }
 
-    browser.runtime.onMessage.addListener(async (message) => {
+    browser.runtime.onMessage.addListener((message) => {
         if (message.type === 'languageChanged') {
-            await i18n.init();
-            browser.contextMenus.update("smart-translate", {
-                title: i18n.t("contextMenuTitle")
+            i18n.init().then(() => {
+                browser.contextMenus.update("smart-translate", {
+                    title: i18n.t("contextMenuTitle")
+                });
             });
         } else if (message.type === 'playTTS') {
             playTTS(message.text, message.langCode);
