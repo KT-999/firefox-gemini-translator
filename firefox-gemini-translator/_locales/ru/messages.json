@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Удалить ключ Gemini"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (Флагманские рассуждения нового поколения)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (Флагманские расширенные рассуждения)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "Всегда использовать Gemini 4 Argon"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "Всегда использовать Gemini 3.8 Pro"
   }
 }

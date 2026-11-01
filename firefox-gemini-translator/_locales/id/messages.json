@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Hapus Kunci Gemini"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (Penalaran Unggulan Generasi Berikutnya)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (Penalaran Tingkat Lanjut)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "Selalu gunakan Gemini 4 Argon"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "Selalu gunakan Gemini 3.8 Pro"
   }
 }

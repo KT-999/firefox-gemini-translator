@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Gemini कुंजी हटाएं"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (अगली पीढ़ी का प्रमुख रीजनिंग)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (प्रमुख उन्नत रीजनिंग)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "हमेशा Gemini 4 Argon का उपयोग करें"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "हमेशा Gemini 3.8 Pro का उपयोग करें"
   }
 }

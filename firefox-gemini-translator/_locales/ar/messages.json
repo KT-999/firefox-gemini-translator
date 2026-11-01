@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "إزالة مفتاح Gemini"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (استدلال رائد من الجيل التالي)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (استدلال متقدم رائد)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "استخدم دائمًا Gemini 4 Argon"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "استخدم دائمًا Gemini 3.8 Pro"
   }
 }

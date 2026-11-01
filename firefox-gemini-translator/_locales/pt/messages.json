@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Remover chave do Gemini"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (Raciocínio topo de linha de última geração)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (Raciocínio avançado de ponta)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "Sempre usar Gemini 4 Argon"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "Sempre usar Gemini 3.8 Pro"
   }
 }

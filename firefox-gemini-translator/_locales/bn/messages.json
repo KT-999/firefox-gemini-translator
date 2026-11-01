@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Gemini কী সরান"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (নেক্সট-জেন ফ্ল্যাগশিপ রিজনিং)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (ফ্ল্যাগশিপ অ্যাডভান্সড রিজনিং)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "সবসময় Gemini 4 Argon ব্যবহার করুন"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "সবসময় Gemini 3.8 Pro ব্যবহার করুন"
   }
 }

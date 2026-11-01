@@ -72,7 +72,7 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       sourceText = `${i18n.t("engineTagGemini")} ${formatGeminiModelLabel(modelName)}`.trim();
       if (modelName.includes('flash')) {
         sourceDisplayEl.classList.add('model-flash');
-      } else if (modelName.includes('pro')) {
+      } else if (modelName.includes('pro') || modelName.includes('argon')) {
         sourceDisplayEl.classList.add('model-pro');
       }
     }
@@ -192,7 +192,9 @@ async function main() {
     defaultTargetLang
   );
   const migrateModelValue = (val) => {
-    if (val === 'gemini-3-pro-preview') return 'gemini-3.1-pro-preview';
+    if (val === 'gemini-3.7-flash') return 'gemini-3.8-flash';
+    if (val === 'gemini-3-flash-preview') return 'gemini-3.8-flash';
+    if (val === 'gemini-3-pro-preview') return 'gemini-3.8-pro';
     if (val === 'gemini-3.1-flash-lite-preview') return 'gemini-3.1-flash-lite';
     return val;
   };

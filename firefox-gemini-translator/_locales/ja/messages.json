@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Gemini キーを削除"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (次世代フラグシップ推論)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (フラグシップ高精度推論)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "常に Gemini 4 Argon を使用"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "常に Gemini 3.8 Pro を使用"
   }
 }

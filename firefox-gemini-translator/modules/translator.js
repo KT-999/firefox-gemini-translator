@@ -103,9 +103,12 @@ export function resolveGeminiModelName(modelName) {
     if (resolved.includes('1.5') || resolved.includes('2.0')) {
         console.warn(`舊版 Gemini 模型已停用，改用 gemini-3.8-flash: ${resolved}`);
         resolved = 'gemini-3.8-flash';
+    } else if (resolved === 'gemini-3.7-flash' || resolved === 'gemini-3-flash-preview') {
+        console.warn(`${resolved} 已停用/過期，改用 gemini-3.8-flash`);
+        resolved = 'gemini-3.8-flash';
     } else if (resolved === 'gemini-3-pro-preview') {
-        console.warn(`gemini-3-pro-preview 已停用，改用 gemini-3.1-pro-preview`);
-        resolved = 'gemini-3.1-pro-preview';
+        console.warn(`gemini-3-pro-preview 已停用，改用 gemini-3.8-pro`);
+        resolved = 'gemini-3.8-pro';
     } else if (resolved === 'gemini-3.1-flash-lite-preview') {
         resolved = 'gemini-3.1-flash-lite';
     }

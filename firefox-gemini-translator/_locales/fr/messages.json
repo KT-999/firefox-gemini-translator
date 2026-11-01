@@ -380,5 +380,23 @@
   },
   "geminiRemoveKey": {
     "message": "Supprimer la clé Gemini"
+  },
+  "engineOptionGemini4Argon": {
+    "message": "Gemini 4 Argon"
+  },
+  "engineOptionGemini38Pro": {
+    "message": "Gemini 3.8 Pro"
+  },
+  "geminiModel4Argon": {
+    "message": "Gemini 4 Argon (Raisonnement phare nouvelle génération)"
+  },
+  "geminiModel38Pro": {
+    "message": "Gemini 3.8 Pro (Raisonnement avancé phare)"
+  },
+  "contextMenuEngineGemini4Argon": {
+    "message": "Toujours utiliser Gemini 4 Argon"
+  },
+  "contextMenuEngineGemini38Pro": {
+    "message": "Toujours utiliser Gemini 3.8 Pro"
   }
 }
