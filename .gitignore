@@ -8,3 +8,5 @@ desktop.ini
 # 忽略 MAC 系統設定檔
 .DS_Store
 
+# 忽略 打包壓縮檔
+*.zip
