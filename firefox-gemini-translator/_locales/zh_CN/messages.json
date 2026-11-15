@@ -325,7 +325,7 @@
     "message": "Pro"
   },
   "engineOptionGemini38Flash": {
-    "message": "Gemini 3.8 Flash"
+    "message": "Gemini 3.8 Flash (极速推荐)"
   },
   "engineOptionGemini37Flash": {
     "message": "Gemini 3.7 Flash"
@@ -343,16 +343,16 @@
     "message": "Gemini 3.1 Pro Preview"
   },
   "geminiModel38Flash": {
-    "message": "Gemini 3.8 Flash（最新主力推荐）"
+    "message": "Gemini 3.8 Flash (极速秒出，主力推荐)"
   },
   "geminiModel37Flash": {
     "message": "Gemini 3.7 Flash（稳定高效）"
   },
   "geminiModel35Flash": {
-    "message": "Gemini 3.5 Flash（基础稳定）"
+    "message": "Gemini 3.5 Flash (稳定高效)"
   },
   "geminiModel35FlashLite": {
-    "message": "Gemini 3.5 Flash-Lite（极速、最省资源）"
+    "message": "Gemini 3.5 Flash-Lite (极速轻量)"
   },
   "geminiModel31FlashLite": {
     "message": "Gemini 3.1 Flash-Lite（高性价比轻量模型）"
@@ -382,16 +382,16 @@
     "message": "移除 Gemini Key"
   },
   "engineOptionGemini4Argon": {
-    "message": "Gemini 4 Argon"
+    "message": "Gemini 4 Argon (旗舰深度推理)"
   },
   "engineOptionGemini38Pro": {
-    "message": "Gemini 3.8 Pro"
+    "message": "Gemini 3.8 Pro (高阶推理)"
   },
   "geminiModel4Argon": {
-    "message": "Gemini 4 Argon (新一代旗舰推理)"
+    "message": "Gemini 4 Argon (旗舰深度推理，约25秒)"
   },
   "geminiModel38Pro": {
-    "message": "Gemini 3.8 Pro (旗舰高阶推理)"
+    "message": "Gemini 3.8 Pro (旗舰高阶推理，约15秒)"
   },
   "contextMenuEngineGemini4Argon": {
     "message": "一律使用 Gemini 4 Argon"
@@ -400,16 +400,16 @@
     "message": "一律使用 Gemini 3.8 Pro"
   },
   "engineOptionGemini4Carbon": {
-    "message": "Gemini 4 Carbon"
+    "message": "Gemini 4 Carbon (长程顶级推理)"
   },
   "engineOptionGemini4Hydrogen": {
-    "message": "Gemini 4 Hydrogen"
+    "message": "Gemini 4 Hydrogen (深度思考推理)"
   },
   "geminiModel4Carbon": {
-    "message": "Gemini 4 Carbon (顶级长程深度推理)"
+    "message": "Gemini 4 Carbon (长程顶级推理，约30秒)"
   },
   "geminiModel4Hydrogen": {
-    "message": "Gemini 4 Hydrogen (极速高效日常轻量)"
+    "message": "Gemini 4 Hydrogen (深度思考推理，约20秒)"
   },
   "contextMenuEngineGemini4Carbon": {
     "message": "一律使用 Gemini 4 Carbon"

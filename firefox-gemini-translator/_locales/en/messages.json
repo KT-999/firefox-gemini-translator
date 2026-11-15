@@ -325,7 +325,7 @@
     "message": "Pro"
   },
   "engineOptionGemini38Flash": {
-    "message": "Gemini 3.8 Flash"
+    "message": "Gemini 3.8 Flash (Fast & Recommended)"
   },
   "engineOptionGemini37Flash": {
     "message": "Gemini 3.7 Flash"
@@ -343,16 +343,16 @@
     "message": "Gemini 3.1 Pro Preview"
   },
   "geminiModel38Flash": {
-    "message": "Gemini 3.8 Flash (Recommended)"
+    "message": "Gemini 3.8 Flash (Instant & Recommended, ~0.5s)"
   },
   "geminiModel37Flash": {
     "message": "Gemini 3.7 Flash (Balanced)"
   },
   "geminiModel35Flash": {
-    "message": "Gemini 3.5 Flash (Baseline)"
+    "message": "Gemini 3.5 Flash (Balanced & Fast)"
   },
   "geminiModel35FlashLite": {
-    "message": "Gemini 3.5 Flash-Lite (Fast, cost-effective)"
+    "message": "Gemini 3.5 Flash-Lite (Ultra Fast, Lightweight)"
   },
   "geminiModel31FlashLite": {
     "message": "Gemini 3.1 Flash-Lite (High efficiency)"
@@ -382,16 +382,16 @@
     "message": "Remove Gemini Key"
   },
   "engineOptionGemini4Argon": {
-    "message": "Gemini 4 Argon"
+    "message": "Gemini 4 Argon (Flagship Reasoning)"
   },
   "engineOptionGemini38Pro": {
-    "message": "Gemini 3.8 Pro"
+    "message": "Gemini 3.8 Pro (Advanced Reasoning)"
   },
   "geminiModel4Argon": {
-    "message": "Gemini 4 Argon (Next-Gen Flagship Reasoning)"
+    "message": "Gemini 4 Argon (Flagship Reasoning, ~25s)"
   },
   "geminiModel38Pro": {
-    "message": "Gemini 3.8 Pro (Flagship Advanced Reasoning)"
+    "message": "Gemini 3.8 Pro (Advanced Reasoning, ~15s)"
   },
   "contextMenuEngineGemini4Argon": {
     "message": "Always use Gemini 4 Argon"
@@ -400,16 +400,16 @@
     "message": "Always use Gemini 3.8 Pro"
   },
   "engineOptionGemini4Carbon": {
-    "message": "Gemini 4 Carbon"
+    "message": "Gemini 4 Carbon (Top-Tier Reasoning)"
   },
   "engineOptionGemini4Hydrogen": {
-    "message": "Gemini 4 Hydrogen"
+    "message": "Gemini 4 Hydrogen (Deep Reasoning)"
   },
   "geminiModel4Carbon": {
-    "message": "Gemini 4 Carbon (Top-Tier Deep Reasoning)"
+    "message": "Gemini 4 Carbon (Top-Tier Long Reasoning, ~30s)"
   },
   "geminiModel4Hydrogen": {
-    "message": "Gemini 4 Hydrogen (High-Speed & Cost-Efficient)"
+    "message": "Gemini 4 Hydrogen (Deep Reasoning, ~20s)"
   },
   "contextMenuEngineGemini4Carbon": {
     "message": "Always use Gemini 4 Carbon"
