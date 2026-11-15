@@ -15,8 +15,19 @@ export async function addHistoryItem(original, translated, engine, targetLang, s
     const { translationHistory = [], maxHistorySize = 20 } = await browser.storage.local.get(["translationHistory", "maxHistorySize"]);
     if (!original || !translated) return;
 
+    const cleanOriginal = (typeof original === 'object' && original !== null)
+      ? (typeof original.toString === 'function' ? original.toString() : String(original))
+      : String(original);
+    const cleanTranslated = (typeof translated === 'object' && translated !== null)
+      ? (typeof translated.toString === 'function' ? translated.toString() : String(translated))
+      : String(translated);
+
+    if (!cleanOriginal.trim() || !cleanTranslated.trim()) return;
+
     const newEntry = {
-      original, translated, engine, targetLang, sourceLang, modelName,
+      original: cleanOriginal,
+      translated: cleanTranslated,
+      engine, targetLang, sourceLang, modelName,
       timestamp: new Date().toISOString()
     };
 

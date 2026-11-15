@@ -73,9 +73,10 @@ export async function translateWithGoogle(text, targetLang) {
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
     const durationMs = Math.round(performance.now() - startTime);
-    const result = new String(translatedText);
-    result.durationMs = durationMs;
-    return result;
+    return {
+        translatedText: String(translatedText),
+        durationMs
+    };
 }
 
 export async function translateWithGoogleCloud(text, targetLang, apiKey) {
@@ -104,9 +105,10 @@ export async function translateWithGoogleCloud(text, targetLang, apiKey) {
         throw new Error("從 Google Cloud 未收到翻譯結果");
     }
     const durationMs = Math.round(performance.now() - startTime);
-    const result = new String(translatedText);
-    result.durationMs = durationMs;
-    return result;
+    return {
+        translatedText: String(translatedText),
+        durationMs
+    };
 }
 
 /**
@@ -132,8 +134,9 @@ export function resolveGeminiModelName(modelName) {
 }
 
 /**
- * 【效能最佳化】使用 Gemini API 進行翻譯，關閉不必要的思考過程（thinkingBudget: 0）達到即時秒出翻譯，
- * 並調高 Token 上限與容錯降級機制，精準測量與記錄思考/翻譯耗時。
+ * 【效能最佳化】使用 Gemini API 進行翻譯：
+ * 針對 Gemini 4 / 3.x 模型使用 thinkingLevel: "minimal"，對 2.5 系列使用 thinkingBudget: 0，
+ * 將推理延遲降到最低（跳過數十秒深度思考），並保證回傳純字串防止紀錄序列化異常。
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
     const startTime = performance.now();
@@ -141,29 +144,31 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     const apiVersion = (resolvedModelName === 'gemini-pro') ? 'v1' : 'v1beta';
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${resolvedModelName}:generateContent`;
 
-    // 使用 i18n 產生完整提示詞作為 fallback，同時透過 systemInstruction 強化指令遵循與防止 Prompt Injection
     const prompt = i18n_t ? i18n_t("promptSystem", [targetLang, text]) : text;
-    const systemInstructionText = `You are a professional translation engine. Translate the user's input text into ${targetLang}. Rules: 1. Output ONLY the translation without any explanation, preamble, or notes. 2. If the input is a single vocabulary word with multiple common meanings, list them separated by '、' or ', '. 3. If the input is a sentence, phrase, or paragraph, provide the most fluent and natural single translation. 4. Do NOT wrap the output in quotes or Markdown formatting.`;
+    const systemInstructionText = `You are a professional real-time translation engine. Translate the user's input text into ${targetLang}. Rules: 1. Output ONLY the translation directly without any explanation, preamble, notes, or internal thinking steps. 2. If the input is a single vocabulary word with multiple common meanings, list them separated by '、' or ', '. 3. If the input is a sentence, phrase, or paragraph, provide the most fluent and natural single translation. 4. Do NOT wrap the output in quotes or Markdown formatting.`;
 
     const shouldRetry = (status) => [429, 500, 503].includes(status);
     const maxAttempts = 3;
     let data;
-    let triedWithoutThinking = false;
 
-    // 關閉思考推理 (thinkingBudget: 0) 以達到即時快速回應，並擴大輸出 token 上限防止被截斷
+    // 根據模型世代配置最小思考設定
+    const isGen3or4 = resolvedModelName.includes('4-') || resolvedModelName.includes('3.') || resolvedModelName.includes('3-');
+    
     const requestBody = {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
             maxOutputTokens: 8192,
             temperature: 0.1,
-            thinkingConfig: {
-                thinkingBudget: 0
-            }
+            thinkingConfig: isGen3or4 
+                ? { thinkingLevel: "minimal" } 
+                : { thinkingBudget: 0 }
         }
     };
     if (apiVersion === 'v1beta') {
         requestBody.systemInstruction = { parts: [{ text: systemInstructionText }] };
     }
+
+    let fallbackLevel = 0;
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         const response = await fetch(GEMINI_API_URL, {
@@ -187,17 +192,31 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
             errorBody = null;
         }
 
-        // 若特定模型不支援 thinkingBudget: 0 導致 400，動態移除 thinkingConfig 立即重試降級
+        // 若模型對 thinkingConfig 拋出 400，平滑動態降級相容
         const errorMsg = (errorBody?.error?.message || '').toLowerCase();
-        if (response.status === 400 && !triedWithoutThinking && (errorMsg.includes('thinking') || errorMsg.includes('budget'))) {
-            console.warn(`模型 ${resolvedModelName} 不支援 thinkingBudget: 0，改為預設推理模式重試...`);
-            delete requestBody.generationConfig.thinkingConfig;
-            triedWithoutThinking = true;
-            attempt -= 1;
-            continue;
+        if (response.status === 400 && (errorMsg.includes('thinking') || errorMsg.includes('budget') || errorMsg.includes('level'))) {
+            if (fallbackLevel === 0) {
+                console.warn(`模型 ${resolvedModelName} 降級嘗試 thinkingLevel: low...`);
+                requestBody.generationConfig.thinkingConfig = { thinkingLevel: "low" };
+                fallbackLevel = 1;
+                attempt -= 1;
+                continue;
+            } else if (fallbackLevel === 1) {
+                console.warn(`模型 ${resolvedModelName} 降級嘗試 thinkingBudget: 0...`);
+                requestBody.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+                fallbackLevel = 2;
+                attempt -= 1;
+                continue;
+            } else if (fallbackLevel === 2) {
+                console.warn(`模型 ${resolvedModelName} 移除 thinkingConfig...`);
+                delete requestBody.generationConfig.thinkingConfig;
+                fallbackLevel = 3;
+                attempt -= 1;
+                continue;
+            }
         }
 
-        // 精準判斷是否為無效的 API Key (HTTP 403 或 Google API_KEY_INVALID 錯誤原因)
+        // 精準判斷是否為無效的 API Key
         const errorStatus = errorBody?.error?.status || '';
         const isInvalidKey =
             response.status === 403 ||
@@ -243,7 +262,8 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     }
 
     const durationMs = Math.round(performance.now() - startTime);
-    const result = new String(translatedText);
-    result.durationMs = durationMs;
-    return result;
+    return {
+        translatedText: String(translatedText),
+        durationMs
+    };
 }

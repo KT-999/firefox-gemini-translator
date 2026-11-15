@@ -148,12 +148,27 @@ export async function renderHistory(history = []) {
       }
     }
 
+    function sanitizeHistoryText(val) {
+      if (typeof val === 'string') return val;
+      if (typeof val === 'object' && val !== null) {
+        const keys = Object.keys(val).filter(k => /^\d+$/.test(k)).sort((a, b) => Number(a) - Number(b));
+        if (keys.length > 0) {
+          return keys.map(k => val[k]).join('');
+        }
+        return '';
+      }
+      return String(val || '');
+    }
+
+    const cleanOriginal = sanitizeHistoryText(item.original);
+    const cleanTranslated = sanitizeHistoryText(item.translated);
+
     const originalP = document.createElement("p");
     originalP.className = "original-text";
-    originalP.textContent = item.original;
+    originalP.textContent = cleanOriginal;
     const translatedP = document.createElement("p");
     translatedP.className = "translated-text";
-    translatedP.textContent = item.translated;
+    translatedP.textContent = cleanTranslated;
     const footerDiv = document.createElement("div");
     footerDiv.className = "history-item-footer";
 
@@ -179,7 +194,7 @@ export async function renderHistory(history = []) {
     listenOriginalBtn.className = "listen-btn";
     listenOriginalBtn.title = i18n.t("listenOriginalButtonTooltip");
     listenOriginalBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
-    listenOriginalBtn.onclick = () => playTTS(item.original, item.sourceLang);
+    listenOriginalBtn.onclick = () => playTTS(cleanOriginal, item.sourceLang);
     if (!item.sourceLang || item.sourceLang === 'und') {
         listenOriginalBtn.classList.add('hidden');
     }
@@ -190,14 +205,14 @@ export async function renderHistory(history = []) {
     listenBtn.title = i18n.t("listenButtonTooltip");
     listenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
     const targetLangCode = LANG_NAME_TO_CODE_MAP[item.targetLang] || 'zh-TW';
-    listenBtn.onclick = () => playTTS(item.translated, targetLangCode);
+    listenBtn.onclick = () => playTTS(cleanTranslated, targetLangCode);
     buttonGroup.appendChild(listenBtn);
 
     const copyOriginalBtn = document.createElement("button");
     copyOriginalBtn.className = "copy-history-btn";
     copyOriginalBtn.textContent = i18n.t("copyOriginal");
     copyOriginalBtn.onclick = () => {
-      navigator.clipboard.writeText(item.original).then(() => {
+      navigator.clipboard.writeText(cleanOriginal).then(() => {
         copyOriginalBtn.textContent = i18n.t("copied");
         setTimeout(() => { copyOriginalBtn.textContent = i18n.t("copyOriginal"); }, 1500);
       });
@@ -206,7 +221,7 @@ export async function renderHistory(history = []) {
     copyTranslatedBtn.className = "copy-history-btn";
     copyTranslatedBtn.textContent = i18n.t("copyTranslated");
     copyTranslatedBtn.onclick = () => {
-      navigator.clipboard.writeText(item.translated).then(() => {
+      navigator.clipboard.writeText(cleanTranslated).then(() => {
         copyTranslatedBtn.textContent = i18n.t("copied");
         setTimeout(() => { copyTranslatedBtn.textContent = i18n.t("copyTranslated"); }, 1500);
       });

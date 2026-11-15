@@ -98,15 +98,18 @@ async function handleTranslation(selectedText, tabId, engineOverride = null) {
             });
         }
 
+        let translationResult;
         if (engine === 'google') {
-            translatedText = await translateWithGoogle(selectedText, targetLang);
+            translationResult = await translateWithGoogle(selectedText, targetLang);
         } else if (engine === 'google-cloud') {
-            translatedText = await translateWithGoogleCloud(selectedText, targetLang, settings.GOOGLE_CLOUD_API_KEY);
+            translationResult = await translateWithGoogleCloud(selectedText, targetLang, settings.GOOGLE_CLOUD_API_KEY);
             await saveSettings({ googleCloudKeyValid: true });
         } else { // engine is 'gemini'
-            translatedText = await translateWithGemini(selectedText, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
+            translationResult = await translateWithGemini(selectedText, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
             await saveSettings({ geminiKeyValid: true });
         }
+        translatedText = String(translationResult?.translatedText || translationResult || '');
+        const durationMs = translationResult?.durationMs ?? null;
 
         const sourceLang = await detectSourceLanguage(selectedText);
         await addHistoryItem(selectedText, translatedText, engine, targetLang, sourceLang, modelName);
@@ -119,7 +122,7 @@ async function handleTranslation(selectedText, tabId, engineOverride = null) {
             engine,
             modelName,
             modelLabel,
-            durationMs: translatedText.durationMs ?? null,
+            durationMs,
             sourceLangCode: sourceLang,
             sourceLangName,
             targetLangCode: LANG_NAME_TO_CODE_MAP[targetLang] || 'zh-TW',

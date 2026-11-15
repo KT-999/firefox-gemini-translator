@@ -30,9 +30,10 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
     let engine = 'google';
     let modelName = null;
 
+    let translationResult;
     if (engineSelection === 'google') {
       engine = 'google';
-      translatedText = await translateWithGoogle(text, targetLang);
+      translationResult = await translateWithGoogle(text, targetLang);
     } else if (engineSelection === 'google-cloud') {
       engine = 'google-cloud';
       if (!settings.GOOGLE_CLOUD_API_KEY) {
@@ -43,7 +44,7 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
         sourceDisplayEl.textContent = '';
         return;
       }
-      translatedText = await translateWithGoogleCloud(text, targetLang, settings.GOOGLE_CLOUD_API_KEY);
+      translationResult = await translateWithGoogleCloud(text, targetLang, settings.GOOGLE_CLOUD_API_KEY);
       await saveSettings({ googleCloudKeyValid: true });
     } else { // A Gemini model is selected
       engine = 'gemini';
@@ -56,9 +57,12 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
         sourceDisplayEl.textContent = '';
         return;
       }
-      translatedText = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
+      translationResult = await translateWithGemini(text, targetLang, settings.GEMINI_API_KEY, modelName, i18n.t);
       await saveSettings({ geminiKeyValid: true });
     }
+
+    translatedText = String(translationResult?.translatedText || translationResult || '');
+    const durationMs = translationResult?.durationMs ?? null;
 
     sourceLang = await detectSourceLanguage(text);
     const sourceLangName = getDisplayLanguageName(sourceLang, settings.UI_LANG || 'zh_TW');
@@ -83,10 +87,10 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
     }
     sourceDisplayEl.textContent = sourceText;
 
-    if (timeDisplayEl && translatedText.durationMs !== undefined && translatedText.durationMs !== null) {
-      const timeStr = translatedText.durationMs < 1000 
-        ? `${Math.round(translatedText.durationMs)}ms` 
-        : `${(translatedText.durationMs / 1000).toFixed(2)}s`;
+    if (timeDisplayEl && durationMs !== undefined && durationMs !== null) {
+      const timeStr = durationMs < 1000 
+        ? `${Math.round(durationMs)}ms` 
+        : `${(durationMs / 1000).toFixed(2)}s`;
       timeDisplayEl.textContent = `⏱️ ${timeStr}`;
       timeDisplayEl.title = i18n.t("translationTimeTooltip") || "翻譯耗時";
       timeDisplayEl.classList.remove('hidden');
