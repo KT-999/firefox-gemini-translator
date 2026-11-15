@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "常に Gemini 3.8 Pro を使用"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (最上位長文深層推論)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (超高速・高効率日常推論)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "常に Gemini 4 Carbon を使用"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "常に Gemini 4 Hydrogen を使用"
   }
 }

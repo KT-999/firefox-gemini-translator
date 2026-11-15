@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "항상 Gemini 3.8 Pro 사용"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (최고급 장문 심층 추론)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (초고속 고효율 일상 추론)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "항상 Gemini 4 Carbon 사용"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "항상 Gemini 4 Hydrogen 사용"
   }
 }

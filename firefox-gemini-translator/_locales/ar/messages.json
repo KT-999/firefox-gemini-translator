@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "استخدم دائمًا Gemini 3.8 Pro"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (استدلال عميق من الدرجة الأولى)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (عالي السرعة وفعال من حيث التكلفة)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "استخدم دائمًا Gemini 4 Carbon"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "استخدم دائمًا Gemini 4 Hydrogen"
   }
 }

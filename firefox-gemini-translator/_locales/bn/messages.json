@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "সবসময় Gemini 3.8 Pro ব্যবহার করুন"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (টপ-টিয়ার গভীর রিজনিং)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (উচ্চ গতি ও ব্যয়-সাশ্রয়ী)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "সবসময় Gemini 4 Carbon ব্যবহার করুন"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "সবসময় Gemini 4 Hydrogen ব্যবহার করুন"
   }
 }

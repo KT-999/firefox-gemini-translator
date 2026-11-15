@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "Selalu gunakan Gemini 3.8 Pro"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (Penalaran Mendalam Tingkat Atas)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (Kecepatan Tinggi & Hemat Biaya)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "Selalu gunakan Gemini 4 Carbon"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "Selalu gunakan Gemini 4 Hydrogen"
   }
 }

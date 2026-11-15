@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "Immer Gemini 3.8 Pro verwenden"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (Spitzenklasse Deep-Reasoning)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (Hochgeschwindigkeits- & kosteneffizient)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "Immer Gemini 4 Carbon verwenden"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "Immer Gemini 4 Hydrogen verwenden"
   }
 }

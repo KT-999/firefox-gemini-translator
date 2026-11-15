@@ -398,5 +398,23 @@
   },
   "contextMenuEngineGemini38Pro": {
     "message": "हमेशा Gemini 3.8 Pro का उपयोग करें"
+  },
+  "engineOptionGemini4Carbon": {
+    "message": "Gemini 4 Carbon"
+  },
+  "engineOptionGemini4Hydrogen": {
+    "message": "Gemini 4 Hydrogen"
+  },
+  "geminiModel4Carbon": {
+    "message": "Gemini 4 Carbon (शीर्ष स्तरीय गहन रीजनिंग)"
+  },
+  "geminiModel4Hydrogen": {
+    "message": "Gemini 4 Hydrogen (उच्च गति और लागत प्रभावी)"
+  },
+  "contextMenuEngineGemini4Carbon": {
+    "message": "हमेशा Gemini 4 Carbon का उपयोग करें"
+  },
+  "contextMenuEngineGemini4Hydrogen": {
+    "message": "हमेशा Gemini 4 Hydrogen का उपयोग करें"
   }
 }

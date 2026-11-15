@@ -70,9 +70,9 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       sourceDisplayEl.classList.add('engine-google-cloud');
     } else {
       sourceText = `${i18n.t("engineTagGemini")} ${formatGeminiModelLabel(modelName)}`.trim();
-      if (modelName.includes('flash')) {
+      if (modelName.includes('flash') || modelName.includes('hydrogen')) {
         sourceDisplayEl.classList.add('model-flash');
-      } else if (modelName.includes('pro') || modelName.includes('argon')) {
+      } else if (modelName.includes('pro') || modelName.includes('argon') || modelName.includes('carbon')) {
         sourceDisplayEl.classList.add('model-pro');
       }
     }
