@@ -5,6 +5,14 @@ import { LANG_NAME_TO_CODE_MAP, containsCjk } from './languages.js';
 
 export { containsCjk };
 
+export function formatDuration(durationMs) {
+    if (durationMs === undefined || durationMs === null || isNaN(durationMs)) return '';
+    if (durationMs < 1000) {
+        return `${Math.round(durationMs)}ms`;
+    }
+    return `${(durationMs / 1000).toFixed(2)}s`;
+}
+
 export function decideEngine(text) {
     let useGoogleTranslate = false;
     if (containsCjk(text)) {
@@ -18,6 +26,7 @@ export function decideEngine(text) {
 }
 
 export async function translateWithGoogle(text, targetLang) {
+    const startTime = performance.now();
     const tl = LANG_NAME_TO_CODE_MAP[targetLang] || "zh-TW";
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&dt=bd&dt=ss&dt=ex&q=${encodeURIComponent(text)}`;
 
@@ -63,10 +72,14 @@ export async function translateWithGoogle(text, targetLang) {
     }
 
     if (!translatedText) throw new Error("從 Google 未收到翻譯結果");
-    return translatedText;
+    const durationMs = Math.round(performance.now() - startTime);
+    const result = new String(translatedText);
+    result.durationMs = durationMs;
+    return result;
 }
 
 export async function translateWithGoogleCloud(text, targetLang, apiKey) {
+    const startTime = performance.now();
     const target = LANG_NAME_TO_CODE_MAP[targetLang] || "zh-TW";
     const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(apiKey)}`, {
         method: "POST",
@@ -90,7 +103,10 @@ export async function translateWithGoogleCloud(text, targetLang, apiKey) {
     if (!translatedText) {
         throw new Error("從 Google Cloud 未收到翻譯結果");
     }
-    return translatedText;
+    const durationMs = Math.round(performance.now() - startTime);
+    const result = new String(translatedText);
+    result.durationMs = durationMs;
+    return result;
 }
 
 /**
@@ -116,9 +132,11 @@ export function resolveGeminiModelName(modelName) {
 }
 
 /**
- * 【最終修正】使用 Gemini API 進行翻譯，將 API 金鑰放入 Header 中，並使用 systemInstruction 隔離系統提示詞與原文。
+ * 【效能最佳化】使用 Gemini API 進行翻譯，關閉不必要的思考過程（thinkingBudget: 0）達到即時秒出翻譯，
+ * 並調高 Token 上限與容錯降級機制，精準測量與記錄思考/翻譯耗時。
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
+    const startTime = performance.now();
     const resolvedModelName = resolveGeminiModelName(modelName);
     const apiVersion = (resolvedModelName === 'gemini-pro') ? 'v1' : 'v1beta';
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${resolvedModelName}:generateContent`;
@@ -130,10 +148,18 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     const shouldRetry = (status) => [429, 500, 503].includes(status);
     const maxAttempts = 3;
     let data;
+    let triedWithoutThinking = false;
 
+    // 關閉思考推理 (thinkingBudget: 0) 以達到即時快速回應，並擴大輸出 token 上限防止被截斷
     const requestBody = {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 2048, temperature: 0.1 }
+        generationConfig: {
+            maxOutputTokens: 8192,
+            temperature: 0.1,
+            thinkingConfig: {
+                thinkingBudget: 0
+            }
+        }
     };
     if (apiVersion === 'v1beta') {
         requestBody.systemInstruction = { parts: [{ text: systemInstructionText }] };
@@ -161,14 +187,23 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
             errorBody = null;
         }
 
+        // 若特定模型不支援 thinkingBudget: 0 導致 400，動態移除 thinkingConfig 立即重試降級
+        const errorMsg = (errorBody?.error?.message || '').toLowerCase();
+        if (response.status === 400 && !triedWithoutThinking && (errorMsg.includes('thinking') || errorMsg.includes('budget'))) {
+            console.warn(`模型 ${resolvedModelName} 不支援 thinkingBudget: 0，改為預設推理模式重試...`);
+            delete requestBody.generationConfig.thinkingConfig;
+            triedWithoutThinking = true;
+            attempt -= 1;
+            continue;
+        }
+
         // 精準判斷是否為無效的 API Key (HTTP 403 或 Google API_KEY_INVALID 錯誤原因)
-        const errorMessage = errorBody?.error?.message || '';
         const errorStatus = errorBody?.error?.status || '';
         const isInvalidKey =
             response.status === 403 ||
             (response.status === 400 && (
-                errorMessage.toLowerCase().includes('api key') ||
-                errorMessage.toLowerCase().includes('api_key') ||
+                errorMsg.includes('api key') ||
+                errorMsg.includes('api_key') ||
                 errorStatus === 'INVALID_ARGUMENT' && JSON.stringify(errorBody).includes('API_KEY_INVALID')
             ));
 
@@ -206,5 +241,9 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
     if (!translatedText) {
         throw new Error("從 Gemini 未收到翻譯結果");
     }
-    return translatedText;
+
+    const durationMs = Math.round(performance.now() - startTime);
+    const result = new String(translatedText);
+    result.durationMs = durationMs;
+    return result;
 }

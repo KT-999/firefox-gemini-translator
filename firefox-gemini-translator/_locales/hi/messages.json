@@ -416,5 +416,8 @@
   },
   "contextMenuEngineGemini4Hydrogen": {
     "message": "हमेशा Gemini 4 Hydrogen का उपयोग करें"
+  },
+  "translationTimeTooltip": {
+    "message": "अनुवाद समय"
   }
 }

@@ -78,7 +78,8 @@ async function handleTranslation(selectedText, tabId, engineOverride = null) {
             engineOptionGoogleCloud: i18n.t("engineOptionGoogleCloud"),
             engineTagGemini: i18n.t("engineTagGemini"),
             modelTagFlash: i18n.t("modelTagFlash"),
-            modelTagPro: i18n.t("modelTagPro")
+            modelTagPro: i18n.t("modelTagPro"),
+            translationTimeTooltip: i18n.t("translationTimeTooltip")
         };
 
         const modelLabel = modelName ? formatGeminiModelLabel(modelName) : '';
@@ -118,6 +119,7 @@ async function handleTranslation(selectedText, tabId, engineOverride = null) {
             engine,
             modelName,
             modelLabel,
+            durationMs: translatedText.durationMs ?? null,
             sourceLangCode: sourceLang,
             sourceLangName,
             targetLangCode: LANG_NAME_TO_CODE_MAP[targetLang] || 'zh-TW',

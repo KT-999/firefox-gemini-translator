@@ -416,5 +416,8 @@
   },
   "contextMenuEngineGemini4Hydrogen": {
     "message": "সবসময় Gemini 4 Hydrogen ব্যবহার করুন"
+  },
+  "translationTimeTooltip": {
+    "message": "অনুবাদ সময়"
   }
 }

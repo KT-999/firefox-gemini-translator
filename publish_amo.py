@@ -164,8 +164,8 @@ if __name__ == "__main__":
     create_zip(source_dir, zip_name)
     
     release_notes = {
-        "zh-TW": "升級至 v2.6.0: 支援 Gemini 4 系列 (Carbon, Argon, Hydrogen)、Gemini 3.8 Pro 最新 API，並優化多語系支援與相容性。",
-        "en-US": "Upgrade to v2.6.0: Support latest Gemini 4 series (Carbon, Argon, Hydrogen) and Gemini 3.8 Pro, with improved i18n and compatibility."
+        "zh-TW": "升級至 v2.7.0: 最佳化 Gemini 翻譯回應速度（關閉不必要思考並調高 Token 上限）、新增翻譯/思考耗時標籤顯示、升級至最新模型架構與增強穩定度。",
+        "en-US": "Upgrade to v2.7.0: Optimize Gemini translation response speed (disable unnecessary thinking & increase token ceiling), add translation duration display tag, and improve stability."
     }
     
     success = upload_to_amo(token, zip_name, addon_id, license_slug="MIT", release_notes=release_notes)

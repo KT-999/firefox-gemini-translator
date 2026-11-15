@@ -13,9 +13,14 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
   resultEl.innerHTML = '<div class="loading-spinner"></div>';
   const sourceLangEl = document.getElementById('sourceLangDisplay');
   const sourceDisplayEl = document.getElementById('translationSourceDisplay');
+  const timeDisplayEl = document.getElementById('translationTimeDisplay');
   sourceLangEl.textContent = '';
   sourceDisplayEl.textContent = '';
   sourceDisplayEl.className = 'translation-source-display'; // Reset classes
+  if (timeDisplayEl) {
+    timeDisplayEl.textContent = '';
+    timeDisplayEl.classList.add('hidden');
+  }
 
   let sourceLang = 'und';
 
@@ -77,6 +82,15 @@ async function handlePopupTranslate(text, targetLang, engineSelection, resultEl,
       }
     }
     sourceDisplayEl.textContent = sourceText;
+
+    if (timeDisplayEl && translatedText.durationMs !== undefined && translatedText.durationMs !== null) {
+      const timeStr = translatedText.durationMs < 1000 
+        ? `${Math.round(translatedText.durationMs)}ms` 
+        : `${(translatedText.durationMs / 1000).toFixed(2)}s`;
+      timeDisplayEl.textContent = `⏱️ ${timeStr}`;
+      timeDisplayEl.title = i18n.t("translationTimeTooltip") || "翻譯耗時";
+      timeDisplayEl.classList.remove('hidden');
+    }
 
     const targetLangCode = LANG_NAME_TO_CODE_MAP[targetLang] || 'zh-TW';
 

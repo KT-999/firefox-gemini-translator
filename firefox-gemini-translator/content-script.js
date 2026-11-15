@@ -143,6 +143,13 @@
       .gt-engine-tag.engine-gemini { background-color: var(--gt-primary); }
       .gt-engine-tag.model-flash { background-color: #00897b; }
       .gt-engine-tag.model-pro { background-color: #3949ab; }
+      .gt-engine-tag.time-tag {
+        background-color: rgba(148, 163, 184, 0.2);
+        color: var(--gt-text-sub);
+        border: 1px solid var(--gt-border);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+      }
 
       .gt-close-btn {
         position: absolute;
@@ -249,7 +256,15 @@
     }
   }
 
-  function buildTagContainer(engine, modelName, modelLabel, uiStrings) {
+  function formatDuration(durationMs) {
+    if (durationMs === undefined || durationMs === null || isNaN(durationMs)) return '';
+    if (durationMs < 1000) {
+      return `${Math.round(durationMs)}ms`;
+    }
+    return `${(durationMs / 1000).toFixed(2)}s`;
+  }
+
+  function buildTagContainer(engine, modelName, modelLabel, uiStrings, durationMs) {
     const tagContainer = document.createElement('div');
     tagContainer.className = 'gt-tag-container';
 
@@ -261,10 +276,10 @@
 
       const modelTag = document.createElement('span');
       modelTag.className = 'gt-engine-tag model-tag';
-      if (modelName.includes('flash')) {
+      if (modelName.includes('flash') || modelName.includes('hydrogen')) {
         modelTag.classList.add('model-flash');
         modelTag.textContent = modelLabel || uiStrings.modelTagFlash;
-      } else if (modelName.includes('pro')) {
+      } else if (modelName.includes('pro') || modelName.includes('argon') || modelName.includes('carbon')) {
         modelTag.classList.add('model-pro');
         modelTag.textContent = modelLabel || uiStrings.modelTagPro;
       } else {
@@ -283,6 +298,15 @@
       }
       tagContainer.appendChild(googleTag);
     }
+
+    if (durationMs !== undefined && durationMs !== null) {
+      const timeTag = document.createElement('span');
+      timeTag.className = 'gt-engine-tag time-tag';
+      timeTag.textContent = `⏱️ ${formatDuration(durationMs)}`;
+      timeTag.title = uiStrings.translationTimeTooltip || '翻譯耗時';
+      tagContainer.appendChild(timeTag);
+    }
+
     return tagContainer;
   }
 
@@ -372,7 +396,7 @@
   async function createTranslationCard(data) {
     const {
       originalText, translatedText, engine, modelName, modelLabel,
-      sourceLangCode, sourceLangName, targetLangCode, uiStrings
+      sourceLangCode, sourceLangName, targetLangCode, uiStrings, durationMs
     } = data;
 
     const theme = await resolveTheme();
@@ -381,7 +405,7 @@
     card.id = 'gemini-translate-card';
     card.className = `gt-card-theme-${theme}`;
 
-    card.appendChild(buildTagContainer(engine, modelName, modelLabel, uiStrings));
+    card.appendChild(buildTagContainer(engine, modelName, modelLabel, uiStrings, durationMs));
 
     // Close Button
     const closeBtn = document.createElement('button');

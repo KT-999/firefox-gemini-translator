@@ -416,5 +416,8 @@
   },
   "contextMenuEngineGemini4Hydrogen": {
     "message": "Usar siempre Gemini 4 Hydrogen"
+  },
+  "translationTimeTooltip": {
+    "message": "Tiempo de traducción"
   }
 }
