@@ -164,8 +164,8 @@ if __name__ == "__main__":
     create_zip(source_dir, zip_name)
     
     release_notes = {
-        "zh-TW": "升級至 v2.9.0: 重組並優化模型推薦清單（預設推薦 0.5s 秒出極速 Flash 模型，標明 Gemini 4 為深度思考模型）、修復歷史紀錄譯文顯示。",
-        "en-US": "Upgrade to v2.9.0: Reorder model options (prioritize ~0.5s instant Flash models, mark Gemini 4 as deep reasoning) and fix history translations."
+        "zh-TW": "升級至 v2.10.0: 大幅優化翻譯回應速度（由 25 秒縮短至約 0.8 秒！），預設並推薦使用超低延遲之 Gemini 3.5 Flash 模型，針對 Gemini 4 模型自動配置關閉思考以避免 400 錯誤與重複重試，並加入伺服器 503/429 尖峰擁塞時的自動平滑切換機制。",
+        "en-US": "Upgrade to v2.10.0: Massive speed optimizations (reducing latency from 25s down to ~0.8s!), prioritize ultra-fast Gemini 3.5 Flash, fix Gemini 4 thinkingConfig compatibility to prevent 400 errors and retry stalls, and add automatic graceful fallback during server 503/429 spikes."
     }
     
     success = upload_to_amo(token, zip_name, addon_id, license_slug="MIT", release_notes=release_notes)

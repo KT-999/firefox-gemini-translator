@@ -221,7 +221,7 @@ async function main() {
     migrateModelValue(settings.POPUP_TRANSLATE_ENGINE),
     defaultPopupEngine
   );
-  const normalizedGeminiModel = normalizeSelectValue(dom.geminiModelSelect, migrateModelValue(settings.GEMINI_MODEL), 'gemini-3.8-flash');
+  const normalizedGeminiModel = normalizeSelectValue(dom.geminiModelSelect, migrateModelValue(settings.GEMINI_MODEL), 'gemini-3.5-flash');
   const normalizedContextMenuEngine = normalizeSelectValue(dom.contextMenuEngineSelect, migrateModelValue(settings.CONTEXT_MENU_ENGINE), 'smart');
   dom.geminiModelSelect.value = normalizedGeminiModel;
   dom.contextMenuEngineSelect.value = normalizedContextMenuEngine;

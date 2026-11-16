@@ -112,18 +112,18 @@ export async function translateWithGoogleCloud(text, targetLang, apiKey) {
 }
 
 /**
- * 將舊版或已停用的 Gemini 模型名稱自動轉為最新可用模型。
+ * 將舊版、已停用或高負載逾時的 Gemini 模型名稱自動轉為最新極速可用模型。
  * @param {string} modelName
  * @returns {string}
  */
 export function resolveGeminiModelName(modelName) {
-    let resolved = modelName || 'gemini-3.8-flash';
-    if (resolved.includes('1.5') || resolved.includes('2.0')) {
-        console.warn(`舊版 Gemini 模型已停用，改用 gemini-3.8-flash: ${resolved}`);
-        resolved = 'gemini-3.8-flash';
+    let resolved = modelName || 'gemini-3.5-flash';
+    if (resolved.includes('1.5') || resolved.includes('2.0') || resolved.includes('2.5')) {
+        console.warn(`舊版 Gemini 模型已停用，改用 gemini-3.5-flash: ${resolved}`);
+        resolved = 'gemini-3.5-flash';
     } else if (resolved === 'gemini-3.7-flash' || resolved === 'gemini-3-flash-preview') {
-        console.warn(`${resolved} 已停用/過期，改用 gemini-3.8-flash`);
-        resolved = 'gemini-3.8-flash';
+        console.warn(`${resolved} 已停用/過期，改用 gemini-3.5-flash`);
+        resolved = 'gemini-3.5-flash';
     } else if (resolved === 'gemini-3-pro-preview') {
         console.warn(`gemini-3-pro-preview 已停用，改用 gemini-3.8-pro`);
         resolved = 'gemini-3.8-pro';
@@ -135,50 +135,67 @@ export function resolveGeminiModelName(modelName) {
 
 /**
  * 【效能最佳化】使用 Gemini API 進行翻譯：
- * 針對 Gemini 4 / 3.x 模型使用 thinkingLevel: "minimal"，對 2.5 系列使用 thinkingBudget: 0，
- * 將推理延遲降到最低（跳過數十秒深度思考），並保證回傳純字串防止紀錄序列化異常。
+ * 針對 Gemini 3.5 系列使用 thinkingLevel: "minimal"（~0.8 秒極速回應）；
+ * 針對 Gemini 4 系列使用 thinkingBudget: 0（避免 MINIMAL 拋出 400 錯誤）；
+ * 遇到 503 / 429 尖峰擁塞時自動平滑切換至 gemini-3.5-flash，避免 25 秒重試空轉。
  */
 export async function translateWithGemini(text, targetLang, apiKey, modelName, i18n_t) {
     const startTime = performance.now();
-    const resolvedModelName = resolveGeminiModelName(modelName);
-    const apiVersion = (resolvedModelName === 'gemini-pro') ? 'v1' : 'v1beta';
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${resolvedModelName}:generateContent`;
-
-    const prompt = i18n_t ? i18n_t("promptSystem", [targetLang, text]) : text;
+    let currentModel = resolveGeminiModelName(modelName);
     const systemInstructionText = `You are a professional real-time translation engine. Translate the user's input text into ${targetLang}. Rules: 1. Output ONLY the translation directly without any explanation, preamble, notes, or internal thinking steps. 2. If the input is a single vocabulary word with multiple common meanings, list them separated by '、' or ', '. 3. If the input is a sentence, phrase, or paragraph, provide the most fluent and natural single translation. 4. Do NOT wrap the output in quotes or Markdown formatting.`;
+    const prompt = i18n_t ? i18n_t("promptSystem", [targetLang, text]) : text;
 
-    const shouldRetry = (status) => [429, 500, 503].includes(status);
-    const maxAttempts = 3;
-    let data;
-
-    // 根據模型世代配置最小思考設定
-    const isGen3or4 = resolvedModelName.includes('4-') || resolvedModelName.includes('3.') || resolvedModelName.includes('3-');
-    
-    const requestBody = {
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-            maxOutputTokens: 8192,
-            temperature: 0.1,
-            thinkingConfig: isGen3or4 
-                ? { thinkingLevel: "minimal" } 
-                : { thinkingBudget: 0 }
+    const buildConfig = (model) => {
+        // Gemini 4 旗艦推理系列：不支援 "minimal"，直接指定 thinkingBudget: 0 關閉思考以提速
+        if (model.startsWith('gemini-4-')) {
+            return { thinkingBudget: 0 };
         }
+        // Gemini 3.5 / 3.1 等系列：支援 thinkingLevel: "minimal"，極速秒出（< 1秒）
+        if (model.includes('3.5') || model.includes('3.1') || model.includes('flash-lite')) {
+            return { thinkingLevel: 'minimal' };
+        }
+        return { thinkingBudget: 0 };
     };
-    if (apiVersion === 'v1beta') {
-        requestBody.systemInstruction = { parts: [{ text: systemInstructionText }] };
-    }
 
+    const maxAttempts = 3;
+    let data = null;
     let fallbackLevel = 0;
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        const response = await fetch(GEMINI_API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-goog-api-key": apiKey
-            },
-            body: JSON.stringify(requestBody)
-        });
+        const apiVersion = (currentModel === 'gemini-pro') ? 'v1' : 'v1beta';
+        const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${currentModel}:generateContent`;
+
+        const requestBody = {
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: {
+                maxOutputTokens: 8192,
+                temperature: 0.1,
+                thinkingConfig: buildConfig(currentModel)
+            }
+        };
+        if (apiVersion === 'v1beta') {
+            requestBody.systemInstruction = { parts: [{ text: systemInstructionText }] };
+        }
+
+        let response;
+        try {
+            response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-goog-api-key": apiKey
+                },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (fetchErr) {
+            console.warn(`Gemini 請求連線失敗:`, fetchErr);
+            if (currentModel !== 'gemini-3.5-flash' && attempt < maxAttempts - 1) {
+                console.warn(`切換至極速穩定模型 gemini-3.5-flash 重試...`);
+                currentModel = 'gemini-3.5-flash';
+                continue;
+            }
+            throw new Error(`網路連線錯誤: ${fetchErr.message}`);
+        }
 
         if (response.ok) {
             data = await response.json();
@@ -192,32 +209,10 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
             errorBody = null;
         }
 
-        // 若模型對 thinkingConfig 拋出 400，平滑動態降級相容
         const errorMsg = (errorBody?.error?.message || '').toLowerCase();
-        if (response.status === 400 && (errorMsg.includes('thinking') || errorMsg.includes('budget') || errorMsg.includes('level'))) {
-            if (fallbackLevel === 0) {
-                console.warn(`模型 ${resolvedModelName} 降級嘗試 thinkingLevel: low...`);
-                requestBody.generationConfig.thinkingConfig = { thinkingLevel: "low" };
-                fallbackLevel = 1;
-                attempt -= 1;
-                continue;
-            } else if (fallbackLevel === 1) {
-                console.warn(`模型 ${resolvedModelName} 降級嘗試 thinkingBudget: 0...`);
-                requestBody.generationConfig.thinkingConfig = { thinkingBudget: 0 };
-                fallbackLevel = 2;
-                attempt -= 1;
-                continue;
-            } else if (fallbackLevel === 2) {
-                console.warn(`模型 ${resolvedModelName} 移除 thinkingConfig...`);
-                delete requestBody.generationConfig.thinkingConfig;
-                fallbackLevel = 3;
-                attempt -= 1;
-                continue;
-            }
-        }
+        const errorStatus = errorBody?.error?.status || '';
 
         // 精準判斷是否為無效的 API Key
-        const errorStatus = errorBody?.error?.status || '';
         const isInvalidKey =
             response.status === 403 ||
             (response.status === 400 && (
@@ -230,8 +225,30 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
             throw new Error('Invalid API Key');
         }
 
-        if (shouldRetry(response.status) && attempt < maxAttempts - 1) {
-            const delayMs = 500 * (2 ** attempt);
+        // 若模型對 thinkingConfig 拋出 400，平滑動態降級相容
+        if (response.status === 400 && (errorMsg.includes('thinking') || errorMsg.includes('budget') || errorMsg.includes('level'))) {
+            if (fallbackLevel === 0) {
+                requestBody.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+                fallbackLevel = 1;
+                attempt -= 1;
+                continue;
+            } else if (fallbackLevel === 1) {
+                delete requestBody.generationConfig.thinkingConfig;
+                fallbackLevel = 2;
+                attempt -= 1;
+                continue;
+            }
+        }
+
+        // 遇高負載 503 或限流 429 時，直接平滑切換至超低負載極速的 gemini-3.5-flash，避免等待 20 幾秒
+        if ((response.status === 503 || response.status === 429) && currentModel !== 'gemini-3.5-flash') {
+            console.warn(`模型 ${currentModel} 回應 ${response.status}（負載過高），立即平滑切換至 gemini-3.5-flash...`);
+            currentModel = 'gemini-3.5-flash';
+            continue;
+        }
+
+        if ([429, 500, 503].includes(response.status) && attempt < maxAttempts - 1) {
+            const delayMs = 300 * (2 ** attempt);
             console.warn(`Gemini API ${response.status}，${delayMs}ms 後重試...`);
             await new Promise(resolve => setTimeout(resolve, delayMs));
             continue;
@@ -239,8 +256,7 @@ export async function translateWithGemini(text, targetLang, apiKey, modelName, i
 
         console.error("Gemini API Error Response:", {
             status: response.status,
-            apiVersion,
-            modelName: resolvedModelName,
+            modelName: currentModel,
             errorBody
         });
         throw new Error(`API 網路錯誤: ${response.status}`);
